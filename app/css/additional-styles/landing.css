@@ -1,0 +1,99 @@
+.div-class {
+      background-image: url("../../../public/images/pbimage3.jpeg");
+      background-size: cover;
+      background-repeat: no-repeat;
+    };
+
+h1{
+  width: 100%;
+  height: 100vh;
+  line-height: 80vh;
+  justify-content: center;
+  text-align: center;
+  display: block;
+  font-size: 100px;
+}
+
+.view {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.box{
+  height: 350px;
+  width: 300px;
+  margin: 50px;
+  background-color: rgb(44, 41, 37);
+  border: 0.5mm solid black;
+  border-radius: 8px;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    scale : 0.0 ;
+  }
+  to {
+    opacity: 10;
+    scale : 1;
+  }
+}
+
+.box {
+  animation: appear linear;
+  animation-timeline: view();
+  animation-range: entry 0% cover 30%;
+}
+
+.highlight{
+  animation: appear linear;
+  animation-timeline: view();
+  animation-range: entry 0% cover 30%;
+}
+
+.event-card {
+  width: 300px;
+  height: 350px;
+  perspective: 800px;
+  padding: 10px;
+}
+
+.event-card:hover > .card {
+  cursor: pointer;
+  transform: rotateY(180deg);
+}
+
+.card {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  transition: transform 1500ms;
+  transform-style: preserve-3d;
+}
+
+.front,
+.back {
+  height: 100%;
+  width: 100%;
+  border-radius: 2rem;
+  box-shadow: 0 0 5px 2px rgba(50, 50, 50, 0.25);
+  position: absolute;
+  backface-visibility: hidden;
+}
+
+.front {
+  background-color: rgb(32, 98, 4);
+}
+
+.back {
+  background-color: #3a3a3a;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5rem;
+}
+
