@@ -178,7 +178,7 @@ const RecruitmentForm: React.FC = () => {
               {mode === true ? (
                 <div className="mb-4">
                   <label className="block">
-                    {`Admission Numner(For 1st Years)`}
+                    {`Admission Number(For 1st Years)`}
                     <span className="text-red-600"> * </span>
                   </label>
                   <input
