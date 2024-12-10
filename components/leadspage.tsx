@@ -28,8 +28,8 @@ const Leads: React.FC = () => {
     try {
       const resp = await fetch("/api/leads");
       const data = await resp.json();
-      const currentLeads = data.currentLeads
-      const alumniLeads = data.alumniLeads
+      const currentLeads = data.currentLeads;
+      const alumniLeads = data.alumniLeads;
       setCurrentLeads(currentLeads);
       setAlumniLeads(alumniLeads);
       setLoading(false);
@@ -59,7 +59,7 @@ const Leads: React.FC = () => {
     fetchLeads();
   }, []);
 
-  const handleAddOrEditLead = async (selectedLead:Lead) => {
+  const handleAddOrEditLead = async (selectedLead: Lead) => {
     if (!selectedLead?.name || !selectedLead?.position) {
       console.error(
         "Validation failed: Missing required fields (Name and Position)"
@@ -69,9 +69,7 @@ const Leads: React.FC = () => {
     }
 
     try {
-      const leadData = { ...selectedLead };
       const storage = getStorage();
-
       let imageUrl = selectedLead.imageUrl;
 
       // If an image is being uploaded, handle that
@@ -88,6 +86,12 @@ const Leads: React.FC = () => {
         console.log("Image uploaded successfully, URL:", imageUrl);
       }
 
+      // Create the lead data with the updated (or original) image URL
+      const leadData = {
+        ...selectedLead,
+        imageUrl: imageUrl, // Ensure the Firebase URL is used
+      };
+
       if (selectedLead.id) {
         // Update lead in Firestore
         try {
@@ -98,31 +102,35 @@ const Leads: React.FC = () => {
             },
             body: JSON.stringify(leadData),
           });
-        }
-        catch (error) {
+        } catch (error) {
           console.error("Error updating lead:", error);
-          alert("An error occurred while updating the lead. Check the console for details.");
+          alert(
+            "An error occurred while updating the lead. Check the console for details."
+          );
         }
         alert("Lead updated successfully");
       } else {
         // Add new lead to Firestore
-        try { await fetch("/api/leads", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(leadData),
-        });
-        alert("Lead added successfully");
-      }catch (error) {
-        console.error("Error adding lead:", error);
-        alert("An error occurred while adding the lead. Check the console for details.");
-      }
+        try {
+          await fetch("/api/leads", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(leadData),
+          });
+          alert("Lead added successfully");
+        } catch (error) {
+          console.error("Error adding lead:", error);
+          alert(
+            "An error occurred while adding the lead. Check the console for details."
+          );
+        }
       }
 
       setShowForm(false);
       setSelectedLead(null);
-      await fetchLeads(); 
+      await fetchLeads();
     } catch (error) {
       console.error("Error in handleAddOrEditLead:", error);
       alert(

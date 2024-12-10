@@ -40,30 +40,33 @@ const EventCard: React.FC<EventCardProps> = ({
 
   return (
     <div
-      className="relative bg-gray-900 shadow-lg rounded-xl overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-xl cursor-pointer w-full mb-4 sm:w-1/3 sm:mb-0 md:w-3/12"
+      className="relative bg-gray-800 shadow-lg rounded-2xl overflow-hidden transition duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer w-full sm:w-[48%] lg:w-[30%] mb-6"
       onClick={() => onSelect(event)}
     >
-      {/* Event Date Badge */}
-      
-
       {/* Event Image */}
-      <Image
-        src={event.imageURL}
-        alt={event.eventName}
-        width={300}
-        height={100}
-        className="w-full h-48 p-2 object-cover rounded-2xl"
-      />
-      
+      <div className="relative">
+        <Image
+          src={event.imageURL}
+          alt={event.eventName}
+          width={300}
+          height={200}
+          className="w-full h-48 object-cover"
+        />
+        {/* Event Date Badge */}
+        <div className="absolute top-4 left-4 bg-blue-600 text-white py-1 px-3 rounded-xl text-center shadow-md">
+          <p className="text-lg font-bold">{day}</p>
+          <p className="text-sm uppercase tracking-wide">{month}</p>
+        </div>
+      </div>
 
       {/* Event Content */}
-      <div className="p-5 text-white">
-      <div className="absolute top-90 left-4 bg-gray-800 text-white p-2 rounded-2xl text-center shadow-lg ">
-        <p className="text-xl font-bold">{day}</p>
-        <p className="text-sm uppercase">{month}</p>
-      </div>
-        <h3 className="text-xl font-semibold mb-2 ml-16">{event.eventName}</h3>
-        <p className="text-gray-400 mb-4 truncate ml-16">{event.description}</p>
+      <div className="p-4">
+        <h3 className="text-lg font-semibold text-white truncate">
+          {event.eventName}
+        </h3>
+        <p className="text-gray-400 text-sm mt-2 line-clamp-2">
+          {event.description}
+        </p>
 
         {/* Admin Options */}
         {isAdminLoggedIn && (
@@ -73,7 +76,7 @@ const EventCard: React.FC<EventCardProps> = ({
                 e.stopPropagation();
                 onSelect(event);
               }}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-300"
             >
               Update
             </button>
@@ -82,7 +85,7 @@ const EventCard: React.FC<EventCardProps> = ({
                 e.stopPropagation();
                 onDelete(event.id);
               }}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition duration-300"
             >
               Delete
             </button>

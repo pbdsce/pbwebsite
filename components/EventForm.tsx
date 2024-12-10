@@ -1,6 +1,10 @@
 import { useState } from "react";
 
-const EventForm = () => {
+interface EventFormProps {
+  refreshEvents?: () => Promise<void>; // Optional refresh function
+}
+
+const EventForm: React.FC<EventFormProps> = ({ refreshEvents }) => {
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [lastDateOfRegistration, setLastDateOfRegistration] = useState("");
@@ -11,7 +15,7 @@ const EventForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await fetch ("/api/events", {
+      await fetch("/api/events", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -25,7 +29,6 @@ const EventForm = () => {
           registrationLink,
         }),
       });
-      
 
       alert("Event added successfully!");
 
@@ -36,7 +39,11 @@ const EventForm = () => {
       setDescription("");
       setImageURL("");
       setRegistrationLink("");
-      window.location.reload();
+
+      // Refresh events if the function is provided
+      if (refreshEvents) {
+        await refreshEvents();
+      }
     } catch (error) {
       console.error("Error adding event:", error);
     }
@@ -50,7 +57,10 @@ const EventForm = () => {
       <h2 className="text-2xl font-bold mb-4">Add New Event</h2>
       {/* Event Name */}
       <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="eventName">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="eventName"
+        >
           Event Name
         </label>
         <input
@@ -65,7 +75,10 @@ const EventForm = () => {
 
       {/* Event Date */}
       <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="eventDate">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="eventDate"
+        >
           Event Date
         </label>
         <input
@@ -80,7 +93,10 @@ const EventForm = () => {
 
       {/* Last Date of Registration */}
       <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="lastDateOfRegistration">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="lastDateOfRegistration"
+        >
           Last Date of Registration
         </label>
         <input
@@ -95,7 +111,10 @@ const EventForm = () => {
 
       {/* Description */}
       <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="description"
+        >
           Description
         </label>
         <textarea
@@ -109,7 +128,10 @@ const EventForm = () => {
 
       {/* Image URL */}
       <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="imageURL">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="imageURL"
+        >
           Image URL
         </label>
         <input
@@ -124,7 +146,10 @@ const EventForm = () => {
 
       {/* Registration Link */}
       <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="registrationLink">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="registrationLink"
+        >
           Registration Link
         </label>
         <input
@@ -137,7 +162,10 @@ const EventForm = () => {
         />
       </div>
 
-      <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-700">
+      <button
+        type="submit"
+        className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-700"
+      >
         Add Event
       </button>
     </form>
