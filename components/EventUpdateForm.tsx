@@ -3,20 +3,24 @@ import { useState } from "react";
 interface EventUpdateFormProps {
   eventId: string;
   initialEventData: {
+    id: string;
     eventName: string;
+    description: string;
     eventDate: string;
     lastDateOfRegistration: string;
-    description: string;
+    dateCreated: string;
+    dateModified: string;
     imageURL: string;
-    registrationLink: string; 
+    registrationLink: string;
   };
+  refreshEvents?: () => Promise<void>; // Optional refresh function
 }
 
 const EventUpdateForm = ({
   eventId,
   initialEventData,
+  refreshEvents, // Destructure the prop
 }: EventUpdateFormProps) => {
- 
   const [eventName, setEventName] = useState(initialEventData.eventName);
   const [eventDate, setEventDate] = useState(initialEventData.eventDate);
   const [lastDateOfRegistration, setLastDateOfRegistration] = useState(
@@ -24,12 +28,14 @@ const EventUpdateForm = ({
   );
   const [description, setDescription] = useState(initialEventData.description);
   const [imageURL, setImageURL] = useState(initialEventData.imageURL);
-  const [registrationLink, setRegistrationLink] = useState(initialEventData.registrationLink); // New state for registration link
+  const [registrationLink, setRegistrationLink] = useState(
+    initialEventData.registrationLink
+  );
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await fetch(`/api/events/?eventid=${eventId}`, {
+      const response = await fetch(`/api/events/?eventid=${eventId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -41,11 +47,18 @@ const EventUpdateForm = ({
           lastDateOfRegistration,
           description,
           imageURL,
-          registrationLink, 
+          registrationLink,
         }),
       });
-      alert("Event updated successfully!");
-      window.location.reload();
+
+      if (response.ok) {
+        alert("Event updated successfully!");
+        if (refreshEvents) {
+          await refreshEvents(); // Refresh events if the function is provided
+        }
+      } else {
+        alert("Failed to update event.");
+      }
     } catch (error) {
       console.error("Error updating event:", error);
     }

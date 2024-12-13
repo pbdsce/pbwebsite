@@ -1,9 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-
 import { auth } from "@/Firebase";
+import { useStore } from "@/lib/zustand/store";
 
 interface Lead {
   id: string;
@@ -16,20 +15,20 @@ interface Lead {
 
 const Leads: React.FC = () => {
   const [loading, setLoading] = useState(true);
-
   const [showForm, setShowForm] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [currentLeads, setCurrentLeads] = useState<Lead[]>([]);
   const [alumniLeads, setAlumniLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null); // For editing leads
+  const { image } = useStore();
 
   // Fetch leads from Firestore
   const fetchLeads = async () => {
     try {
       const resp = await fetch("/api/leads");
       const data = await resp.json();
-      const currentLeads = data.currentLeads
-      const alumniLeads = data.alumniLeads
+      const currentLeads = data.currentLeads;
+      const alumniLeads = data.alumniLeads;
       setCurrentLeads(currentLeads);
       setAlumniLeads(alumniLeads);
       setLoading(false);
@@ -59,7 +58,7 @@ const Leads: React.FC = () => {
     fetchLeads();
   }, []);
 
-  const handleAddOrEditLead = async (selectedLead:Lead) => {
+  const handleAddOrEditLead = async (selectedLead: Lead) => {
     if (!selectedLead?.name || !selectedLead?.position) {
       console.error(
         "Validation failed: Missing required fields (Name and Position)"
@@ -69,24 +68,44 @@ const Leads: React.FC = () => {
     }
 
     try {
-      const leadData = { ...selectedLead };
-      const storage = getStorage();
-
       let imageUrl = selectedLead.imageUrl;
 
-      // If an image is being uploaded, handle that
       if (selectedLead.imageUrl && selectedLead.imageUrl.startsWith("blob")) {
-        console.log("Image file detected, uploading to Firebase Storage...");
-        const imageRef = ref(storage, `images/${selectedLead.name}`);
-
-        // Fetch the blob file for upload
-        const imageBlob = await fetch(selectedLead.imageUrl).then((r) =>
-          r.blob()
+        console.log(
+          "Image file detected, preparing for upload to Firebase Storage..."
         );
-        await uploadBytes(imageRef, imageBlob);
-        imageUrl = await getDownloadURL(imageRef);
+
+        // Create a new FormData object
+        const formData = new FormData();
+        if (image) {
+          formData.append("file", image);
+          formData.append("name", selectedLead.name);
+        }
+
+        const response = await fetch("/api/leads/upload", {
+          method: "POST",
+          body: formData, // FormData automatically sets the correct headers
+        });
+
+        let data;
+        try {
+          data = await response.json();
+        } catch (error) {
+          console.error("Failed to parse JSON response:", error);
+          throw new Error("Unexpected response from the server");
+        }
+        imageUrl = data.imageUrl;
+        if (!response.ok) {
+          console.error("Error uploading file:", data);
+          throw new Error(data.message || "Error uploading file");
+        }
         console.log("Image uploaded successfully, URL:", imageUrl);
       }
+
+      const leadData = {
+        ...selectedLead,
+        imageUrl: imageUrl, // Ensure the Firebase URL is used
+      };
 
       if (selectedLead.id) {
         // Update lead in Firestore
@@ -98,31 +117,35 @@ const Leads: React.FC = () => {
             },
             body: JSON.stringify(leadData),
           });
-        }
-        catch (error) {
+        } catch (error) {
           console.error("Error updating lead:", error);
-          alert("An error occurred while updating the lead. Check the console for details.");
+          alert(
+            "An error occurred while updating the lead. Check the console for details."
+          );
         }
         alert("Lead updated successfully");
       } else {
         // Add new lead to Firestore
-        try { await fetch("/api/leads", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(leadData),
-        });
-        alert("Lead added successfully");
-      }catch (error) {
-        console.error("Error adding lead:", error);
-        alert("An error occurred while adding the lead. Check the console for details.");
-      }
+        try {
+          await fetch("/api/leads", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(leadData),
+          });
+          alert("Lead added successfully");
+        } catch (error) {
+          console.error("Error adding lead:", error);
+          alert(
+            "An error occurred while adding the lead. Check the console for details."
+          );
+        }
       }
 
       setShowForm(false);
       setSelectedLead(null);
-      await fetchLeads(); 
+      await fetchLeads();
     } catch (error) {
       console.error("Error in handleAddOrEditLead:", error);
       alert(
@@ -336,6 +359,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
       imageUrl: "",
     }
   );
+  const { setImage } = useStore();
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -351,10 +375,13 @@ const LeadForm: React.FC<LeadFormProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
+
     if (files && files.length > 0) {
+      const file = files[0];
+      setImage(file);
       setLead((prevLead) => ({
         ...prevLead,
-        imageUrl: URL.createObjectURL(files[0]),
+        imageUrl: URL.createObjectURL(file),
       }));
     } else {
       console.error("No file selected or invalid file input");
