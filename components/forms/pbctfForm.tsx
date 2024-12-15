@@ -3,8 +3,6 @@ import "../../app/css/additional-styles/utility-patterns.css";
 import "../../app/css/additional-styles/theme.css";
 import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
-import { db } from "@/Firebase";
 import { branches } from "@/lib/constants/dropdownOptions";
 import { Press_Start_2P } from "next/font/google";
 import toast from "react-hot-toast";
@@ -106,29 +104,6 @@ const PBCTFForm: React.FC = () => {
   const watchYear2 = watch("participant2.year");
   const watchUsn1 = watch("participant1.usn");
   const watchUsn2 = watch("participant2.usn");
-
-
-
-  const checkUsnUniqueness = async (usn: string): Promise<boolean> => {
-    const q = query(
-      collection(db, "pbctf_registrations"),
-      where("participant1.usn", "==", usn)
-    );
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-      return false;
-    }
-
-    const q2 = query(
-      collection(db, "pbctf_registrations"),
-      where("participant2.usn", "==", usn)
-    );
-    const querySnapshot2 = await getDocs(q2);
-
-    return querySnapshot2.empty;
-  };
-
   
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
@@ -139,9 +114,15 @@ const PBCTFForm: React.FC = () => {
     try {
       const recaptcha_token = token;
       if (recaptcha_token) {
+
+        const regData = {
+          recaptcha_token,
+          data: data
+        }
+
         const response = await fetch("/api/registration/pbctf", {
           method: "POST",
-          body: JSON.stringify({ recaptcha_token }),
+          body: JSON.stringify(regData),
         });
 
         const res = await response.json();
@@ -150,41 +131,6 @@ const PBCTFForm: React.FC = () => {
           toast.error(res.message);
           return;
         }
-
-
-        // Check if USNs are the same for duo participation
-        if (
-          data.participationType === "duo" &&
-          data.participant2 &&
-          data.participant1.usn === data.participant2.usn
-        ) {
-          setUsnError(
-            "USNs for Participant 1 and Participant 2 cannot be the same"
-          );
-          setIsSubmitting(false);
-          return;
-        }
-
-        // Check USN uniqueness for participant1
-        const isUnique1 = await checkUsnUniqueness(data.participant1.usn);
-        if (!isUnique1) {
-          setUsnError("USN for Participant 1 already exists");
-          setIsSubmitting(false);
-          return;
-        }
-
-        // Check USN uniqueness for participant2 if it exists
-        if (data.participationType === "duo" && data.participant2) {
-          const isUnique2 = await checkUsnUniqueness(data.participant2.usn);
-          if (!isUnique2) {
-            setUsnError("USN for Participant 2 already exists");
-            setIsSubmitting(false);
-            return;
-          }
-        }
-
-        // If all checks pass, submit the form
-        await addDoc(collection(db, "pbctf_registrations"), data);
         setSuccess(true);
       }
     } catch (error) {

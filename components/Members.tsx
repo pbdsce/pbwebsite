@@ -104,12 +104,6 @@ export default function Members() {
     };
 
     const handleAddOrEditMember = async () => {
-        if (!newMember.name || !newMember.role || !newMember.year) {
-            alert(
-                "Please fill in all required fields (Name, Domain/Role, and Year)."
-            );
-            return;
-        }
         try {
             const method = isEditing ? "PUT" : "POST";
             const memberData = isEditing
@@ -271,7 +265,7 @@ export default function Members() {
                                                         transformOrigin: "center",
                                                     }}
                                                 />
-                                                <style jsx>{`
+                                                <style>{`
                           @keyframes ring {
                             0% {
                               transform: rotate(0deg);

@@ -59,7 +59,7 @@ const Login = () => {
       <form onSubmit={handleLogin}>
         <div className="relative mb-6">
           <input
-            type="text"
+            type="email"
             id="email"
             placeholder=" "
             value={email}

@@ -32,7 +32,7 @@
     "headlessui": "^0.0.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.419.0",
-    "next": "^14.0.4",
+    "next": "^15.0.3",
     "next-csrf": "^0.2.1",
     "next-rate-limit": "^0.0.3",
     "next-themes": "^0.3.0",

@@ -60,13 +60,6 @@ const Leads: React.FC = () => {
   }, []);
 
   const handleAddOrEditLead = async (selectedLead:Lead) => {
-    if (!selectedLead?.name || !selectedLead?.position) {
-      console.error(
-        "Validation failed: Missing required fields (Name and Position)"
-      );
-      alert("Please fill in all required fields (Name and Position).");
-      return;
-    }
 
     try {
       const leadData = { ...selectedLead };
