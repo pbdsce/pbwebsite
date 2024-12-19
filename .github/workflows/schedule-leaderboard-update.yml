@@ -1,0 +1,18 @@
+name: Update Leaderboard Every Friday
+
+on:
+  schedule:
+    - cron: "0 19 * * 5"
+
+jobs:
+  update-leaderboard:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger API to Update Leaderboard
+        run: |
+          response=$(curl -X POST -s -w "%{http_code}" "https://pointblank.club/api/hustle")
+          if [ "${response: -3}" != "200" ]; then
+            echo "API call failed with status: ${response: -3}"
+            exit 1
+          fi

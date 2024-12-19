@@ -57,22 +57,22 @@ export default function Members() {
 
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const uid = user.uid;
-        try {
-          const resp = await fetch(`/api/admin?uid=${uid}`);
-          const data = await resp.json();
-          if (data.isAdmin) {
-            setIsAdmin(true);
+    useEffect(() => {
+        onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            const uid = user.uid;
+            try {
+              const resp = await fetch(`/api/admin?uid=${uid}`);
+              const data = await resp.json();
+              if (data.isAdmin) {
+                setIsAdmin(true);
+              }
+            } catch (error) {
+              console.log("Error getting document:", error);
+            }
           }
-        } catch (error) {
-          console.log("Error getting document:", error);
-        }
-      }
-    });
-  });
+        });
+      },[isAdmin]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
