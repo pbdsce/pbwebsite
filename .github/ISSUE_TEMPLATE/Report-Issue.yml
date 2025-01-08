@@ -6,6 +6,15 @@ body:
     attributes:
       value: |
         Please fill out the sections below to help everyone identify and fix the bug
+
+  - type: checkboxes
+  attributes:
+    label: "Is there an existing issue for this?"
+    description: Please search to see if an issue already exists for the bug you encountered
+    options:
+    - label: I have searched and didn't find similar issue
+      required: true
+
   - type: textarea
     id: description
     attributes:
@@ -13,6 +22,7 @@ body:
       placeholder: When I click here this happens
     validations:
       required: true
+
   - type: textarea
     id: steps
     attributes:
@@ -22,16 +32,16 @@ body:
         2. Click here
         3. Click there
     
-      
   - type: textarea
     id: expected
     attributes:
       label: What was the expected result?
       placeholder: I expected this to happen
+
   - type: textarea
     id: screenshots
     attributes:
-      label: Put here any screenshots or videos (optional)
+      label: Insert any pictures or video demonstrating the issue. (optional)
   
   - type: markdown
     attributes:
