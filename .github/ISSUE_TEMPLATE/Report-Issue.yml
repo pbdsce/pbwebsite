@@ -23,9 +23,10 @@ body:
         3. Click there
 
 type: textarea 
-id: expected attributes: 
-label: What was the expected result? 
-placeholder: I expected this to happen
+id: expected
+attributes: 
+  label: What was the expected result? 
+  placeholder: I expected this to happen
 
 type: textarea
 id: screenshots
