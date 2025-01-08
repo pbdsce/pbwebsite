@@ -21,20 +21,21 @@ body:
         1. Go to page X
         2. Click here
         3. Click there
-    
-      
   - type: textarea
     id: expected
     attributes:
       label: What was the expected result?
       placeholder: I expected this to happen
-  - type: input
+  - type: textarea
     id: screenshots
     attributes:
-      label: Put here any screenshots or videos (optional)
-      description: You can drag and drop images/videos or paste them from clipboard
-      type: file
-      multiple: true
+      label: Screenshots or videos (optional)
+      description: |
+        You can upload images or videos by:
+        - Dragging and dropping
+        - Pasting from clipboard
+        - Using the file upload button below this textbox
+      placeholder: Drag and drop your screenshots/videos here
   - type: markdown
     attributes:
       value: |
