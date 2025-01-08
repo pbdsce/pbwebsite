@@ -40,4 +40,4 @@ next-env.d.ts
 .env.local
 
 # include package-lock.json
-!/package-lock.json
+package-lock.json
