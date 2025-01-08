@@ -28,11 +28,13 @@ body:
     attributes:
       label: What was the expected result?
       placeholder: I expected this to happen
-  - type: textarea
+  - type: input
     id: screenshots
     attributes:
       label: Put here any screenshots or videos (optional)
-  
+      description: You can drag and drop images/videos or paste them from clipboard
+      type: file
+      multiple: true
   - type: markdown
     attributes:
       value: |
