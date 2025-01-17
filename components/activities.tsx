@@ -45,9 +45,9 @@ const activityData: ActivityData[] = [
   {
     Title: "Hackathons",
     Subtitle: "Smart India Hackathon",
-    Image: "/images/hack.jpg",
+    Image: "/images/SIH_2024.jpg",
     Description:
-      "Each year, we organize the internal round of the Smart India Hackathon. In the 2020 edition, over 300+ individuals from DSCE participated. Two of our teams advanced to the finals, with one emerging as the winner of the software edition. Along with this, teams from Point Blank have won hackathons all across the city and country.",
+      "Each year, we organize the internal round of the Smart India Hackathon. In the 2024 edition, over 300+ individuals from DSCE participated. Two of our teams advanced to the finals, with one emerging as the winner of the software edition. Along with this, teams from Point Blank have won hackathons all across the city and country.",
   },
   {
     Title: "Cybersecurity",
