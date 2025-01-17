@@ -52,7 +52,7 @@ const activityData: ActivityData[] = [
   {
     Title: "Cybersecurity",
     Subtitle: "PB CTF",
-    Image: "/images/ctf.jpg",
+    Image: "/images/ctf2.jpg",
     Description:
       "We organize workshops and sessions on various topics in cybersecurity, including hands-on practice on different platforms. In 2023, we launched the first in-house Capture The Flag event, PBCTF, which attracted over 70+ participants.",
   },
