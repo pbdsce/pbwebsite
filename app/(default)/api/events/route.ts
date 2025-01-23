@@ -64,11 +64,321 @@ const validateEvent = (event: any) => {
   return errors;
 };
 
+/**
+ * @swagger
+ * /api/events:
+ *   get:
+ *     summary: Retrieve all events
+ *     description: This endpoint retrieves all events from the database.
+ *     tags:
+ *       - Events
+ *     responses:
+ *       200:
+ *         description: A list of all events
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 events:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "1234-5678-9101"
+ *                       eventName:
+ *                         type: string
+ *                         example: "Hackathon 2025"
+ *                       description:
+ *                         type: string
+ *                         example: "A coding event to solve real-world problems."
+ *                       eventDate:
+ *                         type: string
+ *                         format: date
+ *                         example: "2025-05-30"
+ *                       lastDateOfRegistration:
+ *                         type: string
+ *                         format: date
+ *                         example: "2025-05-25"
+ *                       dateCreated:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-01-20T10:30:00Z"
+ *                       dateModified:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-01-20T10:30:00Z"
+ *                       imageURL:
+ *                         type: string
+ *                         example: "https://example.com/event-image.jpg"
+ *                       registrationLink:
+ *                         type: string
+ *                         example: "https://example.com/register"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred"
+ *                 details:
+ *                   type: string
+ *                   example: "Error details"
+ */
+
+/**
+ * @swagger
+ * /api/events:
+ *   post:
+ *     summary: Create a new event
+ *     description: This endpoint creates a new event in the database.
+ *     tags:
+ *       - Events
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               eventName:
+ *                 type: string
+ *                 description: Name of the event
+ *                 example: "Hackathon 2025"
+ *               eventDate:
+ *                 type: string
+ *                 format: date
+ *                 description: Date of the event
+ *                 example: "2025-05-30"
+ *               lastDateOfRegistration:
+ *                 type: string
+ *                 format: date
+ *                 description: Last date for event registration
+ *                 example: "2025-05-25"
+ *               description:
+ *                 type: string
+ *                 description: Event description
+ *                 example: "A coding event to solve real-world problems."
+ *               imageURL:
+ *                 type: string
+ *                 description: URL for event image
+ *                 example: "https://example.com/event-image.jpg"
+ *               registrationLink:
+ *                 type: string
+ *                 description: URL for event registration
+ *                 example: "https://example.com/register"
+ *     responses:
+ *       201:
+ *         description: Event created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "1234-5678-9101"
+ *       400:
+ *         description: Validation errors in input data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Validation failed"
+ *                 details:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["Event name is required", "Event date is required"]
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred"
+ *                 details:
+ *                   type: string
+ *                   example: "Error details"
+ */
+
+/**
+ * @swagger
+ * /api/events:
+ *   put:
+ *     summary: Update an existing event
+ *     description: This endpoint updates an event based on the provided event ID.
+ *     tags:
+ *       - Events
+ *     parameters:
+ *       - in: query
+ *         name: eventid
+ *         required: true
+ *         description: The ID of the event to update.
+ *         schema:
+ *           type: string
+ *           example: "1234-5678-9101"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               eventName:
+ *                 type: string
+ *                 description: Name of the event
+ *                 example: "Hackathon 2025"
+ *               eventDate:
+ *                 type: string
+ *                 format: date
+ *                 description: Date of the event
+ *                 example: "2025-05-30"
+ *               lastDateOfRegistration:
+ *                 type: string
+ *                 format: date
+ *                 description: Last date for event registration
+ *                 example: "2025-05-25"
+ *               description:
+ *                 type: string
+ *                 description: Event description
+ *                 example: "A coding event to solve real-world problems."
+ *               imageURL:
+ *                 type: string
+ *                 description: URL for event image
+ *                 example: "https://example.com/event-image.jpg"
+ *               registrationLink:
+ *                 type: string
+ *                 description: URL for event registration
+ *                 example: "https://example.com/register"
+ *     responses:
+ *       200:
+ *         description: Event updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "1234-5678-9101"
+ *       400:
+ *         description: Validation errors in input data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Validation failed"
+ *                 details:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["Event name is required", "Event date is required"]
+ *       404:
+ *         description: Event not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Event not found"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred"
+ *                 details:
+ *                   type: string
+ *                   example: "Error details"
+ */
+
+/**
+ * @swagger
+ * /api/events:
+ *   delete:
+ *     summary: Delete an event
+ *     description: This endpoint deletes an event based on the provided event ID.
+ *     tags:
+ *       - Events
+ *     parameters:
+ *       - in: query
+ *         name: eventid
+ *         required: true
+ *         description: The ID of the event to delete.
+ *         schema:
+ *           type: string
+ *           example: "1234-5678-9101"
+ *     responses:
+ *       200:
+ *         description: Event deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Event deleted successfully"
+ *       400:
+ *         description: Event ID is required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Event ID is required"
+ *       404:
+ *         description: Event not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Event not found"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred"
+ *                 details:
+ *                   type: string
+ *                   example: "Error details"
+ */
+
 // GET request
 export async function GET(request: Request) {
   await connectMongoDB();
   try {
-    
     const eventSnapshot = await Eventmodel.find();
     const eventsList = eventSnapshot.map((event: any) => ({
       id: event.id,
