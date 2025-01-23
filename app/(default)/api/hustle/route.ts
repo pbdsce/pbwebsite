@@ -23,6 +23,146 @@ interface LeaderboardData {
   lastContestCode?: string;
 }
 
+/**
+ * @swagger
+ * /api/hustle:
+ *   post:
+ *     summary: Update the leaderboard with latest contest data
+ *     description: This endpoint fetches the latest contest data and updates the leaderboard rankings and the latest results.
+ *     tags:
+ *       - Hustle
+ *     responses:
+ *       200:
+ *         description: Leaderboard updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Leaderboard updated successfully"
+ *                 rankings:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       rank:
+ *                         type: number
+ *                         example: 1
+ *                       name:
+ *                         type: string
+ *                         example: "John Doe"
+ *                       score:
+ *                         type: number
+ *                         example: 1000
+ *       400:
+ *         description: Failed to update leaderboard due to validation errors
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Failed to update leaderboard"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Failed to update leaderboard"
+ */
+
+/**
+ * @swagger
+ * /api/hustle:
+ *   get:
+ *     summary: Fetch the latest hustle data (leaderboard and latest results)
+ *     description: This endpoint retrieves the latest leaderboard rankings and results of the most recent contest.
+ *     tags:
+ *       - Hustle
+ *     responses:
+ *       200:
+ *         description: Successfully fetched hustle data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Fetched hustle data successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     latest:
+ *                       type: object
+ *                       properties:
+ *                         results:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               rank:
+ *                                 type: number
+ *                                 example: 1
+ *                               name:
+ *                                 type: string
+ *                                 example: "John Doe"
+ *                               score:
+ *                                 type: number
+ *                                 example: 1000
+ *                         updateTime:
+ *                           type: string
+ *                           format: date-time
+ *                           example: "2025-01-23T14:00:00Z"
+ *                     leaderboard:
+ *                       type: object
+ *                       properties:
+ *                         rankings:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               rank:
+ *                                 type: number
+ *                                 example: 1
+ *                               name:
+ *                                 type: string
+ *                                 example: "John Doe"
+ *                               score:
+ *                                 type: number
+ *                                 example: 1000
+ *                               consistency:
+ *                                 type: number
+ *                                 example: 5
+ *       400:
+ *         description: Failed to fetch hustle data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Failed to fetch hustle data"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Failed to fetch hustle data"
+ */
+
 export async function POST() {
   try {
     await connectMongoDB();
@@ -137,3 +277,4 @@ export async function GET() {
     return NextResponse.json({ error: "Failed to fetch hustle data" });
   }
 }
+
