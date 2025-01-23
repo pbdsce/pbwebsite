@@ -36,139 +36,310 @@ function validateLeadData(leadData: any): string | null {
   return null;
 }
 
-export async function GET(request: Request) {
-  try {
-    await connectMongoDB();
-    const leads = await Leadsmodel.find();
-    const currentLeads: Lead[] = [];
-    const alumniLeads: Lead[] = [];
+/**
+ * @swagger
+ * /api/leads:
+ *   get:
+ *     summary: Fetch all leads
+ *     description: This endpoint fetches all leads, divided into current leads and alumni leads.
+ *     tags:
+ *       - Leads
+ *     responses:
+ *       200:
+ *         description: Successfully fetched leads
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 currentLeads:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "4e6b1c2d-8f8a-4b56-9f52-5c8f9a67e079"
+ *                       name:
+ *                         type: string
+ *                         example: "John Doe"
+ *                       position:
+ *                         type: string
+ *                         example: "Current"
+ *                       organization:
+ *                         type: string
+ *                         example: "XYZ Organization"
+ *                       additionalInfo:
+ *                         type: string
+ *                         example: "Lead in Data Science"
+ *                       imageUrl:
+ *                         type: string
+ *                         example: "https://example.com/image.jpg"
+ *                 alumniLeads:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "4e6b1c2d-8f8a-4b56-9f52-5c8f9a67e080"
+ *                       name:
+ *                         type: string
+ *                         example: "Jane Smith"
+ *                       position:
+ *                         type: string
+ *                         example: "Alumni"
+ *                       organization:
+ *                         type: string
+ *                         example: "ABC Corporation"
+ *                       additionalInfo:
+ *                         type: string
+ *                         example: "Former Lead in Marketing"
+ *                       imageUrl:
+ *                         type: string
+ *                         example: "https://example.com/image.jpg"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred while fetching leads"
+ */
 
-    leads.forEach((lead) => {
-      if (lead.position === "Current") {
-        currentLeads.push(lead);
-      } else {
-        alumniLeads.push(lead);
-      }
-    });
+/**
+ * @swagger
+ * /api/leads:
+ *   post:
+ *     summary: Add a new lead
+ *     description: This endpoint allows adding a new lead with the required data.
+ *     tags:
+ *       - Leads
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "John Doe"
+ *               position:
+ *                 type: string
+ *                 enum: ["Current", "Alumni"]
+ *                 example: "Current"
+ *               organization:
+ *                 type: string
+ *                 example: "XYZ Organization"
+ *               additionalInfo:
+ *                 type: string
+ *                 example: "Lead in Data Science"
+ *               imageUrl:
+ *                 type: string
+ *                 example: "https://example.com/image.jpg"
+ *     responses:
+ *       201:
+ *         description: Successfully created lead
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "4e6b1c2d-8f8a-4b56-9f52-5c8f9a67e079"
+ *                 name:
+ *                   type: string
+ *                   example: "John Doe"
+ *                 position:
+ *                   type: string
+ *                   example: "Current"
+ *                 organization:
+ *                   type: string
+ *                   example: "XYZ Organization"
+ *                 additionalInfo:
+ *                   type: string
+ *                   example: "Lead in Data Science"
+ *                 imageUrl:
+ *                   type: string
+ *                   example: "https://example.com/image.jpg"
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Position is required and should be either 'Current' or 'Alumni'"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred while creating the lead"
+ */
 
-    return NextResponse.json({ currentLeads, alumniLeads }, { status: 200 });
-  } catch (error) {
-    console.error("Error fetching leads:", error);
-    return NextResponse.json(
-      {
-        error: "An error occurred while fetching leads",
-        details: (error as Error).message,
-      },
-      { status: 500 }
-    );
-  }
-}
+/**
+ * @swagger
+ * /api/leads:
+ *   put:
+ *     summary: Update an existing lead
+ *     description: This endpoint allows updating an existing lead by its ID.
+ *     tags:
+ *       - Leads
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: "4e6b1c2d-8f8a-4b56-9f52-5c8f9a67e079"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "John Doe"
+ *               position:
+ *                 type: string
+ *                 enum: ["Current", "Alumni"]
+ *                 example: "Current"
+ *               organization:
+ *                 type: string
+ *                 example: "XYZ Organization"
+ *               additionalInfo:
+ *                 type: string
+ *                 example: "Lead in Data Science"
+ *               imageUrl:
+ *                 type: string
+ *                 example: "https://example.com/image.jpg"
+ *     responses:
+ *       200:
+ *         description: Successfully updated lead
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "4e6b1c2d-8f8a-4b56-9f52-5c8f9a67e079"
+ *                 name:
+ *                   type: string
+ *                   example: "John Doe"
+ *                 position:
+ *                   type: string
+ *                   example: "Current"
+ *                 organization:
+ *                   type: string
+ *                   example: "XYZ Organization"
+ *                 additionalInfo:
+ *                   type: string
+ *                   example: "Lead in Data Science"
+ *                 imageUrl:
+ *                   type: string
+ *                   example: "https://example.com/image.jpg"
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Lead ID is required"
+ *       404:
+ *         description: Lead not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Lead not found"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred while updating the lead"
+ */
 
-// POST method: Add a new lead
-export async function POST(request: Request) {
-  try {
-    const leadData = await request.json();
+/**
+ * @swagger
+ * /api/leads:
+ *   delete:
+ *     summary: Delete an existing lead
+ *     description: This endpoint allows deleting a lead by its ID.
+ *     tags:
+ *       - Leads
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: "4e6b1c2d-8f8a-4b56-9f52-5c8f9a67e079"
+ *     responses:
+ *       200:
+ *         description: Successfully deleted lead
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "4e6b1c2d-8f8a-4b56-9f52-5c8f9a67e079"
+ *       400:
+ *         description: Lead ID is required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Lead ID is required"
+ *       404:
+ *         description: Lead not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Lead not found"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred while deleting the lead"
+ */
 
-    const validationError = validateLeadData(leadData);
-    if (validationError) {
-      return NextResponse.json({ error: validationError }, { status: 400 });
-    }
-
-    const leadID: string = uuidv4();
-
-    const newLead = new Leadsmodel({
-      id: leadID,
-      ...leadData,
-    });
-
-    console.log("New lead instance:", newLead);
-
-    const savedLead = await newLead.save();
-    return NextResponse.json(savedLead, { status: 201 });
-  } catch (error) {
-    console.error("Error creating lead:", error);
-    return NextResponse.json(
-      {
-        error: "An error occurred while creating the lead",
-        details: (error as Error).message,
-      },
-      { status: 500 }
-    );
-  }
-}
-// PUT method: Update an existing lead
-export async function PUT(request: Request) {
-  try {
-    const leadData = await request.json();
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-    const user = await Leadsmodel.findOne({ id });
-    const _id = user._id;
-    console.log(_id);
-    if (!id) {
-      return NextResponse.json(
-        { error: "Lead ID is required" },
-        { status: 400 }
-      );
-    }
-
-    // Validate the incoming lead data
-    const validationError = validateLeadData(leadData);
-    if (validationError) {
-      return NextResponse.json({ error: validationError }, { status: 400 });
-    }
-
-    const updatedLead = await Leadsmodel.findOneAndUpdate(
-      { _id },
-      { ...leadData },
-      { new: true }
-    );
-    console.log(updatedLead);
-    if (!updatedLead) {
-      return NextResponse.json({ error: "Lead not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(updatedLead, { status: 200 });
-  } catch (error) {
-    console.error("Error updating lead:", error);
-    return NextResponse.json(
-      {
-        error: "An error occurred while updating the lead",
-        details: (error as Error).message,
-      },
-      { status: 500 }
-    );
-  }
-}
-
-// DELETE method: Remove an existing lead
-export async function DELETE(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-      return NextResponse.json(
-        { error: "Lead ID is required" },
-        { status: 400 }
-      );
-    }
-
-    const deletedLead = await Leadsmodel.findOneAndDelete({ id });
-
-    if (!deletedLead) {
-      return NextResponse.json({ error: "Lead not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({ id }, { status: 200 });
-  } catch (error) {
-    console.error("Error deleting lead:", error);
-    return NextResponse.json(
-      {
-        error: "An error occurred while deleting the lead",
-        details: (error as Error).message,
-      },
-      { status: 500 }
-    );
-  }
-}
