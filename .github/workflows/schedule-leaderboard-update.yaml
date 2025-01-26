@@ -1,0 +1,14 @@
+name: Schedule Leaderboard Update
+
+on:
+  schedule:
+    # Runs at 13:30 UTC (7:00 PM IST) on Friday and Saturday
+    - cron: '30 13 * * 5,6'
+
+jobs:
+  update-leaderboard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Leaderboard
+        run: |
+          curl -X POST https://pointblank.club/api/hustle

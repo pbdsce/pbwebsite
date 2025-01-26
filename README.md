@@ -32,36 +32,33 @@ pnpm install
 bun install
 ```
 
-### **3. Set Up Firebase Configuration**  
-To connect the project to Firebase, you need a `.env.local` file in the root directory.  
+### **3. Install Infisical CLI**  
+Follow the instructions in the [Infisical CLI documentation](https://infisical.com/docs/cli/overview)
+ to install the CLI on your machine. 
 
-#### Create the `.env.local` file:
-```plaintext
-REACT_APP_FIREBASE_API_KEY=xxx
-REACT_APP_FIREBASE_AUTH_DOMAIN=xxx
-REACT_APP_FIREBASE_PROJECT_ID=xxx
-REACT_APP_FIREBASE_STORAGE_BUCKET=xxx
-REACT_APP_FIREBASE_MESSAGING_SENDER_ID=xxx
-REACT_APP_FIREBASE_APP_ID=xxx
-```
-
-**Note**: Replace the `xxx` values with the Firebase configuration keys.  
-Contact one of the maintainers to obtain the Firebase config details.  
-
-### **4. Run the Development Server**  
-Start the development server with one of the following commands:  
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
 The application will be accessible at [http://localhost:3000](http://localhost:3000).  
 
+### **4. Login and Initialize Infisical** 
+1. Navigate to the repository in your terminal.
+2. Run the following command to log in:
+```bash
+infisical login
+```
+**Note** : contact one of the maintainers to obtain the infisical credentials.
+
+### **5. Use infisical run -- as a Prefix for Commands** 
+When running commands, prepend them with `infisical run --`.
+
+For example, instead of running:
+```bash
+npm run dev
+```
+Use:
+```bash
+infisical run -- npm run dev
+```
+#### Tip: To simplify this process, you can create aliases for commonly used commands.** 
 ---
 
 ## **Contributing**  
