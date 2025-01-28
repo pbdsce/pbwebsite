@@ -1,20 +1,16 @@
-import express from "express";
-import swaggerJsdoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
-import swaggerOptions from "./swagger";
+import express from 'express';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './swagger.json';
 
 const app = express();
-const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+// Serve Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Example endpoint
-app.get("/api/hello", (req, res) => {
-  res.json({ message: "Hello, World!" });
-});
+app.listen(3010, () => console.log('Server running at http://localhost:3010'));
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:3000`);
-  console.log(`Swagger docs available at http://localhost:3000/api-docs`);
-});
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './swagger.json';
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
