@@ -25,7 +25,12 @@ export default function ResultsTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("/api/hustle");
+        const response = await fetch("/api/hustle", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
         const data = await response.json();
         console.log(data);
         if (response.ok && data?.data) {

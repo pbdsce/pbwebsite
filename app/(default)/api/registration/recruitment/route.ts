@@ -1,4 +1,5 @@
 import { db } from "@/Firebase";
+import connectMongoDB from "@/lib/dbConnect";
 import { recruitValidate } from "@/lib/server/utils";
 import {
   addDoc,
@@ -26,6 +27,7 @@ const validateUSN = (usn: string): boolean =>
 
 // Add a new registration
 export async function POST(request: Request) {
+  await connectMongoDB();
   const formData = await request.json();
   const { recaptcha_token, ...data } = formData;
   const { email, whatsapp_number, college_id, year_of_study } = formData;
