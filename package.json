@@ -55,6 +55,7 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.3.3",
     "uuid": "^11.0.3",
+    "yamljs": "^0.3.0",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
