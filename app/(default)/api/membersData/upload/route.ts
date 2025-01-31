@@ -4,10 +4,59 @@ import { cloudinary } from "@/Cloudinary";
 import { UploadApiResponse } from "cloudinary";
 
 /**
- * Handles file uploads and uploads the file to Cloudinary.
- *
- * @param {Request} request - The incoming HTTP request
- * @returns {Promise<Response>} - A response containing the uploaded image URL or an error message
+ * @swagger
+ * /api/upload:
+ *   post:
+ *     summary: Upload an image file to Cloudinary
+ *     description: This endpoint handles image file uploads and uploads the file to Cloudinary.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: The image file to be uploaded.
+ *     responses:
+ *       200:
+ *         description: Successfully uploaded the image
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 imageUrl:
+ *                   type: string
+ *                   description: The secure URL of the uploaded image
+ *       400:
+ *         description: Bad request, no file uploaded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Bad Request"
+ *                 details:
+ *                   type: string
+ *                   example: "No file uploaded"
+ *       500:
+ *         description: Internal server error during upload
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Cloudinary Upload Failed"
+ *                 details:
+ *                   type: string
+ *                   example: "Unknown upload error"
  */
 export async function POST(request: Request): Promise<Response> {
   try {

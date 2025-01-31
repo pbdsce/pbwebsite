@@ -4,12 +4,11 @@ import { cloudinary } from "@/Cloudinary";
 import { UploadApiResponse } from "cloudinary";
 
 /**
-<<<<<<< HEAD
  * @swagger
  * /api/upload:
  *   post:
- *     summary: Uploads an image to Firebase Storage.
- *     description: Receives an image file and uploads it to Firebase Storage, returning the download URL.
+ *     summary: Uploads an image to Cloudinary.
+ *     description: Receives an image file and uploads it to Cloudinary, returning the secure URL of the uploaded image.
  *     requestBody:
  *       required: true
  *       content:
@@ -20,9 +19,10 @@ import { UploadApiResponse } from "cloudinary";
  *               file:
  *                 type: string
  *                 format: binary
+ *                 description: The image file to be uploaded.
  *               name:
  *                 type: string
- *                 description: The name of the file in storage.
+ *                 description: The desired name of the file in storage.
  *     responses:
  *       200:
  *         description: Image uploaded successfully.
@@ -33,9 +33,9 @@ import { UploadApiResponse } from "cloudinary";
  *               properties:
  *                 imageUrl:
  *                   type: string
- *                   example: "https://firebasestorage.googleapis.com/v0/b/example.appspot.com/o/image.jpg"
+ *                   example: "https://res.cloudinary.com/your-cloud-name/image/upload/v1234567890/images/image.jpg"
  *       400:
- *         description: Bad request, file not provided.
+ *         description: Bad request, file or name not provided.
  *         content:
  *           application/json:
  *             schema:
@@ -43,10 +43,12 @@ import { UploadApiResponse } from "cloudinary";
  *               properties:
  *                 message:
  *                   type: string
+ *                   example: "Bad Request"
  *                 details:
  *                   type: string
+ *                   example: "File and name are required"
  *       500:
- *         description: Internal server error.
+ *         description: Internal server error during the upload process.
  *         content:
  *           application/json:
  *             schema:
@@ -54,18 +56,13 @@ import { UploadApiResponse } from "cloudinary";
  *               properties:
  *                 message:
  *                   type: string
+ *                   example: "Cloudinary Upload Failed"
  *                 details:
  *                   type: string
+ *                   example: "Unknown upload error"
  */
-export async function POST(request: Request) {
-=======
- * Handles file uploads and uploads the file to Cloudinary.
- *
- * @param {Request} request - The incoming HTTP request
- * @returns {Promise<Response>} - A response containing the uploaded image URL or an error message
- */
+
 export async function POST(request: Request): Promise<Response> {
->>>>>>> prod
   try {
     // Parse the form data from the incoming request
     const formData = await request.formData();

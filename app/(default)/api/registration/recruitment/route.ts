@@ -10,22 +10,77 @@ import {
 } from "firebase/firestore";
 import { NextResponse } from "next/server";
 
-// Helper validation functions
-const validateEmail = (email: string): boolean =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     RegistrationRequest:
+ *       type: object
+ *       required:
+ *         - email
+ *         - whatsapp_number
+ *         - college_id
+ *         - year_of_study
+ *       properties:
+ *         email:
+ *           type: string
+ *           description: The email of the participant.
+ *         whatsapp_number:
+ *           type: string
+ *           description: The WhatsApp number of the participant.
+ *         college_id:
+ *           type: string
+ *           description: The college ID or USN of the participant.
+ *         year_of_study:
+ *           type: integer
+ *           description: The year of study of the participant.
+ *         recaptcha_token:
+ *           type: string
+ *           description: The reCAPTCHA validation token.
+ *     RegistrationResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           description: The response message indicating success or failure.
+ *         error:
+ *           type: string
+ *           description: A specific error message if any.
+ */
 
-const validatePhone = (phone: string): boolean =>
-  /^[6-9]\d{9}$/.test(phone);
+/**
+ * @swagger
+ * /api/register:
+ *   post:
+ *     summary: Register a new participant for recruitment.
+ *     description: Validates the input and reCAPTCHA, then stores the registration details in Firebase.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegistrationRequest'
+ *     responses:
+ *       200:
+ *         description: Registration successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RegistrationResponse'
+ *       400:
+ *         description: Validation failed or input errors.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RegistrationResponse'
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RegistrationResponse'
+ */
 
-// Validate Admission Number (1st Years)
-const validateAdmissionNumber = (admissionNumber: string): boolean =>
-  /^[1-9][0-9][A-Z]{4}[0-9]{4}$/.test(admissionNumber);
-
-// Validate USN (Other Years)
-const validateUSN = (usn: string): boolean =>
-  /^[1][D][S][1-3][0-9][A-Z]{2}[0-9]{3}$/.test(usn);
-
-// Add a new registration
 export async function POST(request: Request) {
   await connectMongoDB();
   const formData = await request.json();

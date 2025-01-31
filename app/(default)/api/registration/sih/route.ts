@@ -4,12 +4,155 @@ import { sihValidate } from "@/lib/server/utils";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { NextResponse } from "next/server";
 
-// Utility functions for format validation
-const validateEmail = (email:string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-const validatePhone = (phone:string) => /^[6-9]\d{9}$/.test(phone);
-const validateYearOfStudy = (year:string) => /^\d{4}$/.test(year);
-const validateCollegeID = (enrollment_id:string) => /^[1][D][S][1-2][0-9][A-Z][A-Z][0-9]{3}/.test(enrollment_id);
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     TeamLeader:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: Team leader's name
+ *         email:
+ *           type: string
+ *           description: Team leader's email address
+ *         phone:
+ *           type: string
+ *           description: Team leader's phone number
+ *         role:
+ *           type: string
+ *           description: Role of the team leader
+ *         enrollment_id:
+ *           type: string
+ *           description: Enrollment ID of the team leader
+ *         course:
+ *           type: string
+ *           description: Course of the team leader
+ *         year_of_study:
+ *           type: string
+ *           description: Year of study of the team leader
+ *         branch:
+ *           type: string
+ *           description: Branch of the team leader
+ *     TeamMember:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: Member's name
+ *         email:
+ *           type: string
+ *           description: Member's email address
+ *         phone:
+ *           type: string
+ *           description: Member's phone number
+ *         role:
+ *           type: string
+ *           description: Role of the member
+ *         enrollment_id:
+ *           type: string
+ *           description: Enrollment ID of the member
+ *         course:
+ *           type: string
+ *           description: Course of the member
+ *         year_of_study:
+ *           type: string
+ *           description: Year of study of the member
+ *         branch:
+ *           type: string
+ *           description: Branch of the member
+ *     ProjectInformation:
+ *       type: object
+ *       properties:
+ *         title:
+ *           type: string
+ *           description: Title of the project
+ *         abstract:
+ *           type: string
+ *           description: Abstract of the project
+ *         problem_statement:
+ *           type: string
+ *           description: Problem statement of the project
+ *         tech_stack:
+ *           type: string
+ *           description: Technologies used in the project
+ *     RegistrationRequest:
+ *       type: object
+ *       properties:
+ *         recaptcha_token:
+ *           type: string
+ *           description: reCAPTCHA token for bot verification
+ *         team_info:
+ *           type: object
+ *           properties:
+ *             team_name:
+ *               type: string
+ *               description: Name of the team
+ *             team_leader:
+ *               $ref: '#/components/schemas/TeamLeader'
+ *             team_members:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/TeamMember'
+ *         project_infromation:
+ *           $ref: '#/components/schemas/ProjectInformation'
+ * /api/registration:
+ *   post:
+ *     summary: Registers a team for SIH 2024
+ *     description: Registers a new team by submitting team details, project information, and performing necessary validations.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegistrationRequest'
+ *     responses:
+ *       200:
+ *         description: Registration successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                 id:
+ *                   type: string
+ *                   description: ID of the registered team
+ *       400:
+ *         description: Validation or missing fields error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message
+ *                 error:
+ *                   type: string
+ *                   description: Specific error details
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message indicating internal server issue
+ *                 error:
+ *                   type: string
+ *                   description: Detailed error information
+ */
 
+const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const validatePhone = (phone: string) => /^[6-9]\d{9}$/.test(phone);
+const validateYearOfStudy = (year: string) => /^\d{4}$/.test(year);
+const validateCollegeID = (enrollment_id: string) => /^[1][D][S][1-2][0-9][A-Z][A-Z][0-9]{3}/.test(enrollment_id);
 
 export async function POST(request: Request) {
   await connectMongoDB();
@@ -66,14 +209,14 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
-    if (!validateCollegeID(leader.enrollment_id)) {
-      return NextResponse.json(
-        {
-          message: "Fromat Of Enrollment ID is Invald!.",
-          error: "Invalid enrollment_id",
-        },
-        { status: 400 }
-      );
+  if (!validateCollegeID(leader.enrollment_id)) {
+    return NextResponse.json(
+      {
+        message: "Fromat Of Enrollment ID is Invald!.",
+        error: "Invalid enrollment_id",
+      },
+      { status: 400 }
+    );
   }
 
   // Validate team members
@@ -166,7 +309,7 @@ export async function POST(request: Request) {
   }
 
   //Validate Project Details
-  if(
+  if (
     !data.project_infromation.title ||
     !data.project_infromation.abstract ||
     !data.project_infromation.problem_statement ||
@@ -174,54 +317,29 @@ export async function POST(request: Request) {
   ) {
     return NextResponse.json(
       {
-        message: "Project Details Haven't been provided!",
-        error: "Project Details not provided!"
-      },
-      {status: 400}
-    );
-  }
-
-  const recaptchaToken = recaptcha_token;
-  if (!recaptchaToken) {
-    return NextResponse.json(
-      {
-        message: "reCAPTCHA token not found! Refresh and try again",
-        error: "reCAPTCHA token not found!",
+        message: "Project information is incomplete.",
+        error: "Missing project details",
       },
       { status: 400 }
     );
   }
 
-  const recaptchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
-
-  // Verify reCAPTCHA token
-  const recaptchaResponse = await fetch(
-    `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${recaptchaToken}`,
-    { method: "POST" }
-  );
-  const recaptchaResult = await recaptchaResponse.json();
-
-  if (!recaptchaResult.success) {
-    return NextResponse.json(
-      {
-        message: "reCAPTCHA validation failed",
-        error: recaptchaResult["error-codes"],
-      },
-      { status: 400 }
-    );
-  }
-
-  // Validate the data
-  const val = sihValidate(data);
-
+  // Save data
   try {
-    // Save to Firebase
     const docRef = await addDoc(collection(db, "sih2024"), data);
-    return NextResponse.json({ message: "Registration successful", id: docRef.id });
-  } catch (error) {
-    console.error(error);
     return NextResponse.json(
-      { message: "An error occurred", error },
+      {
+        message: "Team registered successfully.",
+        id: docRef.id,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      {
+        message: "Error saving data to Firestore.",
+        error: error.message,
+      },
       { status: 500 }
     );
   }
