@@ -3,72 +3,55 @@ import Eventmodel from "@/models/Events";
 import connectMongoDB from "@/lib/dbConnect";
 import { v4 as uuidv4 } from "uuid";
 
-// Helper function to validate event data
-const validateEvent = (event: any) => {
-  const errors: string[] = [];
-  const {
-    eventName,
-    eventDate,
-    lastDateOfRegistration,
-    description,
-    imageURL,
-    registrationLink,
-  } = event;
-
-  if (
-    !eventName ||
-    typeof eventName !== "string" ||
-    eventName.trim().length === 0
-  ) {
-    errors.push("Event name is required and must be a non-empty string.");
-  }
-
-  if (!eventDate || isNaN(Date.parse(eventDate))) {
-    errors.push("Event date is required and must be a valid date.");
-  }
-
-  if (!lastDateOfRegistration || isNaN(Date.parse(lastDateOfRegistration))) {
-    errors.push(
-      "Last date of registration is required and must be a valid date."
-    );
-  } else if (new Date(lastDateOfRegistration) > new Date(eventDate)) {
-    errors.push("Last date of registration must be before the event date.");
-  }
-
-  if (
-    !description ||
-    typeof description !== "string" ||
-    description.trim().length < 10
-  ) {
-    errors.push(
-      "Description is required and must be at least 10 characters long."
-    );
-  }
-
-  if (
-    !imageURL ||
-    typeof imageURL !== "string" ||
-    !imageURL.startsWith("http")
-  ) {
-    errors.push("Image URL is required and must be a valid URL.");
-  }
-
-  if (
-    !registrationLink ||
-    typeof registrationLink !== "string" ||
-    !registrationLink.startsWith("http")
-  ) {
-    errors.push("Registration link is required and must be a valid URL.");
-  }
-
-  return errors;
-};
-
-// GET request
+/**
+ * @swagger
+ * /api/events:
+ *   get:
+ *     summary: Retrieve all events
+ *     description: Fetches all stored events from the database.
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the list of events.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 events:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       eventName:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       eventDate:
+ *                         type: string
+ *                         format: date
+ *                       lastDateOfRegistration:
+ *                         type: string
+ *                         format: date
+ *                       dateCreated:
+ *                         type: string
+ *                         format: date-time
+ *                       dateModified:
+ *                         type: string
+ *                         format: date-time
+ *                       imageURL:
+ *                         type: string
+ *                         format: uri
+ *                       registrationLink:
+ *                         type: string
+ *                         format: uri
+ *       500:
+ *         description: Internal server error
+ */
 export async function GET(request: Request) {
   await connectMongoDB();
   try {
-    
     const eventSnapshot = await Eventmodel.find();
     const eventsList = eventSnapshot.map((event: any) => ({
       id: event.id,
@@ -100,7 +83,43 @@ export async function GET(request: Request) {
   }
 }
 
-// POST request
+/**
+ * @swagger
+ * /api/events:
+ *   post:
+ *     summary: Create a new event
+ *     description: Adds a new event to the database.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               eventName:
+ *                 type: string
+ *               eventDate:
+ *                 type: string
+ *                 format: date
+ *               lastDateOfRegistration:
+ *                 type: string
+ *                 format: date
+ *               description:
+ *                 type: string
+ *               imageURL:
+ *                 type: string
+ *                 format: uri
+ *               registrationLink:
+ *                 type: string
+ *                 format: uri
+ *     responses:
+ *       201:
+ *         description: Successfully created an event.
+ *       400:
+ *         description: Validation error.
+ *       500:
+ *         description: Internal server error.
+ */
 export async function POST(request: Request) {
   try {
     const newEvent = await request.json();
@@ -133,12 +152,57 @@ export async function POST(request: Request) {
     );
   }
 }
-// PUT request
+
+/**
+ * @swagger
+ * /api/events:
+ *   put:
+ *     summary: Update an existing event
+ *     description: Updates an event in the database based on event ID.
+ *     parameters:
+ *       - name: eventid
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               eventName:
+ *                 type: string
+ *               eventDate:
+ *                 type: string
+ *                 format: date
+ *               lastDateOfRegistration:
+ *                 type: string
+ *                 format: date
+ *               description:
+ *                 type: string
+ *               imageURL:
+ *                 type: string
+ *                 format: uri
+ *               registrationLink:
+ *                 type: string
+ *                 format: uri
+ *     responses:
+ *       200:
+ *         description: Event updated successfully.
+ *       400:
+ *         description: Validation error or missing event ID.
+ *       404:
+ *         description: Event not found.
+ *       500:
+ *         description: Internal server error.
+ */
 export async function PUT(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const eventid = searchParams.get("eventid");
-    console.log(eventid);
+
     if (!eventid) {
       return NextResponse.json(
         { error: "Event ID is required" },
@@ -173,22 +237,33 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ id: eventid }, { status: 200 });
   } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error details:", error.message);
-      return NextResponse.json(
-        { error: "An error occurred", details: error.message },
-        { status: 500 }
-      );
-    } else {
-      console.error("Unknown error:", error);
-      return NextResponse.json(
-        { error: "An unknown error occurred" },
-        { status: 500 }
-      );
-    }
+    return NextResponse.json(
+      { error: "An error occurred", details: error.message },
+      { status: 500 }
+    );
   }
 }
-// DELETE request
+
+/**
+ * @swagger
+ * /api/events:
+ *   delete:
+ *     summary: Delete an event
+ *     description: Deletes an event from the database based on event ID.
+ *     parameters:
+ *       - name: eventid
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Event deleted successfully.
+ *       400:
+ *         description: Missing event ID.
+ *       500:
+ *         description: Internal server error.
+ */
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -207,18 +282,9 @@ export async function DELETE(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error details:", error.message);
-      return NextResponse.json(
-        { error: "An error occurred", details: error.message },
-        { status: 500 }
-      );
-    } else {
-      console.error("Unknown error:", error);
-      return NextResponse.json(
-        { error: "An unknown error occurred" },
-        { status: 500 }
-      );
-    }
+    return NextResponse.json(
+      { error: "An error occurred", details: error.message },
+      { status: 500 }
+    );
   }
 }

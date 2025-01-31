@@ -11,7 +11,57 @@ import {
 } from "firebase/firestore";
 import { NextResponse } from "next/server";
 
-//Check if USN exists
+/**
+ * @swagger
+ * /api/registrations:
+ *   get:
+ *     summary: Check if a USN is registered
+ *     description: This endpoint checks if the provided USN is already registered for a participant.
+ *     parameters:
+ *       - in: query
+ *         name: usn
+ *         required: true
+ *         schema:
+ *           type: string
+ *           description: The USN of the participant.
+ *     responses:
+ *       200:
+ *         description: The USN is either not registered or already exists.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "usn already exists"
+ *                 isUnique:
+ *                   type: boolean
+ *                   example: false
+ *       400:
+ *         description: Missing USN parameter.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "usn is required"
+ *       500:
+ *         description: Internal server error while fetching data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred"
+ *                 details:
+ *                   type: string
+ *                   example: "Detailed error message"
+ */
 export async function GET(request: Request) {
   await connectMongoDB();
   try {
@@ -65,6 +115,61 @@ export async function GET(request: Request) {
   }
 }
 
+/**
+ * @swagger
+ * /api/registrations:
+ *   post:
+ *     summary: Handle registration actions
+ *     description: This endpoint handles different registration actions like reCAPTCHA validation or adding a registration.
+ *     parameters:
+ *       - in: query
+ *         name: action
+ *         required: true
+ *         schema:
+ *           type: string
+ *           description: Action to perform (validateRecaptcha, addRegistration)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               recaptcha_token:
+ *                 type: string
+ *                 description: The reCAPTCHA token for validation.
+ *     responses:
+ *       200:
+ *         description: Successful operation based on action.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Recaptcha validated!"
+ *       400:
+ *         description: Invalid action specified or missing data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid action specified"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred"
+ */
 export async function POST(request: Request) {
   try {
     const { searchParams } = new URL(request.url); // Extract query parameters
@@ -89,7 +194,58 @@ export async function POST(request: Request) {
   }
 }
 
-// Add a new registration
+/**
+ * @swagger
+ * /api/registrations/validateRecaptcha:
+ *   post:
+ *     summary: Validate reCAPTCHA token
+ *     description: This endpoint validates the reCAPTCHA token to verify if the user is human.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               recaptcha_token:
+ *                 type: string
+ *                 description: The reCAPTCHA token for validation.
+ *     responses:
+ *       200:
+ *         description: reCAPTCHA validated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Recaptcha validated!"
+ *       500:
+ *         description: reCAPTCHA validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "reCAPTCHA validation failed"
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *       400:
+ *         description: Bad Request when reCAPTCHA token is missing.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "reCAPTCHA token not found! Try again"
+ */
 async function validateRecaptcha(request: Request) {
   const formData = await request.json();
   const { recaptcha_token } = formData;
@@ -115,8 +271,7 @@ async function validateRecaptcha(request: Request) {
     );
   }
 
-  // Verify the reCATPTCHA token
-
+  // Verify the reCAPTCHA token
   const recaptchaResponse = await fetch(
     `https://recaptchaenterprise.googleapis.com/v1/projects/${process.env.RECAPTCHA_PROJECT}/assessments?key=${process.env.RECAPTCHA_API_KEY}`,
     {
@@ -137,6 +292,50 @@ async function validateRecaptcha(request: Request) {
   return NextResponse.json({ message: "Recaptcha validated!" });
 }
 
+/**
+ * @swagger
+ * /api/registrations/addRegistration:
+ *   post:
+ *     summary: Add a new registration
+ *     description: This endpoint allows users to register for the event.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               participant1:
+ *                 type: object
+ *                 properties:
+ *                   usn:
+ *                     type: string
+ *                     description: The USN of participant 1.
+ *               participationType:
+ *                 type: string
+ *                 description: Type of participation.
+ *     responses:
+ *       200:
+ *         description: Registration successful.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Registration successful!"
+ *       400:
+ *         description: Invalid data, missing required fields.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid data. Participant1 and participationType are required."
+ */
 async function addRegistration(request: Request) {
   try {
     const data = await request.json();

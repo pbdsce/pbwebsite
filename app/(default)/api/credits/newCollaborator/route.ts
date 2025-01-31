@@ -9,6 +9,43 @@ cloudinary.v2.config({
     api_secret: process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET,
 });
 
+/**
+ * @swagger
+ * /api/credit:
+ *   post:
+ *     summary: Fetch GitHub contributors and store them in the database
+ *     description: Fetches contributors from a specified GitHub repository, downloads their avatars, uploads them to Cloudinary, and saves contributor details in MongoDB.
+ *     responses:
+ *       201:
+ *         description: Successfully stored new contributors
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 newCredits:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       userId:
+ *                         type: integer
+ *                       name:
+ *                         type: string
+ *                       githubUrl:
+ *                         type: string
+ *                         format: uri
+ *                       imageUrl:
+ *                         type: string
+ *                         format: uri
+ *       400:
+ *         description: Failed to fetch contributors
+ *       500:
+ *         description: Internal server error
+ */
+
 function uploadToCloudinary(fileBuffer: Buffer): Promise<{ secure_url: string; public_id: string }> {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.v2.uploader.upload_stream(
@@ -24,7 +61,7 @@ function uploadToCloudinary(fileBuffer: Buffer): Promise<{ secure_url: string; p
       );
       uploadStream.end(fileBuffer); // Write buffer data and end the stream
     });
-  }
+}
   
 export async function POST(request: NextRequest) {
     try{
