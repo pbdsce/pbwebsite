@@ -8,12 +8,18 @@ const nextConfig = {
   },
   transpilePackages: ['swagger-ui-react'],
   images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+    ],
     domains: [
       "firebasestorage.googleapis.com",
       "img.icons8.com",
       "icpc.global",
       "img.freepik.com",
-      "media.licdn.com"
+      "media.licdn.com",
     ],
   },
   webpack: (config) => {
