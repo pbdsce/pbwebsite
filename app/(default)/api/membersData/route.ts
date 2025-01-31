@@ -1,32 +1,14 @@
 import { NextResponse } from "next/server";
-import { db, storage } from "@/Firebase";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  DocumentData,
-  DocumentSnapshot,
-  doc,
-  updateDoc,
-  deleteDoc,
-  getDoc,
-} from "firebase/firestore";
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-} from "firebase/storage";
+import { cloudinary } from "@/Cloudinary";
 import connectMongoDB from "@/lib/dbConnect";
 import Membersmodel from "@/models/Members";
-import { v4 as uuidv4 } from "uuid";
 import { ObjectId } from "mongodb";
 
 // GET handler to retrieve all members
 export async function GET() {
-  await connectMongoDB()
   try {
-    const querySnapshot = await Membersmodel.find()
+    await connectMongoDB();
+    const querySnapshot = await Membersmodel.find();
     const members = querySnapshot.map((member: any) => ({
       id: member.id,
       name: member.name,
@@ -62,7 +44,7 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
 
-    const { name, year, role, company, imageUrl, linkedInUrl } = data;
+    const { name } = data;
 
     if (!name) {
       return NextResponse.json(
@@ -71,18 +53,16 @@ export async function POST(request: Request) {
       );
     }
 
-
     // Add the new member document to the Firestore collection
 
-    const newMember=new Membersmodel({
+    const newMember = new Membersmodel({
       ...data,
-    }) 
-    const savedMember = await newMember.save()
-    
+    });
+    const savedMember = await newMember.save();
 
     // Return success response with the new member's document ID
     return NextResponse.json(
-      { message: "Member added successfully",savedMember},
+      { message: "Member added successfully", savedMember },
       { status: 201 }
     );
   } catch (error) {
@@ -97,25 +77,26 @@ export async function POST(request: Request) {
 
 // PUT handler to update an existing member
 export async function PUT(request: Request) {
-  await connectMongoDB();
-
   try {
     const data = await request.json();
-    const { id, name, imageUrl } = data;
-    const newid:Object=new ObjectId(id);
+    const { id, name } = data;
+    const newid: Object = new ObjectId(id);
     // Validate required fields
     if (!id || !name) {
       return NextResponse.json(
-        { message: "Missing required fields: 'id' and 'name' are mandatory.", error: true },
+        {
+          message: "Missing required fields: 'id' and 'name' are mandatory.",
+          error: true,
+        },
         { status: 400 }
       );
     }
 
     // Update the member in the database
     const updatedData = await Membersmodel.findOneAndUpdate(
-      { _id:newid }, 
-      { ...data }, 
-      { new: true } 
+      { _id: newid },
+      { ...data },
+      { new: true }
     );
 
     // Check if the member was found and updated
@@ -131,24 +112,25 @@ export async function PUT(request: Request) {
       { message: "Member updated successfully", data: updatedData },
       { status: 200 }
     );
-
   } catch (error) {
     console.error("Error updating member:", error);
     return NextResponse.json(
-      { message: `Failed to update member: ${(error as Error).message}`, error: true },
+      {
+        message: `Failed to update member: ${(error as Error).message}`,
+        error: true,
+      },
       { status: 500 }
     );
   }
 }
-
 
 // DELETE handler to delete a member and their image
 export async function DELETE(request: Request) {
   try {
     // Parse the request body to get the member ID
     const { id } = await request.json();
-    const newid:Object=new ObjectId(id);
-    // Check if the member ID is provided
+
+    // Validate the member ID
     if (!id) {
       return NextResponse.json(
         { message: "Missing member ID", error: true },
@@ -156,7 +138,11 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const memberSnapshot = await Membersmodel.findOne({_id:newid})
+    const newid: Object = new ObjectId(id);
+
+    // Find the member in the database
+    const memberSnapshot = await Membersmodel.findOne({ _id: newid });
+
     // If the member does not exist, return a 404 response
     if (!memberSnapshot) {
       return NextResponse.json(
@@ -165,25 +151,47 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const memberData = memberSnapshot
+    const memberData = memberSnapshot;
     const imageUrl = memberData.imageUrl;
 
+    // If the member has an associated image URL, delete it from Cloudinary
     if (imageUrl) {
-      const imageRef = ref(storage, imageUrl);
-      await deleteObject(imageRef).catch((error) => {
-        console.error("Error deleting image from Firebase Storage:", error);
+      try {
+        // Extract the public_id from the Cloudinary image URL
+        const publicId = imageUrl.split("/").pop()?.split(".")[0]; // Extracts the file name without extension
+
+        if (publicId) {
+          // Delete the image from Cloudinary
+          await cloudinary.uploader.destroy(
+            `members/${publicId}`,
+            (error, result) => {
+              if (error) {
+                console.error("Error deleting image from Cloudinary:", error);
+                throw new Error("Failed to delete image from Cloudinary");
+              }
+              console.log("Cloudinary deletion result:", result);
+            }
+          );
+        }
+      } catch (error) {
+        console.error("Error during Cloudinary image deletion:", error);
         return NextResponse.json(
           { message: "Failed to delete image from storage", error: true },
           { status: 500 }
         );
-      });
+      }
     }
-    await Membersmodel.deleteOne({_id:newid});
+
+    // Delete the member document from the database
+    await Membersmodel.deleteOne({ _id: newid });
+
+    // Return a success response
     return NextResponse.json(
       { message: "Member and associated image deleted successfully" },
       { status: 200 }
     );
   } catch (error) {
+    // Log and return an error response
     console.error("Error deleting member:", error);
     return NextResponse.json(
       { message: "Failed to delete member", error },

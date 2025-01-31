@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import Achievementmodel from "@/models/Achievements";
 import { cloudinary } from "@/Cloudinary";
+import { Readable } from "stream";
+import { UploadApiResponse } from "cloudinary";
 import connectMongoDB from "@/lib/dbConnect";
+
+/* Keep the Swagger documentation as is */
 
 /**
  * @swagger
@@ -71,35 +75,19 @@ import connectMongoDB from "@/lib/dbConnect";
  *                   type: string
  *       400:
  *         description: Bad request, missing or invalid fields.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
  *       500:
  *         description: Internal server error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                 details:
- *                   type: string
  */
 
 /**
  * Utility function to upload an image to Cloudinary
  */
-async function uploadToCloudinary(buffer: Buffer, folder: string, publicId: string) {
+async function uploadToCloudinary(buffer: Buffer, folder: string, publicId: string): Promise<UploadApiResponse> {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       { folder, public_id: publicId },
       (error, result) => {
-        if (error) {
+        if (error || !result) {
           reject(error);
         } else {
           resolve(result);
@@ -107,12 +95,8 @@ async function uploadToCloudinary(buffer: Buffer, folder: string, publicId: stri
       }
     );
 
-    // Create a readable stream and pipe it to the Cloudinary uploader
-    const { Readable } = require("stream");
-    const readableStream = new Readable();
-    readableStream.push(buffer);
-    readableStream.push(null); // End the stream
-    readableStream.pipe(uploadStream);
+    const stream = Readable.from(buffer);
+    stream.pipe(uploadStream);
   });
 }
 
@@ -122,17 +106,14 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
 
     // Extract required fields
-    const name = formData.get("name") as string | null;
-    const email = formData.get("email") as string | null;
-    const batch = formData.get("batch") as string | null;
-    const portfolio = formData.get("portfolio") as string | null;
-    const internship = formData.get("internship") as string | null;
-    const companyPosition = formData.get("companyPosition") as string | null;
-    const achievements = formData.get("achievements") 
-      ? JSON.parse(formData.get("achievements") as string)
-      : [];
-
-    const image = formData.get("image") as File | null;
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const batch = formData.get("batch") as string;
+    const portfolio = formData.get("portfolio") as string;
+    const internship = formData.get("internship") as string;
+    const companyPosition = formData.get("companyPosition") as string;
+    const achievements = JSON.parse(formData.get("achievements") as string) as string[];
+    const image = formData.get("image") as File;
 
     // Validate required fields
     if (!name || !email || !batch || !achievements.length) {
@@ -142,11 +123,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for duplicate name in the database
+    // Check for duplicate name
     const existingMember = await Achievementmodel.findOne({ name });
     if (existingMember) {
       return NextResponse.json(
-        { error: `A member with the name \"${name}\" already exists.` },
+        { error: `A member with the name ${name} already exists.` },
         { status: 400 }
       );
     }
@@ -169,7 +150,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create a new achievement document
     const newAchievement = new Achievementmodel({
       name,
       email,
@@ -187,6 +167,101 @@ export async function POST(request: NextRequest) {
     console.error("Error creating achievement:", error);
     return NextResponse.json(
       { error: "An internal server error occurred.", details: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    await connectMongoDB();
+    const { searchParams } = new URL(request.url);
+    const name = searchParams.get("name");
+
+    const query = name ? { name } : {};
+    const achievements = await Achievementmodel.find(query);
+
+    const members = achievements.map((member: any) => ({
+      id: member._id,
+      name: member.name,
+      email: member.email || null,
+      batch: member.batch || null,
+      portfolio: member.portfolio || null,
+      internship: member.internship || null,
+      companyPosition: member.companyPosition || null,
+      achievements: member.achievements || [],
+      imageUrl: member.imageUrl || null,
+    }));
+
+    return NextResponse.json(members);
+  } catch (error) {
+    console.error("Error fetching members:", error);
+    return NextResponse.json(
+      { error: "An error occurred while fetching members", details: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    await connectMongoDB();
+    const formData = await request.formData();
+    const name = formData.get("name") as string;
+
+    const existingMember = await Achievementmodel.findOne({ name });
+    if (!existingMember) {
+      return NextResponse.json(
+        { error: `No member found with the name ${name}` },
+        { status: 404 }
+      );
+    }
+
+    // Extract data from the form, using existing values if new data is not provided
+    const email = (formData.get("email") as string) || existingMember.email;
+    const batch = (formData.get("batch") as string) || existingMember.batch;
+    const portfolio = (formData.get("portfolio") as string) || existingMember.portfolio;
+    const internship = (formData.get("internship") as string) || existingMember.internship;
+    const companyPosition = (formData.get("companyPosition") as string) || existingMember.companyPosition;
+    const achievements = formData.get("achievements")
+      ? JSON.parse(formData.get("achievements") as string)
+      : existingMember.achievements;
+    const image = formData.get("image") as File;
+
+    let imageUrl = existingMember.imageUrl;
+
+    // Handle image upload if a new image is provided
+    if (image) {
+      const arrayBuffer = await image.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      try {
+        const uploadResult = await uploadToCloudinary(buffer, "achievements", name);
+        imageUrl = uploadResult.secure_url;
+      } catch (error) {
+        console.error("Image upload failed:", error);
+        return NextResponse.json(
+          { error: "Image upload failed. Please try again later." },
+          { status: 500 }
+        );
+      }
+    }
+
+    // Update the member data
+    existingMember.email = email;
+    existingMember.batch = batch;
+    existingMember.portfolio = portfolio;
+    existingMember.internship = internship;
+    existingMember.companyPosition = companyPosition;
+    existingMember.achievements = achievements;
+    existingMember.imageUrl = imageUrl;
+
+    await existingMember.save();
+    return NextResponse.json(existingMember);
+  } catch (error) {
+    console.error("Error updating member:", error);
+    return NextResponse.json(
+      { error: "An error occurred while updating", details: (error as Error).message },
       { status: 500 }
     );
   }

@@ -1,13 +1,14 @@
 import { cn } from "@/lib/server/utils";
 import HyperText from "./magicui/hyper-text";
 import Image from "next/image";
+import Carousel from "@/components/carousel.component";
 
 interface ActivityCardProps {
     LeftAligned: boolean;
     Title: string;
     Subtitle: string | React.ReactNode;
     Description: string;
-    ImageSrc: string;
+    ImageSrc: string[];
 }
 
 export default function ActivityCard({...props}: ActivityCardProps) {
@@ -46,13 +47,11 @@ export default function ActivityCard({...props}: ActivityCardProps) {
 
             <div className="highlight flex-6 my-auto px-4 sm:px-8">
                 <div className="highlight w-full h-64 sm:w-96 sm:h-96 flex items-center justify-center bg-black-900">
-                    <Image
-                        src={props.ImageSrc}
-                        alt=""
-                        className="rounded-xl object-cover w-full h-full"
-                        width={500}
-                        height={500}
-                    />
+                <Carousel 
+                    slides={props.ImageSrc}
+                    useScrollHoverEffects={true}
+                    className="ActivityCard"
+                />
                 </div>
             </div>
         </div>

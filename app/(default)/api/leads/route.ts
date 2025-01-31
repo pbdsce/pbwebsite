@@ -5,7 +5,7 @@ import Leadsmodel from "@/models/Leads";
 
 // Interface for Lead
 interface Lead {
-  id:string;
+  id: string;
   name: string;
   position: string;
   organization: string;
@@ -18,7 +18,10 @@ function validateLeadData(leadData: any): string | null {
   if (!leadData.name || typeof leadData.name !== "string") {
     return "Name is required and should be a string";
   }
-  if (!leadData.position || !["Current", "Alumni"].includes(leadData.position)) {
+  if (
+    !leadData.position ||
+    !["Current", "Alumni"].includes(leadData.position)
+  ) {
     return 'Position is required and should be either "Current" or "Alumni"';
   }
   if (!leadData.organization || typeof leadData.organization !== "string") {
@@ -34,9 +37,9 @@ function validateLeadData(leadData: any): string | null {
 }
 
 export async function GET(request: Request) {
-  await connectMongoDB();
   try {
-    const leads = await Leadsmodel.find(); 
+    await connectMongoDB();
+    const leads = await Leadsmodel.find();
     const currentLeads: Lead[] = [];
     const alumniLeads: Lead[] = [];
 
@@ -52,7 +55,10 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Error fetching leads:", error);
     return NextResponse.json(
-      { error: "An error occurred while fetching leads", details: (error as Error).message },
+      {
+        error: "An error occurred while fetching leads",
+        details: (error as Error).message,
+      },
       { status: 500 }
     );
   }
@@ -60,17 +66,15 @@ export async function GET(request: Request) {
 
 // POST method: Add a new lead
 export async function POST(request: Request) {
-  await connectMongoDB();
   try {
-    const leadData = await request.json();  
+    const leadData = await request.json();
 
-    
     const validationError = validateLeadData(leadData);
     if (validationError) {
       return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
-    const leadID: string = uuidv4(); 
+    const leadID: string = uuidv4();
 
     const newLead = new Leadsmodel({
       id: leadID,
@@ -79,28 +83,33 @@ export async function POST(request: Request) {
 
     console.log("New lead instance:", newLead);
 
-    const savedLead = await newLead.save(); 
+    const savedLead = await newLead.save();
     return NextResponse.json(savedLead, { status: 201 });
   } catch (error) {
     console.error("Error creating lead:", error);
     return NextResponse.json(
-      { error: "An error occurred while creating the lead", details: (error as Error).message },
+      {
+        error: "An error occurred while creating the lead",
+        details: (error as Error).message,
+      },
       { status: 500 }
     );
   }
 }
 // PUT method: Update an existing lead
 export async function PUT(request: Request) {
-  await connectMongoDB();
   try {
     const leadData = await request.json();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-    const user= await Leadsmodel.findOne({id})
-    const _id=user._id
-    console.log(_id)
+    const user = await Leadsmodel.findOne({ id });
+    const _id = user._id;
+    console.log(_id);
     if (!id) {
-      return NextResponse.json({ error: "Lead ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Lead ID is required" },
+        { status: 400 }
+      );
     }
 
     // Validate the incoming lead data
@@ -110,11 +119,11 @@ export async function PUT(request: Request) {
     }
 
     const updatedLead = await Leadsmodel.findOneAndUpdate(
-      { _id },            
-      { ...leadData} ,
-      {new:true},
+      { _id },
+      { ...leadData },
+      { new: true }
     );
-    console.log(updatedLead)
+    console.log(updatedLead);
     if (!updatedLead) {
       return NextResponse.json({ error: "Lead not found" }, { status: 404 });
     }
@@ -123,7 +132,10 @@ export async function PUT(request: Request) {
   } catch (error) {
     console.error("Error updating lead:", error);
     return NextResponse.json(
-      { error: "An error occurred while updating the lead", details: (error as Error).message },
+      {
+        error: "An error occurred while updating the lead",
+        details: (error as Error).message,
+      },
       { status: 500 }
     );
   }
@@ -131,13 +143,15 @@ export async function PUT(request: Request) {
 
 // DELETE method: Remove an existing lead
 export async function DELETE(request: Request) {
-  await connectMongoDB();
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json({ error: "Lead ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Lead ID is required" },
+        { status: 400 }
+      );
     }
 
     const deletedLead = await Leadsmodel.findOneAndDelete({ id });
@@ -150,7 +164,10 @@ export async function DELETE(request: Request) {
   } catch (error) {
     console.error("Error deleting lead:", error);
     return NextResponse.json(
-      { error: "An error occurred while deleting the lead", details: (error as Error).message },
+      {
+        error: "An error occurred while deleting the lead",
+        details: (error as Error).message,
+      },
       { status: 500 }
     );
   }
