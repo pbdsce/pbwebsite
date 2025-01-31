@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import 'swagger-ui-react/swagger-ui.css';
 
 @layer base {
   :root {
