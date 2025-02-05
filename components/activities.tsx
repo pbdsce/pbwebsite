@@ -50,6 +50,13 @@ const activityData: ActivityData[] = [
       "Each year, we organize the internal round of the Smart India Hackathon. In the 2020 edition, over 300+ individuals from DSCE participated. Two of our teams advanced to the finals, with one emerging as the winner of the software edition. Along with this, teams from Point Blank have won hackathons all across the city and country.",
   },
   {
+    Title: "OPEN SOURCE",
+    Subtitle: "Google Summer of Code",
+    Image: ["/images/gsoc.png"],
+    Description:
+      "Google Summer of Code(GSOC) is a global program focused on bringing more student developers into open source software development. GSoC Contributors work with an open source organization on a 12+ week programming project under the guidance of mentors.",
+  },
+  {
     Title: "Cybersecurity",
     Subtitle: "PB CTF",
     Image: ["/images/ctf4.jpg", "/images/ctf1.jpg", "/images/ctf2.jpg", "/images/ctf3.jpg"],
