@@ -9,9 +9,17 @@ export const swaggerOptions = {
     },
     servers: [
       {
+        url: process.env.NEXT_PUBLIC_API_URL || 'https://pointblank.club',
+        description: 'Production server',
+      },
+      {
+        url: process.env.NEXT_PUBLIC_STAGING_URL || 'https://staging--pbpage.netlify.app/',
+        description: 'Staging server',
+      },
+      {
         url: 'http://localhost:3000',
         description: 'Development server',
-      },
+      }
     ],
     tags: [
       { name: 'Achievements', description: 'Achievements management endpoints' },

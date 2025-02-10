@@ -16,7 +16,8 @@ interface Lead {
 const Leads: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  // const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const { isAdmin , setAdmin } = useStore();
   const [currentLeads, setCurrentLeads] = useState<Lead[]>([]);
   const [alumniLeads, setAlumniLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null); // For editing leads
@@ -45,14 +46,14 @@ const Leads: React.FC = () => {
           const resp = await fetch(`/api/admin?uid=${uid}`);
           const data = await resp.json();
           if (data.isAdmin) {
-            setIsAdminLoggedIn(true);
+            setAdmin(true);
           }
         } catch (error) {
           console.log("Error getting document:", error);
         }
       }
     });
-  });
+  }, [isAdmin]);
 
   useEffect(() => {
     fetchLeads();
@@ -186,7 +187,7 @@ const Leads: React.FC = () => {
         color: "#fff",
       }}
     >
-      {isAdminLoggedIn && (
+      {isAdmin && (
         <button
           onClick={toggleForm}
           style={{
@@ -219,14 +220,14 @@ const Leads: React.FC = () => {
         leads={currentLeads}
         onEdit={handleEditLead}
         onDelete={handleDeleteLead}
-        isAdminLoggedIn={isAdminLoggedIn}
+        isAdminLoggedIn={isAdmin}
       />
       <LeadSection
         title="Alumni Leads"
         leads={alumniLeads}
         onEdit={handleEditLead}
         onDelete={handleDeleteLead}
-        isAdminLoggedIn={isAdminLoggedIn}
+        isAdminLoggedIn={isAdmin}
       />
     </section>
   );

@@ -16,6 +16,7 @@ const nextConfig = {
       "icpc.global",
       "img.freepik.com",
       "media.licdn.com",
+      "res.cloudinary.com"
     ],
   },
   async headers() {

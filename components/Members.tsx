@@ -9,6 +9,7 @@ import Image from "next/image";
 import Card from "./ui/Card";
 import CollapsibleSection from "./ui/CollapsibleSection";
 import { useStoreMember } from "@/lib/zustand/store";
+import { useStore } from "@/lib/zustand/store";
 
 interface Member {
   id?: string;
@@ -57,7 +58,8 @@ export default function Members() {
     setOpenIndex(openIndex === index ? -1 : index);
   };
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  // const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin, setAdmin } = useStore();
 
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
@@ -67,7 +69,7 @@ export default function Members() {
           const resp = await fetch(`/api/admin?uid=${uid}`);
           const data = await resp.json();
           if (data.isAdmin) {
-            setIsAdmin(true);
+            setAdmin(true);
           }
         } catch (error) {
           console.log("Error getting document:", error);

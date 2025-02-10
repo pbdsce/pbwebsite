@@ -5,6 +5,7 @@ import { Transition } from '@headlessui/react';
 import Link from 'next/link';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/Firebase';
+import { useStore } from "@/lib/zustand/store";
 
 
 export default function MobileMenu() {
@@ -14,10 +15,12 @@ export default function MobileMenu() {
   const trigger = useRef<HTMLButtonElement>(null);
   const mobileNav = useRef<HTMLDivElement>(null);
   const [loggedIn, setLoggedIn] = useState(false);
+  const { reset } = useStore();
 
   const handleLogout = async () => {
     await auth.signOut();
     setLoggedIn(false);
+    reset();
   }
 
   useEffect(() => {

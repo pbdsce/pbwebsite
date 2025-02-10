@@ -4,6 +4,7 @@ import axios from "axios";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
 import AchievementCard from "@/components/AchievementCard";
+import { useStore} from "@/lib/zustand/store";
 
 interface Achiever {
   id?: string;
@@ -24,7 +25,7 @@ export default function AchievementsPage() {
   const [newAchievement, setNewAchievement] = useState<Partial<Achiever>>({
     achievements: [""],
   });
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin , setAdmin } = useStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editName, setEditName] = useState("");
   const [editAchievements, setEditAchievements] = useState<Partial<Achiever>>({
@@ -39,14 +40,15 @@ export default function AchievementsPage() {
           const resp = await fetch(`/api/admin?uid=${uid}`);
           const data = await resp.json();
           if (data.isAdmin) {
-            setIsAdmin(true);
+            setAdmin(true);
           }
         } catch (error) {
           console.log("Error getting document:", error);
         }
       }
     });
-  }, []);
+  },[isAdmin]);
+
 
   useEffect(() => {
     async function fetchAchievers() {

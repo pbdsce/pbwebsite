@@ -1,5 +1,7 @@
 "use client";
 
+import { useStore } from "@/lib/zustand/store";
+
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -13,12 +15,16 @@ export default function Header() {
   const pathname = usePathname();
 
   const [loggedIn, setLoggedIn] = useState(false);
+  const { reset } = useStore();
 
   const handleLogout = async () => {
     await auth.signOut();
     setLoggedIn(false);
-  };
 
+    reset();
+  }
+
+ 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
