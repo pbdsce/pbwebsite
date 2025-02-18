@@ -42,7 +42,7 @@ export default function Teams() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-3xl sm:text-4xl text-center text-green-500 font-black"
+                className="text-2xl sm:text-3xl text-center text-green-500 font-black"
               >
                 Our Founding Members
               </motion.h2>
@@ -51,26 +51,26 @@ export default function Teams() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-gray-300 text-lg sm:text-xl lg:w-8/12 lg:mx-auto"
+              className="text-gray-300 text-base sm:text-lg lg:w-7/12 lg:mx-auto"
             >
               Point Blank started as a project by three friends who wanted to induce a change by providing a platform for like-minded, smart students to come together and learn from each other.
             </motion.p>
           </motion.div>
-          <div className="flex flex-col md:flex-row gap-9 md:gap-4 lg:gap-10 justify-center">
+          <div className="flex flex-col md:flex-row gap-9 md:gap-4 lg:gap-0 justify-center">
             {teamData.map((member, index) => (
               <motion.div 
                 key={index} 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-                className="flex-1 space-y-6 text-center"
+                className="flex-1 space-y-3 text-center"
               >
                 <DirectionAwareHover
                   className="sm:w-64 sm:h-64 mx-auto object-cover rounded-xl"
                   src={member.url}
                 >
-                  <p className="text-2xl sm:text-3xl font-bold">{member.name}</p>
-                  <p className="text-gray-300 text-base sm:text-lg md:px-6 lg:px-10">
+                  <p className="text-lg sm:text-xl font-bold">{member.name}</p>
+                  <p className="text-gray-300 text-sm sm:text-base md:px-6 lg:px-10">
                     {member.description}
                   </p>
                 </DirectionAwareHover>

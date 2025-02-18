@@ -110,7 +110,7 @@ TeamMemberItem.propTypes = {
 
 const TeamMember9 = () => {
 	return (
-		<section className="ezy__team9 light py-14 md:py-24 md:pt-10">
+		<section className="ezy__team9 light py-14 md:pt-5 md:pb-14">
 			<div className="container px-4 mx-auto">
 
 				<div className="grid grid-cols-4 gap-6 text-center pt-6">

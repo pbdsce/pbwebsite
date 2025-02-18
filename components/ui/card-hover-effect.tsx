@@ -110,7 +110,7 @@ export const CardTitle = ({
   return (
     <h3
       className={cn(
-        "text-zinc-100 font-bold tracking-wide text-xl align-center justify-center text-center",
+        "text-zinc-100 font-bold tracking-wide text-xl sm:text-base align-center justify-center text-center",
         className
       )}
     >

@@ -16,7 +16,7 @@ const Share: React.FC<ShareProps> = () => {
         <motion.h1 
         initial={{ opacity: 0, y: 100 }}
         whileInView={{ opacity: 1, y: 0 }}
-        className="text-4xl sm:text-7xl font-extrabold text-gray-100 mt-2 p-2 pt-5">
+        className="text-2xl sm:text-4xl font-extrabold text-gray-100 mt-2 pt-5">
           Stay <span className="text-green-500">Connected</span>
         </motion.h1>
       </div>

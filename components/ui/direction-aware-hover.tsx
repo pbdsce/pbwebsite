@@ -68,7 +68,7 @@ export const DirectionAwareHover = ({
       onTouchEnd={() => setIsMobileHovered(false)}
       ref={ref}
       className={cn(
-        "md:h-[30rem] w-60 h-60 md:w-[25rem] bg-transparent rounded-lg overflow-hidden group/card relative",
+        "md:h-[23rem] w-60 h-60 md:w-[18rem] bg-transparent rounded-lg overflow-hidden group/card relative shadow-green-950 shadow-lg transition-shadow duration-300 hover:shadow-3xl hover:shadow-green-950",
         className
       )}
     >
