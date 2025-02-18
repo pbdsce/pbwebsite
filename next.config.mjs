@@ -3,6 +3,8 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true, // Disables lint checks during the build process
   },
+  output: 'export',
+  distDir: '.next',
   images: {
     remotePatterns: [
       {
@@ -18,6 +20,7 @@ const nextConfig = {
       "media.licdn.com",
       "res.cloudinary.com"
     ],
+    unoptimized: true,  // Required when using export
   },
   async headers() {
     return [
