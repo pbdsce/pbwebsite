@@ -1,5 +1,8 @@
+'use client';
 import Image from 'next/image';
 import React from 'react';
+import { motion } from 'framer-motion';
+import { DirectionAwareHover } from './ui/direction-aware-hover';
 
 export default function Teams() {
   const teamData = [
@@ -21,42 +24,61 @@ export default function Teams() {
   ];
 
   return (
-    <section className="relative" data-aos="zoom-y-out" data-aos-delay="150">
-      <div className="py-16 md:py-20">
+    <section className="relative min-h-screen">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="container mx-auto px-6 md:px-12 xl:px-32">
-          <div className="mb-12 md:mb-16 text-center">
-            <div className="font-bold pt-10 md:pt-20 pb-4">
-              <h2 className="text-3xl sm:text-4xl text-center font-black">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-12 md:mb-16 text-center"
+          >
+            <div className="font-bold pt-14 md:pt-20 pb-4">
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-3xl sm:text-4xl text-center text-green-500 font-black"
+              >
                 Our Founding Members
-              </h2>
+              </motion.h2>
             </div>
-            <p className="text-gray-300 text-lg sm:text-xl lg:w-8/12 lg:mx-auto">
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="text-gray-300 text-lg sm:text-xl lg:w-8/12 lg:mx-auto"
+            >
               Point Blank started as a project by three friends who wanted to induce a change by providing a platform for like-minded, smart students to come together and learn from each other.
-            </p>
-          </div>
-          <div className="flex flex-col md:flex-row gap-16 md:gap-8 lg:gap-16">
+            </motion.p>
+          </motion.div>
+          <div className="flex flex-col md:flex-row gap-9 md:gap-4 lg:gap-10 justify-center">
             {teamData.map((member, index) => (
-              <div key={index} className="flex-1 space-y-6 text-center">
-                <Image
-                  className="w-40 h-40 sm:w-64 sm:h-64 mx-auto object-cover rounded-xl"
+              <motion.div 
+                key={index} 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
+                className="flex-1 space-y-6 text-center"
+              >
+                <DirectionAwareHover
+                  className="sm:w-64 sm:h-64 mx-auto object-cover rounded-xl"
                   src={member.url}
-                  alt={member.name}
-                  width="640"
-                  height="805"
-                />
-                <div className="flex flex-col gap-2">
-                  <h4 className="text-2xl sm:text-3xl font-bold text-green-500">
-                    {member.name}
-                  </h4>
+                >
+                  <p className="text-2xl sm:text-3xl font-bold">{member.name}</p>
                   <p className="text-gray-300 text-base sm:text-lg md:px-6 lg:px-10">
                     {member.description}
                   </p>
-                </div>
-              </div>
+                </DirectionAwareHover>
+              </motion.div>
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
