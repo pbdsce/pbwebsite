@@ -8,14 +8,13 @@ import { cn } from "@/lib/server/utils";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
 import { useRouter } from "next/navigation";
-
 const RegisterPage = () => {
   const router = useRouter();
 
   useEffect(() => {
     router.push("/");
-  }, []);
-
+  }
+)
   onAuthStateChanged(auth, (user) => {
     if (!user) {
       router.push("/login");
