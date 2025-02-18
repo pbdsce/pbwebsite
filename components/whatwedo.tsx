@@ -1,28 +1,17 @@
-"use client";
 import Image from "next/image";
 import logo from "@/public/images/alien.webp";
-import { motion } from "framer-motion";
 
 export default function WhatWeDo() {
   return (
-    <section className="min-h-screen flex items-center">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <section className="py-12 max-w-6xl md:mx-20 mx-5">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row items-center justify-between">
           {/* Left Column */}
           <div className="lg:w-1/2 mb-8 lg:mb-0 text-center lg:text-left">
-            <motion.h2
-              initial={{ opacity: 0, y: -40 }}
-              whileInView={{type: "spring", opacity: 1, y: 0}}
-              transition={{ delay: 0.5 }}
-              className="text-2xl sm:text-4xl font-black mb-1 mt-2 sm:mb-4 sm:mt-0">
+            <h2 className="text-3xl sm:text-4xl font-black mb-4">
               Our <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-100 to-[#00c853]">Mission</span>, together.
-            </motion.h2>
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{type: "spring", opacity: 1, y: 0}}
-              transition={{ delay: 0.5 }}
-              className="text-gray-200 text-sm sm:text-xl leading-relaxed mb-6">
-            <p>
+            </h2>
+            <p className="text-gray-200 text-base sm:text-lg leading-relaxed mb-6">
               In Point Blank, we believe in the concept of no spoon-feeding. We are here to help you learn and grow together. We are a community of coders, hackers, developers, and tech enthusiasts passionate about technology and learning.
             </p>
             {/* List of Values */}
@@ -55,25 +44,12 @@ export default function WhatWeDo() {
                 </div>
               </div>
             </div>
-            </motion.div>
           </div>
           
           {/* Right Column with Image */}
-          <motion.div 
-            drag
-            dragSnapToOrigin
-            dragElastic={0.8}
-            whileDrag={{zIndex:99}}
-            whileTap={{ scale: 0.9 }}
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{type: "spring", opacity: 1, x: 0}}
-            transition={{ 
-              type: "spring", 
-              
-            }}
-            className="lg:w-1/2 flex justify-left lg:justify-end">
+          <div className="lg:w-1/2 flex justify-left lg:justify-end">
             <Image src={logo} alt="Logo" width={300} height={300} className="shadow-lg rounded-lg" unoptimized />
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

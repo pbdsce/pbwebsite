@@ -1,6 +1,7 @@
 "use client";
 
 import { useStore } from "@/lib/zustand/store";
+
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -8,7 +9,6 @@ import Logo from "./logo";
 import MobileMenu from "./mobile-menu";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
-import { motion } from "framer-motion";
 
 export default function Header() {
   const [top, setTop] = useState<boolean>(true);
@@ -52,13 +52,9 @@ export default function Header() {
     >
       <div className="mx-auto px-5 sm:px-6">
         <div className="flex items-center justify-between h-16 md:h-20">
-        <motion.div
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-            className="shrink-0 mr-4"
-          >
+          <div className="shrink-0 mr-4">
             <Logo />
-          </motion.div>
+          </div>
           <nav className="hidden md:flex md:grow">
             <ul className="flex grow justify-end flex-wrap items-center">
               <li>

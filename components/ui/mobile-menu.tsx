@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Transition } from '@headlessui/react';
 import Link from 'next/link';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/Firebase';
@@ -54,34 +54,10 @@ export default function MobileMenu() {
 
   if (!mounted) return null;
 
-  const menuVariants = {
-    closed: {
-      opacity: 0,
-      y: -20,
-      transition: {
-        staggerChildren: 0,
-        staggerDirection: -1
-      }
-    },
-    open: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
-  };
-
-  const itemVariants = {
-    closed: { opacity: 0, y: -10 },
-    open: { opacity: 1, y: 0 }
-  };
-
   return (
     <div className="flex md:hidden">
       <button
-        ref={trigger}
+	ref={trigger}
         className="hamburger ml-5"
         aria-controls="mobile-nav"
         aria-expanded={mobileNavOpen ? "true" : "false"}
@@ -119,46 +95,54 @@ export default function MobileMenu() {
 
       {/* Mobile navigation */}
       <div ref={mobileNav}>
-        <AnimatePresence>
-          {mobileNavOpen && (
-            <motion.nav
-              id="mobile-nav"
-              className="absolute overflow-hidden top-full h-screen pb-16 z-20 left-0 w-full bg-black"
-              initial="closed"
-              animate="open"
-              exit="closed"
-              variants={menuVariants}
-            >
-              <motion.ul className="px-5 py-2" variants={menuVariants}>
-                <motion.li variants={itemVariants}>
-                  <Link href="/leads" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Leads</Link>
-                </motion.li>
-                <motion.li variants={itemVariants}>
-                  <Link href="/members" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Members</Link>
-                </motion.li>
-                <motion.li variants={itemVariants}>
-                  <Link href="/achievements" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Achievements</Link>
-                </motion.li>
-                <motion.li variants={itemVariants}>
-                  <Link href="/hustle" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Hustle Results</Link>
-                </motion.li>
-                {loggedIn ? (
-                  <motion.li variants={itemVariants}>
-                    <button onClick={handleLogout} className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center">
-                      Logout
-                    </button>
-                  </motion.li>
-                ) : (
-                  <motion.li variants={itemVariants}>
-                    <Link href="/login" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>
-                      Login
-                    </Link>
-                  </motion.li>
-                )}
-              </motion.ul>
-            </motion.nav>
-          )}
-        </AnimatePresence>
+        <Transition
+          show={mobileNavOpen}
+          as="nav"
+          id="mobile-nav"
+          className="absolute overflow-hidden top-full h-screen pb-16 z-20 left-0 w-full bg-black"
+          enter="transition ease-out duration-200 transform"
+          enterFrom="opacity-0 -translate-y-2"
+          enterTo="opacity-100 translate-y-0"
+          leave="transition ease-out duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <ul className="px-5 py-2">
+            {/* <li>
+              <Link href="/events" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Events</Link>
+            </li> */}
+            <li>
+              <Link href="/leads" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Leads</Link>
+            </li>
+            <li>
+              <Link href="/members" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Members</Link>
+            </li>
+            <li>
+              <Link href="/achievements" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Achievements</Link>
+            </li>
+            <li>
+              <Link href="/hustle" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Hustle Results</Link>
+            </li>
+            {/* <li>
+              <Link href="mailto:admin@pointblank.club" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>
+                Contact Us
+              </Link>
+            </li> */}
+            {loggedIn ? (
+              <li>
+                <button onClick={handleLogout} className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" >
+                  Logout
+                </button>
+              </li>
+            ) : (
+              <li>
+                <Link href="/login" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>
+                  Login
+                </Link>
+              </li>
+            )}
+          </ul>
+        </Transition>
       </div>
     </div>
   );

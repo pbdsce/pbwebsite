@@ -1,8 +1,5 @@
-'use client'
 /** @jsxImportSource react */
-
 import React from "react";
-import { motion } from "framer-motion";
 import Image from "next/image"; // Assuming you are using next/image for optimization
 import { ContributorsBtn } from "./ContributorsBtn";
 
@@ -13,23 +10,16 @@ const Share: React.FC<ShareProps> = () => {
   return (
     <section className="py-12">
       <div className="text-center mb-12">
-        <motion.h1 
-        initial={{ opacity: 0, y: 100 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        className="text-4xl sm:text-7xl font-extrabold text-gray-100 mt-2 p-2 pt-5">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-100 mt-2 p-2">
           Stay <span className="text-green-500">Connected</span>
-        </motion.h1>
+        </h1>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
           {/* All cards in a single grid */}
           <div className="w-full max-w-md">
             {/* Card 1 - LinkedIn */}
-            <motion.div
-              initial={{opacity:0,x:-30}}
-              whileInView={{opacity:1,x:0}}
-              transition={{delay:0.1}}
-              className="bg-gradient-to-tr from-blue-600 to-blue-300 p-6 shadow-md text-white rounded-xl flex flex-col h-full">
+            <div className="bg-gradient-to-tr from-blue-600 to-blue-300 p-6 rounded-lg shadow-md text-white rounded-xl flex flex-col h-full">
               <div className="flex justify-start mb-4">
                 {/* Replace the src with the actual Slack logo you use */}
                 <Image
@@ -52,16 +42,12 @@ const Share: React.FC<ShareProps> = () => {
                   Follow Us
                 </a>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           <div className="w-full max-w-md">
             {/* Card 2 - Instagram */}
-            <motion.div
-              initial={{opacity:0,y:-30}}
-              whileInView={{opacity:1,y:0}}
-              transition={{delay:0.2}}
-              className="bg-gradient-to-tr from-purple-400 to-pink-500 p-6 shadow-md text-white rounded-xl flex flex-col h-full">
+            <div className="bg-gradient-to-tr from-purple-400 to-pink-500 p-6 rounded-lg shadow-md text-white rounded-xl flex flex-col h-full">
               <div className="flex justify-start mb-4">
                 {/* Replace with Insta logo */}
                 <Image
@@ -84,16 +70,12 @@ const Share: React.FC<ShareProps> = () => {
                   Follow Us
                 </a>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           <div className="w-full max-w-md">
             {/* Card 3 - Blog */}
-            <motion.div
-              initial={{opacity:0,x:30}}
-              whileInView={{opacity:1,x:0}}
-              transition={{delay:0.3}}
-              className="bg-gradient-to-tr from-cyan-500 to-blue-500 p-6 shadow-md text-white rounded-xl flex flex-col h-full">
+            <div className="bg-gradient-to-tr from-cyan-500 to-blue-500 p-6 rounded-lg shadow-md text-white rounded-xl flex flex-col h-full">
               <div className="flex justify-start mb-4">
                 <Image
                   src="https://img.icons8.com/ios/50/FFFFFF/blog.png"
@@ -116,16 +98,12 @@ const Share: React.FC<ShareProps> = () => {
                   Read Now
                 </a>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* Card 4 - Brochure */}
           <div className="w-full max-w-md">
-            <motion.div
-              initial={{opacity:0,x:-30}}
-              whileInView={{opacity:1,x:0}}
-              transition={{delay:0.4}}
-              className="bg-gradient-to-tr from-green-500 to-green-300 p-6 shadow-md text-white rounded-xl flex flex-col h-full">
+            <div className="bg-gradient-to-tr from-green-500 to-green-300 p-6 rounded-lg shadow-md text-white rounded-xl flex flex-col h-full">
               <div className="flex justify-start mb-4">
                 <p className="text-2xl font-bold">📄 Brochure </p>
               </div>
@@ -142,22 +120,19 @@ const Share: React.FC<ShareProps> = () => {
                   Download Now
                 </a>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* Card 5 - Youtube */}
           <div className="w-full max-w-md">
-            <motion.div
-                initial={{opacity:0,y:30}}
-                whileInView={{opacity:1,y:0}}
-                transition={{delay:0.5}}
-                className="relative p-6 shadow-md text-white rounded-xl flex flex-col h-full overflow-hidden"
-                style={{
-                  backgroundImage: `url(https://res.cloudinary.com/pbsite/image/upload/c_thumb,w_200,g_face/v1737399749/WhatsApp_Image_2025-01-14_at_11.24.24_k3xyj5.jpg)`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              >
+            <div
+              className="relative p-6 rounded-lg shadow-md text-white rounded-xl flex flex-col h-full overflow-hidden"
+              style={{
+                backgroundImage: `url(https://res.cloudinary.com/pbsite/image/upload/c_thumb,w_200,g_face/v1737399749/WhatsApp_Image_2025-01-14_at_11.24.24_k3xyj5.jpg)`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
               {/* Blur overlay */}
               <div className="absolute inset-0 backdrop-blur-sm bg-black/50"></div>
 
@@ -188,15 +163,11 @@ const Share: React.FC<ShareProps> = () => {
                   </a>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
           <div className="w-full max-w-md">
             {/* Card 6 - Contributors */}
-            <motion.div
-              initial={{opacity:0,x:30}}
-              whileInView={{opacity:1,x:0}}
-              transition={{delay:0.6}}
-              className="bg-gradient-to-tr from-gray-900 to-indigo-800 p-6 shadow-md text-white rounded-xl flex flex-col h-full">
+            <div className="bg-gradient-to-tr from-gray-900 to-indigo-800 p-6 rounded-lg shadow-md text-white rounded-xl flex flex-col h-full">
               <div className="flex justify-start mb-4 items-center">
                 <Image
                   src="https://img.icons8.com/?size=100&id=62856&format=png&color=000000"
@@ -215,7 +186,7 @@ const Share: React.FC<ShareProps> = () => {
               <div className="mt-4">
                 <ContributorsBtn />
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>

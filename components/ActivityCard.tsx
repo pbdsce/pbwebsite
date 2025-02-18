@@ -1,8 +1,6 @@
-'use client';
 import { cn } from "@/lib/server/utils";
 import HyperText from "./magicui/hyper-text";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import Carousel from "@/components/carousel.component";
 
 interface ActivityCardProps {
@@ -15,16 +13,14 @@ interface ActivityCardProps {
 
 export default function ActivityCard({...props}: ActivityCardProps) {
     return (
-        <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+        <div
             className={cn(
-                "flex flex-col-reverse pt-44 md:flex-row gap-4 h-full px-4 sm:px-8 md:px-24 text-center",
+                "flex flex-col-reverse md:flex-row gap-4 h-full px-4 sm:px-8 md:px-24 text-center",
                 !props.LeftAligned ? "md:text-left" : "md:text-right",
                 props.LeftAligned ? "" : "md:flex-row-reverse",
             )}
-
+            data-aos="zoom-y-out"
+            data-aos-delay="150"
         >
             <div className="highlight flex-6">
                 <div className="flex flex-col p-4 md:p-24 justify-center content-center bg-black-800">
@@ -35,7 +31,7 @@ export default function ActivityCard({...props}: ActivityCardProps) {
                         )}
                     >
                         <HyperText
-                            className={cn("text-4xl sm:text-7xl font-bold text-green-500 sm:mb-5")}
+                            className={cn("text-2xl sm:text-3xl font-bold text-green-500")}
                             duration={200}
                             text={props.Title}
                         />
@@ -51,13 +47,13 @@ export default function ActivityCard({...props}: ActivityCardProps) {
 
             <div className="highlight flex-6 my-auto px-4 sm:px-8">
                 <div className="highlight w-full h-64 sm:w-96 sm:h-96 flex items-center justify-center bg-black-900">
-                    <Carousel 
-                        slides={props.ImageSrc}
-                        useScrollHoverEffects={true}
-                        className="ActivityCard"
-                    />
+                <Carousel 
+                    slides={props.ImageSrc}
+                    useScrollHoverEffects={true}
+                    className="ActivityCard"
+                />
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 }

@@ -1,8 +1,7 @@
-'use client';
 import { ReactNode } from "react";
+import Image from "next/image";
+import HyperText from "@/components/magicui/hyper-text";
 import ActivityCard from "./ActivityCard";
-import { TextHoverEffect } from "./ui/text-hover-effect";
-import { motion } from "framer-motion";
 
 interface ActivityCardProps {
   Title: string;
@@ -59,41 +58,26 @@ const activityData: ActivityData[] = [
   },
 ];
 
-
 export default function Activities() {
   return (
-    <div className="scrollbar-hide overflow-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] h-screen overflow-y-scroll snap-y snap-mandatory">
-      <div className="flex flex-col items-center font-bold pt-64 pb-5 snap-start h-screen">
-        <div className="h-[40rem] flex items-center justify-center">
-        <TextHoverEffect text="ACTIVITIES" />
-      </div>
-      <motion.div
-        className="text-2xl font-bold text-gray-500 opacity-50 md:text-3xl"
-        animate={{
-          y: [0, 10, 0],
-        }}
-        transition={{
-          duration: 1.5,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      >
-        Scroll Down
-      </motion.div>
+    <>
+      <div className="flex flex-col items-center font-bold pt-20 pb-10">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl text-white text-center font-black mb-0">
+          Activities
+        </h2>
       </div>
       <div className="flex flex-col gap-12 md:gap-16">
         {activityData.map((value, index) => (
-          <div key={index} className="snap-start min-h-screen flex items-center">
-            <ActivityCard
-              Title={value.Title}
-              Subtitle={value.Subtitle}
-              Description={value.Description}
-              ImageSrc={value.Image}
-              LeftAligned={index % 2 === 0}
-            />
-          </div>
+          <ActivityCard
+            key={index}
+            Title={value.Title}
+            Subtitle={value.Subtitle}
+            Description={value.Description}
+            ImageSrc={value.Image}
+            LeftAligned={index % 2 === 0}
+          />
         ))}
       </div>
-    </div>
+    </>
   );
 }
