@@ -13,17 +13,14 @@ const RegisterPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.push("/login");
-      } else {
-        router.push("/");
-      }
-    });
+    router.push("/");
+  }, []);
 
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
-  }, [router]);
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      router.push("/login");
+    }
+  });
 
   return (
     <FormProvider>
