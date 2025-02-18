@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 
 import AOS from 'aos'
 import 'aos/dist/aos.css'
@@ -14,6 +15,7 @@ export default function DefaultLayout({
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname();
 
   useEffect(() => {
     AOS.init({
@@ -26,14 +28,12 @@ export default function DefaultLayout({
 
   return (
     <>
-
       <main className="grow">
-
         {children}
         <Toaster position='top-right' />
       </main>
 
-      <Footer />
+      {pathname !== '/' && <Footer />}
     </>
   )
 }

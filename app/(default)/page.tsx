@@ -9,6 +9,7 @@ export const viewport = {
   width: 'device-width',
 };
 import { PinContainer } from "../(default)/Credits/creditcards/credits";
+import Link from "next/link";
 import Hero from "@/components/hero";
 import WhatWeDo from "@/components/whatwedo";
 import Domains from "@/components/domains";
@@ -19,38 +20,43 @@ import SparklesText from "@/components/magicui/sparkles-text";
 import Achievements from '@/components/achievements';
 import Founder from "@/components/founder";
 import Share from "@/components/share";
+import Contributors from "@/components/contributors";
+import Footer from '@/components/ui/footer';
 
 export default function Home() {
   return (
-    <>
-      <Hero />
-      <WhatWeDo />
-      <Domains />
-      {/* <div className="flex flex-col justify-center items-center py-10 px-5">
-        <SparklesText text="Upcoming Events" className="text-4xl font-bold text-center text-gray-200 mb-4" />
-        <Image
-          src={"/images/recruitment.png"}
-          alt="recruitment-poster"
-          height={400}
-          width={1100}
-          className="rounded-3xl mt-20"
-        />
-        <div className="flex md:flex-row flex-col justify-center items-center py-10 px-5">
-          <a href="/recruitment">
-            <button className="btn-sm px-5 py-3 text-xl font-bold text-white bg-green-600 mx-3 rounded-xl mt-10">
-              Register Now
-            </button>
-          </a>
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-grow h-screen overflow-y-scroll overflow-x-hidden snap-y snap-mandatory">
+        <div className="snap-start h-screen w-full">
+          <Hero />
         </div>
-      </div> */}
-      
-      <div className="-mt-20"> {/* Adjusted margin for Activities section */}
-        <Activities />
-        
+        <div className="snap-start h-screen w-full">
+          <WhatWeDo />
+        </div>
+        <div className="snap-start min-h-screen w-full">
+          <Domains />
+        </div>
+        <div className="snap-start min-h-screen w-full overflow-hidden">
+          <div className="-mt-20">
+            <Activities />
+          </div>
+        </div>
+        <div className="snap-start min-h-screen w-full">
+          <Founder />
+        </div>
+        <div className="snap-start min-h-screen w-full">
+          <Achievements />
+        </div>
+        <div className="snap-start min-h-screen w-full">
+          <Share />
+        </div>
+        <div className="snap-start min-h-screen w-full">
+          <Contributors />
+        </div> 
+        <div className="snap-start w-full">
+          <Footer />
+        </div> 
       </div>
-      <Founder />
-      <Achievements />
-      <Share />
-    </>
+    </div>
   );
 }
