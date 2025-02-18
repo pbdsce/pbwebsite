@@ -4,6 +4,7 @@ import Header from "@/components/ui/header";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import type { Viewport } from 'next'
 
 config.autoAddCss = false;
 
@@ -18,8 +19,13 @@ export const metadata = {
   description: "A group of developers who love to code.",
   keywords: ["developers", "coding", "programming", "software"],
   author: "Point Blank Team",
-  viewport: "width=device-width, initial-scale=1.0",
 };
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#996c254d',
+}
 
 export default function RootLayout({
   children,
