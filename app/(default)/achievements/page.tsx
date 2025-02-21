@@ -5,6 +5,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
 import AchievementCard from "@/components/AchievementCard";
 import { useStore} from "@/lib/zustand/store";
+import LoadingBrackets from "@/components/ui/loading-brackets";
 
 interface Achiever {
   id?: string;
@@ -21,6 +22,7 @@ interface Achiever {
 
 export default function AchievementsPage() {
   const [achievers, setAchievers] = useState<Achiever[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newAchievement, setNewAchievement] = useState<Partial<Achiever>>({
     achievements: [""],
@@ -50,11 +52,14 @@ export default function AchievementsPage() {
   useEffect(() => {
     async function fetchAchievers() {
       try {
+        setIsLoading(true);
         const response = await fetch("/api/achievements");
         const data = await response.json();
         setAchievers(data);
       } catch (error) {
         console.error("Error fetching achievements:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -172,17 +177,25 @@ export default function AchievementsPage() {
   return (
     <div className="container w-full mx-auto pt-32">
       <h1 className="text-center text-4xl font-bold mb-8">Achievements</h1>
-      <div className="grid grid-cols-1 2gl:grid-cols-2 3gl:grid-cols-3 gap-x-5 gap-y-5 max-w-[1030px] mx-auto justify-items-center">
-        {[...Array(3)].map((_, colIndex) => (
-          <div key={colIndex} className="flex flex-col gap-y-5">
-            {achievers
-              .filter((_, index) => index % 3 === colIndex)
-              .map((achiever) => (
-                <AchievementCard key={achiever.email} achiever={achiever} />
-              ))}
-          </div>
-        ))}
-      </div>
+      
+      {isLoading ? (
+        <div className="flex justify-center items-center min-h-[200px]">
+          <LoadingBrackets />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 2gl:grid-cols-2 3gl:grid-cols-3 gap-x-5 gap-y-5 max-w-[1030px] mx-auto justify-items-center">
+          {[...Array(3)].map((_, colIndex) => (
+            <div key={colIndex} className="flex flex-col gap-y-5">
+              {achievers
+                .filter((_, index) => index % 3 === colIndex)
+                .map((achiever) => (
+                  <AchievementCard key={achiever.email} achiever={achiever} />
+                ))}
+            </div>
+          ))}
+        </div>
+      )}
+
       {isLoggedIn ? (
         <div className="text-center mb-8">
           <button
