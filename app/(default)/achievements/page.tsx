@@ -177,7 +177,7 @@ export default function AchievementsPage() {
   return (
     <div className="container w-full mx-auto pt-32">
       <h1 className="text-center text-4xl font-bold mb-8">Achievements</h1>
-      
+
       {isLoading ? (
         <div className="flex justify-center items-center min-h-[200px]">
           <LoadingBrackets />
