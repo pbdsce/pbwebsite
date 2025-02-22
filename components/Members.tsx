@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import ClipLoader from "react-spinners/ClipLoader";
 import { FaEllipsisV } from "react-icons/fa";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
@@ -9,6 +8,7 @@ import Image from "next/image";
 import Card from "./ui/Card";
 import CollapsibleSection from "./ui/CollapsibleSection";
 import { useStore } from "@/lib/zustand/store";
+import LoadingBrackets from "@/components/ui/loading-brackets";
 
 interface Member {
   id?: string;
@@ -298,7 +298,7 @@ export default function Members() {
       <div className="w-full max-w-6xl px-2">
         {loading ? (
           <div className="flex justify-center py-10">
-            <ClipLoader color={"#00C853"} loading={loading} size={50} />
+            <LoadingBrackets/>
           </div>
         ) : (
           <div className="space-y-2">

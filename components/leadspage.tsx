@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
 import { useStore } from "@/lib/zustand/store";
+import LoadingBrackets from "@/components/ui/loading-brackets";
 
 interface Lead {
   id?:string;
@@ -14,7 +15,7 @@ interface Lead {
 }
 
 const Leads: React.FC = () => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   // const [isLoggedInLoggedIn, setLoggedInLoggedIn] = useState(false);
   const { isLoggedIn , setLoggedIn } = useStore();
@@ -32,10 +33,10 @@ const Leads: React.FC = () => {
       const alumniLeads = data.alumniLeads;
       setCurrentLeads(currentLeads);
       setAlumniLeads(alumniLeads);
-      setLoading(false);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching leads:", error);
-      setLoading(false);
+      setIsLoading(false);
     }
   };
   useEffect(() => {
@@ -184,48 +185,56 @@ const Leads: React.FC = () => {
         color: "#fff",
       }}
     >
-      {isLoggedIn && (
-        <button
-          onClick={toggleForm}
-          style={{
-            position: "fixed",
-            top: "85px",
-            right: "85px",
-            padding: "10px 20px",
-            backgroundColor: "#00ff33",
-            color: "#000",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-            zIndex: 1000,
-          }}
-        >
-          {selectedLead ? "Edit Lead" : "Add Lead"}
-        </button>
-      )}
+      {loading ? (
+        <div className="flex justify-center items-center h-[50vh]">
+          <LoadingBrackets />
+        </div>
+      ) : (
+        <>
+          {isLoggedIn && (
+            <button
+              onClick={toggleForm}
+              style={{
+                position: "fixed",
+                top: "85px",
+                right: "85px",
+                padding: "10px 20px",
+                backgroundColor: "#00ff33",
+                color: "#000",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+                zIndex: 1000,
+              }}
+            >
+              {selectedLead ? "Edit Lead" : "Add Lead"}
+            </button>
+          )}
 
-      {showForm && (
-        <LeadForm
-          closeForm={toggleForm}
-          selectedLead={selectedLead}
-          handleAddOrEditLead={handleAddOrEditLead} // Pass fetchLeads to the form for updating leads
-        />
-      )}
+          {showForm && (
+            <LeadForm
+              closeForm={toggleForm}
+              selectedLead={selectedLead}
+              handleAddOrEditLead={handleAddOrEditLead}
+            />
+          )}
 
-      <LeadSection
-        title="Current Leads"
-        leads={currentLeads}
-        onEdit={handleEditLead}
-        onDelete={handleDeleteLead}
-        isLoggedInLoggedIn={isLoggedIn}
-      />
-      <LeadSection
-        title="Alumni Leads"
-        leads={alumniLeads}
-        onEdit={handleEditLead}
-        onDelete={handleDeleteLead}
-        isLoggedInLoggedIn={isLoggedIn}
-      />
+          <LeadSection
+            title="Current Leads"
+            leads={currentLeads}
+            onEdit={handleEditLead}
+            onDelete={handleDeleteLead}
+            isLoggedInLoggedIn={isLoggedIn}
+          />
+          <LeadSection
+            title="Alumni Leads"
+            leads={alumniLeads}
+            onEdit={handleEditLead}
+            onDelete={handleDeleteLead}
+            isLoggedInLoggedIn={isLoggedIn}
+          />
+        </>
+      )}
     </section>
   );
 };

@@ -6,6 +6,7 @@ import { Trophy, RefreshCw, TableProperties } from "lucide-react";
 import { auth } from "../../../Firebase"; // Firebase setup
 import { onAuthStateChanged } from "firebase/auth";
 import { useStore} from "@/lib/zustand/store";
+import LoadingBrackets from "@/components/ui/loading-brackets";
 
 interface Result {
   rank: number;
@@ -187,7 +188,7 @@ export default function ResultsTable() {
 
         {loading ? (
           <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[#00FF66]"></div>
+            <LoadingBrackets />
           </div>
         ) : (
           <>

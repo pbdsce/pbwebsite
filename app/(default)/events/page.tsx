@@ -8,10 +8,12 @@ import EventUpdateForm from "../../../components/EventUpdateForm";
 import EventCard from "../../../components/EventCard";
 import Sidebar from "../../../components/Sidebar";
 import { useStore } from "@/lib/zustand/store";
+import LoadingBrackets from "@/components/ui/loading-brackets";
 
 const EventsPage = () => {
   const [showForm, setShowForm] = useState(false);
   const { isLoggedIn, setLoggedIn } = useStore();
+  const [isLoading, setIsLoading] = useState(true);
   const [events, setEvents] = useState<
     {
       id: string;
@@ -55,10 +57,17 @@ const EventsPage = () => {
   }, [isLoggedIn]);
 
   const fetchEvents = async () => {
-    const resp = await fetch("/api/events");
-    const data = await resp.json();
-    const eventsList = data.events;
-    setEvents(eventsList);
+    try{
+      setIsLoading(true);
+      const resp = await fetch("/api/events");
+      const data = await resp.json();
+      const eventsList = data.events;
+      setEvents(eventsList);
+    } catch (error) {
+      console.error("Error fetching achievements:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -129,46 +138,49 @@ const EventsPage = () => {
       {isLoggedIn && showForm && <EventForm />}
 
       {/* Displaying the Events */}
-      <div className="mt-2">
-        {/* Present Events */}
-
-        {/* Future Events */}
-        {/* <h2 className="text-2xl font-bold mb-4 mt-8">CurreEvents</h2> */}
-        {futureEvents.length > 0 ? (
-          <div className="sm:flex flex-wrap justify-around gap-4 px-4">
-            {futureEvents.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                isLoggedInLoggedIn={isLoggedIn}
-                onDelete={() => deleteEvent(event.id, event)}
-                onSelect={handleEventSelect}
-              />
-            ))}
-          </div>
-        ) : (
-          <p>No presents events available.</p>
-        )}
-      </div>
-
-      {/* Past Events */}
-      <h2 className="text-3xl font-bold mb-8 mt-16 ml-4 text-center">
-        Past Events
-      </h2>
-      {pastEvents.length > 0 ? (
-        <div className="sm:flex flex-wrap justify-around gap-4 px-4">
-          {pastEvents.map((event) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              isLoggedInLoggedIn={isLoggedIn}
-              onDelete={() => deleteEvent(event.id, event)}
-              onSelect={handleEventSelect}
-            />
-          ))}
+      {isLoading ? (
+        <div className="flex justify-center items-center h-[50vh]">
+          <LoadingBrackets />
         </div>
       ) : (
-        <p>No past events available.</p>
+        <div className="mt-2">
+          {/* Future Events */}
+          {futureEvents.length > 0 ? (
+            <div className="sm:flex flex-wrap justify-around gap-4 px-4">
+              {futureEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  isLoggedInLoggedIn={isLoggedIn}
+                  onDelete={() => deleteEvent(event.id, event)}
+                  onSelect={handleEventSelect}
+                />
+              ))}
+            </div>
+          ) : (
+            <p>No presents events available.</p>
+          )}
+        
+          {/* Past Events */}
+          <h2 className="text-3xl font-bold mb-8 mt-16 ml-4 text-center">
+            Past Events
+          </h2>
+          {pastEvents.length > 0 ? (
+            <div className="sm:flex flex-wrap justify-around gap-4 px-4">
+              {pastEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  isLoggedInLoggedIn={isLoggedIn}
+                  onDelete={() => deleteEvent(event.id, event)}
+                  onSelect={handleEventSelect}
+                />
+              ))}
+            </div>
+          ) : (
+            <p>No past events available.</p>
+          )}
+        </div>
       )}
 
       {/* Sidebar for Event Details */}
