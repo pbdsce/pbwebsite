@@ -41,13 +41,17 @@ export default function Carousel({ slides, useScrollHoverEffects = false, classN
         }}
       >
         {slides.map((s, idx) => {
-          return <Image 
-            src={s} 
-            alt="" 
-            {...(useScrollHoverEffects ? { width: 500, height: 500 }: {})}
-            className={cn("items-center", 
-              useScrollHoverEffects && "w-auto h-auto object-cover")}  
-            key={idx} />;
+          return <div className="relative w-full h-full flex-shrink-0">
+  <Image 
+    src={s} 
+    alt={`Slide ${idx}`} 
+    layout="responsive" 
+    width={500} 
+    height={300} 
+    className={cn("object-contain w-full h-full", useScrollHoverEffects ? "object-contain" : "object-cover")}
+  />
+</div>;
+
         })}
       </div>
 
