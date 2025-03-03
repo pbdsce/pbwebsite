@@ -4,6 +4,7 @@ import Header from "@/components/ui/header";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { logInfo } from "@/lib/logger";
 
 config.autoAddCss = false;
 
@@ -26,9 +27,16 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Log page render on the server side
+  if (typeof window === 'undefined') {
+    logInfo("Root layout rendered", {
+      "component": "RootLayout",
+      "event": "render"
+    });
+  }
+
   return (
     <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
-      
       <body
         className={`${inter.variable} font-inter antialiased bg-black text-white tracking-tight`}
       >

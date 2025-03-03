@@ -41,5 +41,8 @@ const nextConfig = {
     }
     return config;
   },
+  experimental: {
+    instrumentationHook: true,
+  },
 };
 export default nextConfig;

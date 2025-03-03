@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./config/loki-config.yaml:/etc/loki/config.yaml
+      - loki-data:/loki-data
+    command: -config.file=/etc/loki/config.yaml
+    user: "0:0"  # Run as root to avoid permission issues
+    restart: unless-stopped
+    networks:
+      - global
+
+  grafana:
+    image: grafana/grafana:10.0.0
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - global
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./config/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "8888:8888"
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - global
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - /var/log:/var/log  # Access system logs
+      - ./config/promtail-config.yaml:/etc/promtail/config.yml
+      - promtail-data:/var/lib/promtail  # Mount volume for positions file
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - global
+
+networks:
+  global:
+    driver: bridge
+
+volumes:
+  grafana-storage:
+  loki-data:
+  promtail-data:

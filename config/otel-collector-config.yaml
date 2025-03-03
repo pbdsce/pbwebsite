@@ -1,0 +1,30 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+  resource:
+    attributes:
+      - key: service.name
+        value: otel-collector
+        action: upsert
+
+exporters:
+  debug:
+    verbosity: detailed
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch, resource]
+      exporters: [debug, loki]
+    
