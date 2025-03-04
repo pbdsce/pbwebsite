@@ -33,7 +33,7 @@ const activityData: ActivityData[] = [
     ),
     Image: ["/images/cp.jpeg", "/images/pbhustle1.jpg", "/images/pbhustle2.jpg"],
     Description:
-      "Point Blank has held 80+ editions of PB Hustle, where participants solve 5-7 problems of increasing difficulty. It fosters a strong programming culture and helps teams qualify for ACM ICPC. DSCE’s top programmers have emerged through this platform, with CodeChef Long Challenge participation growing from 3 to 70+. The community has a 6-star coder on CodeChef and two Candidate Masters on Codeforces, highlighting its CP excellence.",
+      "Since its start in 2019, Point Blank has produced two Candidate Masters, one 6-star coder, and more than ten Experts. Within one year, participation in coding contests grew from just 3 to over 70. In 2020, we qualified the first-ever team from our college to ICPC Regionals and have sent at least one team every year since. Our members have earned multiple top-250 finishes in Google KickStart and reached Round 3 in Meta HackerCup. Additionally, to strengthen coding culture within our college, we organize PB Hustle, an open-to-all competitive programming contest held monthly, completing over 100 editions to date.",
   },
   {
     Title: "Development",
