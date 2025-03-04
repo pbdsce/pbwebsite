@@ -55,14 +55,6 @@ const activityData: ActivityData[] = [
     Image: ["/images/gsocact.jpg", "/images/LFX.png", "/images/githubExtern.png"],
     Description:
     " Point Blank has cultivated a vibrant open-source community, with our members achieving notable success in prestigious programs like Google Summer of Code (GSOC). In the past five years, we have had 20+ successful GSOC participants, 10+ Linux Foundation Training (LiFT) scholars, 3 LFX scholars, and 8 GitHub Externs.",
-      "Each year, we organize the internal round of the Smart India Hackathon. In the 2024 edition, over 300+ individuals from DSCE participated, with four teams advancing to the national level and three reaching the finals. Since 2020, nine teams from DSCE have won SIH, with six of them being PB teams. Additionally, Point Blank teams have won hackathons across the city and country, including CentuRITon, Hackverse, and HackGlobal.",
-  },
-  {
-    Title: "Open Source",
-    Subtitle: "Google Summer of Code",
-    Image: ["/images/gsocact.jpg", "/images/LFX.png", "/images/githubExtern.png"],
-    Description:
-    " Point Blank has cultivated a vibrant open-source community, with our members achieving notable success in prestigious programs like Google Summer of Code (GSOC). In the past five years, we have had 20+ successful GSOC participants, 10+ Linux Foundation Training (LiFT) scholars, 3 LFX scholars, and 8 GitHub Externs.",
   },
   {
     Title: "Cybersecurity",
@@ -76,7 +68,6 @@ const activityData: ActivityData[] = [
 export default function Activities() {
   return (
     <>
-      <div className="flex flex-col items-center font-bold pt-56 pb-10">
       <div className="flex flex-col items-center font-bold pt-56 pb-10">
         <h2 className="text-3xl sm:text-4xl md:text-5xl text-white text-center font-black mb-0">
           Activities
