@@ -60,7 +60,7 @@ export default function Members() {
   const { isLoggedIn, setLoggedIn } = useStore();
 
   useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, async (user : any) => {
       try {
         if (user) {
           setLoggedIn(true);

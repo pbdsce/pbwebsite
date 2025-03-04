@@ -6,6 +6,7 @@ import { auth } from "@/Firebase";
 import AchievementCard from "@/components/AchievementCard";
 import { useStore} from "@/lib/zustand/store";
 import LoadingBrackets from "@/components/ui/loading-brackets";
+import toast from "react-hot-toast";
 
 interface Achiever {
   id?: string;
@@ -34,30 +35,47 @@ export default function AchievementsPage() {
     achievements: [""],
   });
 
+  // Strict auth state change handler
   useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user : any) => {
       try {
-        if (user) {
-          setLoggedIn(true);
-        } else {
-          setLoggedIn(false);
-        }
+        setLoggedIn(!!user);
       } catch (error) {
-        console.log("Error getting document:", error);
+        console.error("Auth state change error:", error);
+        toast.error("Authentication error occurred");
       }
     });
-  }, [isLoggedIn]);
 
+    return () => unsubscribe();
+  }, [setLoggedIn]);
 
+  // Strict achievements fetching with comprehensive error handling
   useEffect(() => {
     async function fetchAchievers() {
       try {
         setIsLoading(true);
         const response = await fetch("/api/achievements");
+        
+        // Validate response
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
-        setAchievers(data);
+        console.log(data.data);
+        
+        // Ensure data is an array and validate each achiever
+        // const validAchievers = (Array.isArray(data) ? data : [])
+
+        setAchievers(data.data);
+        
+        // if (validAchievers.length === 0) {
+        //   toast.success("No achievements found");
+        // }
       } catch (error) {
         console.error("Error fetching achievements:", error);
+        toast.error("Failed to fetch achievements");
+        setAchievers([]);
       } finally {
         setIsLoading(false);
       }
@@ -107,40 +125,84 @@ export default function AchievementsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    const requiredFields = ['email', 'name', 'batch'];
+    const missingFields = requiredFields.filter(field => 
+      !newAchievement[field as keyof Achiever]
+    );
+
+    if (missingFields.length > 0) {
+      toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+
+    // Validate achievements
+    if (!newAchievement.achievements || newAchievement.achievements.length === 0) {
+      toast.error("Please add at least one achievement");
+      return;
+    }
+
     try {
       const formData = new FormData();
+      
+      // Strict null checks and type conversions
       formData.append("image", newAchievement.image || "");
       formData.append("email", newAchievement.email || "");
       formData.append("name", newAchievement.name || "");
       formData.append("batch", String(newAchievement.batch || ""));
       formData.append("portfolio", newAchievement.portfolio || "");
-      formData.append("internship", newAchievement.internship || "");
+      formData.append("internship", newAchievement.internship || "No");
       formData.append("companyPosition", newAchievement.companyPosition || "");
       formData.append(
-        "achievements",
-        JSON.stringify(newAchievement.achievements || [])
+        "achievements", 
+        JSON.stringify(
+          (newAchievement.achievements || [])
+            .filter(ach => ach && ach.trim() !== "")
+        )
       );
+
       const response = await axios.post("/api/achievements", formData);
-      setAchievers((prev) => [...prev, response.data]);
-      setIsModalOpen(false);
+      
+      // Validate response data
+      if (response.data && response.data.name) {
+        setAchievers(prev => [...prev, response.data]);
+        setIsModalOpen(false);
+        toast.success("Achievement added successfully");
+      } else {
+        throw new Error("Invalid response from server");
+      }
     } catch (error) {
       console.error("Error saving data:", error);
+      toast.error("Failed to save achievement. Please try again.");
     }
   };
 
+  // Strict edit fetch handler
   const handleFetch = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!editName || editName.trim() === "") {
+      toast.error("Please enter a name");
+      return;
+    }
+
     try {
-      const response = await axios.get(`/api/achievements?name=${editName}`);
-      const data = response.data;
-      if (data.length === 0) {
-        alert("No user found");
-      } else {
-        const user = data[0];
-        setEditAchievements(user);
+      const response = await axios.get(`/api/achievements?name=${encodeURIComponent(editName)}`);
+      
+      if (!response.data || response.data.length === 0) {
+        toast.error("No user found");
+        return;
       }
+
+      const user = response.data[0];
+      setEditAchievements({
+        ...user,
+        achievements: user.achievements || [""]
+      });
     } catch (error) {
       console.error("Error fetching user:", error);
+      toast.error("Failed to fetch user details");
     }
   };
 

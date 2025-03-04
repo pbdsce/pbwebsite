@@ -110,9 +110,9 @@ export default function MobileMenu() {
           leaveTo="opacity-0"
         >
           <ul className="px-5 py-2">
-            {/* <li>
+            <li>
               <Link href="/events" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Events</Link>
-            </li> */}
+            </li>
             <li>
               <Link href="/leads" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Leads</Link>
             </li>
