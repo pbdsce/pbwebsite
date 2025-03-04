@@ -158,7 +158,9 @@ const EventsPage = () => {
               ))}
             </div>
           ) : (
-            <p>No presents events available.</p>
+            <div className="flex justify-center items-center text-gray-700">
+              <p className="text-xl font-bold">Stay Tuned for Upcoming Events!</p>
+            </div>
           )}
         
           {/* Past Events */}
