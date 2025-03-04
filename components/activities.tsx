@@ -33,7 +33,7 @@ const activityData: ActivityData[] = [
     ),
     Image: ["/images/cp.jpeg", "/images/pbhustle1.jpg", "/images/pbhustle2.jpg"],
     Description:
-      "Point Blank has organized over 40+ editions of its PB Hustle coding contest, where participants solve 5-7 increasingly difficult problems in their preferred programming language. The contest aims to enhance the programming culture in colleges and help teams qualify for the ACM ICPC. Impressively, DSCE's leading programmers have risen through this platform, with participation in the CodeChef Long Challenge expanding from just 3 to over 70+ participants.",
+      "Since its inception in 2019, Point Blank has produced two Candidate Masters, one 6-star coder, and more than ten Experts. Within one year, participation in coding contests grew from just 3 to over 70. In 2020, we qualified the first-ever team from our college to ICPC Regionals and have sent at least one team every year since. Our members have earned multiple top-250 finishes in Google KickStart and reached Round 3 in Meta HackerCup. Additionally, to strengthen coding culture within our college, we organize PB Hustle, an open-to-all competitive programming contest held weekly, completing over 100 editions to date.",
   },
   {
     Title: "Development",
@@ -47,7 +47,14 @@ const activityData: ActivityData[] = [
     Subtitle: "Smart India Hackathon",
     Image: ["/images/hack.jpg", "/images/SIH_2024.png", "/images/SIH.jpg"],
     Description:
-      "Each year, we organize the internal round of the Smart India Hackathon. In the 2020 edition, over 300+ individuals from DSCE participated. Two of our teams advanced to the finals, with one emerging as the winner of the software edition. Along with this, teams from Point Blank have won hackathons all across the city and country.",
+      "Each year, we organize the internal round of the Smart India Hackathon. In the 2024 edition, over 300+ individuals from DSCE participated, with four teams advancing to the national level and three reaching the finals. Since 2020, nine teams from DSCE have won SIH, with six of them being PB teams. Additionally, Point Blank teams have won hackathons across the city and country, including CentuRITon, Hackverse, and HackGlobal.",
+  },
+  {
+    Title: "Open Source",
+    Subtitle: "Google Summer of Code",
+    Image: ["/images/gsocact.jpg", "/images/LFX.png", "/images/githubExtern.png"],
+    Description:
+    " Point Blank has cultivated a vibrant open-source community, with our members achieving notable success in prestigious programs like Google Summer of Code (GSOC). In the past five years, we have had 20+ successful GSOC participants, 10+ Linux Foundation Training (LiFT) scholars, 3 LFX scholars, and 8 GitHub Externs.",
   },
   {
     Title: "Cybersecurity",
@@ -61,7 +68,7 @@ const activityData: ActivityData[] = [
 export default function Activities() {
   return (
     <>
-      <div className="flex flex-col items-center font-bold pt-20 pb-10">
+      <div className="flex flex-col items-center font-bold pt-56 pb-10">
         <h2 className="text-3xl sm:text-4xl md:text-5xl text-white text-center font-black mb-0">
           Activities
         </h2>
