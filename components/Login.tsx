@@ -31,22 +31,6 @@ const Login = () => {
     }
   };
 
-  // const handleGoogleSignIn = async () => {
-  //   try {
-  //     const result = await signInWithPopup(auth, googleProvider);
-  //     const userEmail = result.user.email;
-  //     if (!userEmail?.endsWith("@pointblank.club")) {
-  //       setError("Access not granted!");
-  //       await auth.signOut();
-  //       return;
-  //     } 
-  //     router.push("/"); // Redirect to a home-page after successful login
-  //   } catch (error: any) {
-  //     setError(error.message || "Failed to sign in with Google");
-  //     console.error(error);
-  //   }
-  // };
-
   const handlePasswordReset = async () => {
     if (!email) {
       setResetMessage("Please enter your email address");
@@ -118,22 +102,6 @@ const Login = () => {
             Login
           </button>
         </div>
-        {/* <div className="mb-4">
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            className="w-full p-3 bg-white text-black rounded-md hover:bg-[#aaabad] flex items-center justify-center"
-          >
-            <Image
-              height={32}
-              width={32}
-              src="/images/google_logo.png"
-              alt="Google Logo"
-              className="w-8 h-8 mr-2"
-            />
-            Sign in with Google
-          </button>
-        </div> */}
         {error && <p className="text-red-500">{error}</p>}
         {resetMessage && <p className="text-green-500">{resetMessage}</p>}
       </form>

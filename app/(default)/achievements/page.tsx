@@ -1,10 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, useMemo, useCallback } from "react";
 import axios from "axios";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
 import AchievementCard from "@/components/AchievementCard";
-import { useStore} from "@/lib/zustand/store";
 import LoadingBrackets from "@/components/ui/loading-brackets";
 import toast from "react-hot-toast";
 
@@ -28,50 +28,32 @@ export default function AchievementsPage() {
   const [newAchievement, setNewAchievement] = useState<Partial<Achiever>>({
     achievements: [""],
   });
-  const { isLoggedIn , setLoggedIn } = useStore();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editName, setEditName] = useState("");
   const [editAchievements, setEditAchievements] = useState<Partial<Achiever>>({
     achievements: [""],
   });
 
-  // Strict auth state change handler
+  // Listen to authentication state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user : any) => {
-      try {
-        setLoggedIn(!!user);
-      } catch (error) {
-        console.error("Auth state change error:", error);
-        toast.error("Authentication error occurred");
-      }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user);
     });
-
     return () => unsubscribe();
-  }, [setLoggedIn]);
+  }, []);
 
-  // Strict achievements fetching with comprehensive error handling
+  // Fetch achievements data
   useEffect(() => {
-    async function fetchAchievers() {
+    const fetchAchievers = async () => {
       try {
         setIsLoading(true);
         const response = await fetch("/api/achievements");
-        
-        // Validate response
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
         const data = await response.json();
-        console.log(data.data);
-        
-        // Ensure data is an array and validate each achiever
-        // const validAchievers = (Array.isArray(data) ? data : [])
-
         setAchievers(data.data);
-        
-        // if (validAchievers.length === 0) {
-        //   toast.success("No achievements found");
-        // }
       } catch (error) {
         console.error("Error fetching achievements:", error);
         toast.error("Failed to fetch achievements");
@@ -79,75 +61,94 @@ export default function AchievementsPage() {
       } finally {
         setIsLoading(false);
       }
-    }
+    };
 
     fetchAchievers();
   }, []);
 
-  const handleAddAchievement = () => {
+  // Precompute columns for displaying achievers in 3 columns
+  const columns = useMemo(() => {
+    const cols: Achiever[][] = [[], [], []];
+    achievers.forEach((achiever, index) => {
+      cols[index % 3].push(achiever);
+    });
+    return cols;
+  }, [achievers]);
+
+  // Callbacks for handling achievement inputs in Add Modal
+  const handleAddAchievement = useCallback(() => {
     setNewAchievement((prev) => ({
       ...prev,
       achievements: [...(prev.achievements || []), ""],
     }));
-  };
+  }, []);
 
-  const handleChangeAchievement = (index: number, value: string) => {
-    const updatedAchievements = [...(newAchievement.achievements || [])];
-    updatedAchievements[index] = value;
-    setNewAchievement((prev) => ({
-      ...prev,
-      achievements: updatedAchievements,
-    }));
-  };
+  const handleChangeAchievement = useCallback(
+    (index: number, value: string) => {
+      setNewAchievement((prev) => {
+        const updated = [...(prev.achievements || [])];
+        updated[index] = value;
+        return { ...prev, achievements: updated };
+      });
+    },
+    []
+  );
 
-  const handleEditAddAchievement = () => {
+  // Callbacks for handling achievement inputs in Edit Modal
+  const handleEditAddAchievement = useCallback(() => {
     setEditAchievements((prev) => ({
       ...prev,
       achievements: [...(prev.achievements || []), ""],
     }));
-  };
+  }, []);
 
-  const handleEditChangeAchievement = (index: number, value: string) => {
-    const updatedAchievements = [...(editAchievements.achievements || [])];
-    updatedAchievements[index] = value;
-    setEditAchievements((prev) => ({
-      ...prev,
-      achievements: updatedAchievements,
-    }));
-  };
+  const handleEditChangeAchievement = useCallback(
+    (index: number, value: string) => {
+      setEditAchievements((prev) => {
+        const updated = [...(prev.achievements || [])];
+        updated[index] = value;
+        return { ...prev, achievements: updated };
+      });
+    },
+    []
+  );
 
-  const handleCloseModal = () => {
+  // Close modals and reset edit states
+  const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setIsEditModalOpen(false);
     setEditName("");
     setEditAchievements({ achievements: [""] });
-  };
+  }, []);
 
+  // Submit new achievement
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate required fields
-    const requiredFields = ['email', 'name', 'batch'];
-    const missingFields = requiredFields.filter(field => 
-      !newAchievement[field as keyof Achiever]
+
+    const requiredFields = ["email", "name", "batch"];
+    const missingFields = requiredFields.filter(
+      (field) => !newAchievement[field as keyof Achiever]
     );
 
     if (missingFields.length > 0) {
-      toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      toast.error(
+        `Please fill in all required fields: ${missingFields.join(", ")}`
+      );
       return;
     }
 
-    // Validate achievements
-    if (!newAchievement.achievements || newAchievement.achievements.length === 0) {
+    if (
+      !newAchievement.achievements ||
+      newAchievement.achievements.filter((ach) => ach.trim() !== "").length ===
+        0
+    ) {
       toast.error("Please add at least one achievement");
       return;
     }
 
     try {
       const formData = new FormData();
-      
-      // Strict null checks and type conversions
-      formData.append("image", newAchievement.image || "");
+      if (newAchievement.image) formData.append("image", newAchievement.image);
       formData.append("email", newAchievement.email || "");
       formData.append("name", newAchievement.name || "");
       formData.append("batch", String(newAchievement.batch || ""));
@@ -155,18 +156,15 @@ export default function AchievementsPage() {
       formData.append("internship", newAchievement.internship || "No");
       formData.append("companyPosition", newAchievement.companyPosition || "");
       formData.append(
-        "achievements", 
+        "achievements",
         JSON.stringify(
-          (newAchievement.achievements || [])
-            .filter(ach => ach && ach.trim() !== "")
+          newAchievement.achievements.filter((ach) => ach.trim() !== "")
         )
       );
 
       const response = await axios.post("/api/achievements", formData);
-      
-      // Validate response data
       if (response.data && response.data.name) {
-        setAchievers(prev => [...prev, response.data]);
+        setAchievers((prev) => [...prev, response.data]);
         setIsModalOpen(false);
         toast.success("Achievement added successfully");
       } else {
@@ -178,64 +176,94 @@ export default function AchievementsPage() {
     }
   };
 
-  // Strict edit fetch handler
+  // Fetch user details for editing achievements
   const handleFetch = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!editName || editName.trim() === "") {
+    if (!editName.trim()) {
       toast.error("Please enter a name");
       return;
     }
-
     try {
-      const response = await axios.get(`/api/achievements?name=${encodeURIComponent(editName)}`);
-      
-      if (!response.data || response.data.length === 0) {
+      const response = await axios.get(
+        `/api/achievements?name=${encodeURIComponent(editName)}`
+      );
+      console.log(response.data && response.data.data[0]);
+      if (!response || !response.data || response.data.length === 0) {
         toast.error("No user found");
         return;
       }
-
-      const user = response.data[0];
-      setEditAchievements({
-        ...user,
-        achievements: user.achievements || [""]
-      });
+      const user = response.data.data[0];
+      if (user) {
+        setEditAchievements({
+          ...user,
+          email: user.email || "",
+          batch: user.batch || 0,
+          portfolio: user.portfolio || "",
+          internship: user.internship || "",
+          companyPosition: user.companyPosition || "",
+          achievements: user.achievements || [""],
+        });
+      } else {
+        toast.error("No user found");
+      }
     } catch (error) {
       console.error("Error fetching user:", error);
       toast.error("Failed to fetch user details");
     }
   };
 
+  // Submit edited achievements
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+  
+    // Filter out empty achievements; at least one is required
     const updatedAchievements =
       editAchievements.achievements?.filter((ach) => ach.trim() !== "") || [];
     if (updatedAchievements.length === 0) {
+      toast.error("Please provide at least one achievement");
       return;
     }
+  
+    // Validate required fields on the client side.
+    if (
+      !editAchievements.email?.trim() ||
+      !String(editAchievements.batch)?.trim() ||
+      !editAchievements.portfolio?.trim() ||
+      !editAchievements.companyPosition?.trim()
+    ) {
+      toast.error(
+        "Please provide all required fields: Email, Batch, Portfolio, and Company Position."
+      );
+      return;
+    }
+  
     try {
       const formData = new FormData();
       formData.append("name", editName);
-      formData.append("email", editAchievements.email || "");
-      formData.append("batch", String(editAchievements.batch || ""));
-      formData.append("portfolio", editAchievements.portfolio || "");
+      formData.append("email", editAchievements.email);
+      formData.append("batch", String(editAchievements.batch));
+      formData.append("portfolio", editAchievements.portfolio);
       formData.append("internship", editAchievements.internship || "");
-      formData.append(
-        "companyPosition",
-        editAchievements.companyPosition || ""
-      );
+      formData.append("companyPosition", editAchievements.companyPosition);
       formData.append("achievements", JSON.stringify(updatedAchievements));
       if (editAchievements.image) {
         formData.append("image", editAchievements.image);
       }
-
+  
       const response = await axios.put("/api/achievements", formData);
+      console.log("response:", response.data);
+      if (!response || !response.data || !response.data.data) {
+        toast.error("Failed to update achievements");
+        return;
+      }
+  
       setIsEditModalOpen(false);
+      toast.success("Achievements updated successfully");
     } catch (error) {
       console.error("Error updating achievements:", error);
+      toast.error("Failed to update achievements");
     }
   };
-
   return (
     <div className="container w-full mx-auto pt-32">
       <h1 className="text-center text-4xl font-bold mb-8">Achievements</h1>
@@ -246,19 +274,20 @@ export default function AchievementsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 2gl:grid-cols-2 3gl:grid-cols-3 gap-x-5 gap-y-5 max-w-[1030px] mx-auto justify-items-center">
-          {[...Array(3)].map((_, colIndex) => (
+          {columns.map((col, colIndex) => (
             <div key={colIndex} className="flex flex-col gap-y-5">
-              {achievers
-                .filter((_, index) => index % 3 === colIndex)
-                .map((achiever) => (
-                  <AchievementCard key={achiever.email} achiever={achiever} />
-                ))}
+              {col.map((achiever, index) => (
+                <AchievementCard
+                  key={achiever.id || achiever.email || index}
+                  achiever={achiever}
+                />
+              ))}
             </div>
           ))}
         </div>
       )}
 
-      {isLoggedIn ? (
+      {isLoggedIn && (
         <div className="text-center mb-8">
           <button
             onClick={() => setIsModalOpen(true)}
@@ -267,7 +296,7 @@ export default function AchievementsPage() {
             Add Achievements
           </button>
         </div>
-      ) : null}
+      )}
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
@@ -282,7 +311,6 @@ export default function AchievementsPage() {
                 <input
                   type="email"
                   name="email"
-                  id="email"
                   value={newAchievement.email || ""}
                   onChange={(e) =>
                     setNewAchievement((prev) => ({
@@ -299,7 +327,6 @@ export default function AchievementsPage() {
                 <input
                   type="text"
                   name="name"
-                  id="name"
                   value={newAchievement.name || ""}
                   onChange={(e) =>
                     setNewAchievement((prev) => ({
@@ -316,7 +343,6 @@ export default function AchievementsPage() {
                 <input
                   type="number"
                   name="batch"
-                  id="batch"
                   value={newAchievement.batch || ""}
                   onChange={(e) =>
                     setNewAchievement((prev) => ({
@@ -333,7 +359,6 @@ export default function AchievementsPage() {
                 <input
                   type="text"
                   name="portfolio"
-                  id="portfolio"
                   value={newAchievement.portfolio || ""}
                   onChange={(e) =>
                     setNewAchievement((prev) => ({
@@ -389,7 +414,6 @@ export default function AchievementsPage() {
                 <input
                   type="text"
                   name="companyPosition"
-                  id="companyPosition"
                   value={newAchievement.companyPosition || ""}
                   onChange={(e) =>
                     setNewAchievement((prev) => ({
@@ -408,7 +432,6 @@ export default function AchievementsPage() {
                 <input
                   type="file"
                   name="image"
-                  id="image"
                   accept="image/jpeg, image/png, image/jpg"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
@@ -429,7 +452,6 @@ export default function AchievementsPage() {
                   <div key={index} className="mb-2">
                     <input
                       type="text"
-                      name="achievements"
                       value={achievement}
                       onChange={(e) =>
                         handleChangeAchievement(index, e.target.value)
@@ -467,7 +489,7 @@ export default function AchievementsPage() {
         </div>
       )}
 
-      {isLoggedIn ? (
+      {isLoggedIn && (
         <div className="text-center mb-8">
           <button
             onClick={() => setIsEditModalOpen(true)}
@@ -476,7 +498,7 @@ export default function AchievementsPage() {
             Edit Achievements
           </button>
         </div>
-      ) : null}
+      )}
 
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
@@ -491,7 +513,6 @@ export default function AchievementsPage() {
                 <input
                   type="text"
                   name="name"
-                  id="name"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   className="w-full p-3 bg-gray-800 rounded"
@@ -524,7 +545,6 @@ export default function AchievementsPage() {
                   <input
                     type="text"
                     name="companyPosition"
-                    id="companyPosition"
                     value={editAchievements.companyPosition || ""}
                     onChange={(e) =>
                       setEditAchievements((prev) => ({
@@ -542,7 +562,6 @@ export default function AchievementsPage() {
                     <div key={index} className="mb-2">
                       <input
                         type="text"
-                        name="achievements"
                         value={achievement}
                         onChange={(e) =>
                           handleEditChangeAchievement(index, e.target.value)

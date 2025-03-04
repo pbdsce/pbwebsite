@@ -294,129 +294,118 @@ export async function GET(request: NextRequest) {
 // PUT method: Update an existing achievement based on name
 export async function PUT(request: Request) {
   try {
-    // Validate request method
-    if (request.method !== 'PUT') {
-      return NextResponse.json(
-        { error: 'Method Not Allowed', details: 'Only PUT requests are supported' },
-        { status: 405 }
-      );
-    }
-
+    // Connect to MongoDB
     await connectMongoDB();
+
+    // Parse the incoming form data
     const formData = await request.formData();
     const name = formData.get("name") as string;
-
-    // Validate name is provided
     if (!name) {
       return NextResponse.json(
-        { 
-          error: 'Validation Failed', 
-          details: 'Name is required for updating a member' 
-        },
+        { error: 'Validation Failed', details: 'Name is required for updating a member' },
         { status: 400 }
       );
     }
 
-    // Fetch the existing document by name
+    // Retrieve the existing member document by name
     const existingMember = await Achievementmodel.findOne({ name });
     if (!existingMember) {
       return NextResponse.json(
-        { 
-          error: 'Not Found', 
-          details: `No member found with the name ${name}` 
-        },
+        { error: 'Not Found', details: `No member found with the name ${name}` },
         { status: 404 }
       );
     }
 
-    // Extract data from the form, using existing values if new data is not provided
-    const email = (formData.get("email") as string) || existingMember.email;
-    const batch = (formData.get("batch") as string) || existingMember.batch;
-    const portfolio = (formData.get("portfolio") as string) || existingMember.portfolio;
-    const internship = (formData.get("internship") as string) || existingMember.internship;
-    const companyPosition = (formData.get("companyPosition") as string) || existingMember.companyPosition;
-    const achievements = formData.get("achievements")
-      ? JSON.parse(formData.get("achievements") as string)
-      : existingMember.achievements;
-    const image = formData.get("image") as File;
+    // Retrieve incoming values (they may be empty strings)
+    const emailInput = formData.get("email") as string;
+    const batchInput = formData.get("batch") as string;
+    const portfolioInput = formData.get("portfolio") as string;
+    const internshipInput = formData.get("internship") as string;
+    const companyPositionInput = formData.get("companyPosition") as string;
 
-    let imageUrl = existingMember.imageUrl;
+    // For required fields, if both the new value and the existing value are empty/blank, return an error.
+    if (emailInput===null) {
+      return NextResponse.json(
+        { error: 'Validation Failed', details: 'Email is required' },
+        { status: 400 }
+      );
+    }
+    if (batchInput===null) {
+      return NextResponse.json(
+        { error: 'Validation Failed', details: 'Batch is required' },
+        { status: 400 }
+      );
+    }
+    if (portfolioInput===null) {
+      return NextResponse.json(
+        { error: 'Validation Failed', details: 'Portfolio is required' },
+        { status: 400 }
+      );
+    }
+    if (companyPositionInput===null) {
+      return NextResponse.json(
+        { error: 'Validation Failed', details: 'Company Position is required' },
+        { status: 400 }
+      );
+    }
 
-    // Handle image upload if a new image is provided
-    if (image) {
+    // Parse achievements if provided; otherwise, keep existing achievements.
+    const achievementsData = formData.get("achievements");
+    if (achievementsData) {
       try {
-        // Convert the uploaded file (File object) to a Buffer
+        const achievementsParsed = JSON.parse(achievementsData as string);
+        existingMember.achievements = achievementsParsed;
+      } catch (parseError) {
+        console.error("Error parsing achievements:", parseError);
+        return NextResponse.json(
+          { error: 'Validation Failed', details: 'Achievements is not valid JSON' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Process image upload if a new image is provided
+    const image = formData.get("image") as File;
+    if (image && typeof image.arrayBuffer === 'function' && image.size > 0) {
+      try {
         const arrayBuffer = await image.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-
-        // Create a readable stream from the Buffer
         const stream = Readable.from(buffer);
 
         // Upload the image to Cloudinary
-        const uploadResult: UploadApiResponse = await new Promise(
-          (resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-              { folder: "achievements", public_id: name },
-              (error, result) => {
-                if (error || !result) {
-                  reject(error || new Error('Cloudinary upload failed'));
-                } else {
-                  resolve(result);
-                }
+        const uploadResult: UploadApiResponse = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "achievements", public_id: name },
+            (error, result) => {
+              if (error || !result) {
+                return reject(error || new Error("Cloudinary upload failed"));
               }
-            );
-
-            // Pipe the readable stream into the Cloudinary upload stream
-            stream.pipe(uploadStream);
-          }
-        );
-        imageUrl = uploadResult.secure_url;
+              resolve(result);
+            }
+          );
+          stream.pipe(uploadStream);
+        });
+        existingMember.imageUrl = uploadResult.secure_url;
       } catch (uploadError) {
+        console.error("Image upload error:", uploadError);
         return NextResponse.json(
-          { 
-            error: 'Image Upload Failed', 
-            details: (uploadError as Error).message 
-          },
+          { error: 'Image Upload Failed', details: (uploadError as Error).message },
           { status: 500 }
         );
       }
     }
 
-    // Update the member data
-    try {
-      existingMember.email = email;
-      existingMember.batch = batch;
-      existingMember.portfolio = portfolio;
-      existingMember.internship = internship;
-      existingMember.companyPosition = companyPosition;
-      existingMember.achievements = achievements;
-      existingMember.imageUrl = imageUrl;
+    // Save the updated document
+    await existingMember.save();
 
-      await existingMember.save(); // Save the updated document
-
-      return NextResponse.json(
-        { 
-          message: 'Member Updated Successfully', 
-          data: existingMember 
-        },
-        { status: 200 }
-      );
-    } catch (saveError) {
-      return NextResponse.json(
-        { 
-          error: 'Database Update Failed', 
-          details: (saveError as Error).message 
-        },
-        { status: 500 }
-      );
-    }
+    return NextResponse.json(
+      { message: 'Member Updated Successfully', data: existingMember },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Unexpected error in PUT method:", error);
     return NextResponse.json(
-      { 
-        error: 'Internal Server Error', 
-        details: (error as Error).message 
-      },
+      { error: 'Internal Server Error', details: (error as Error).message },
       { status: 500 }
     );
   }

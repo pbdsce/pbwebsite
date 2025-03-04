@@ -1,8 +1,4 @@
-import logo from "@/public/images/logo.svg";
-import Link from "next/link";
-import Image from "next/image";
 import FlickeringGrid from "@/components/magicui/flickering-grid";
-import { cn } from "@/lib/server/utils";
 import TypingAnimation from "@/components/ui/typing-animation";
 import "../app/css/additional-styles/landing.css";
 

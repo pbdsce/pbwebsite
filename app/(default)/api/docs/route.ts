@@ -21,9 +21,11 @@ export async function GET(request: Request) {
 
     // Check admin status
     const adminDocRef = doc(db, "admin", uid);
+    console.log('Admin doc ref:', adminDocRef);
     const adminDocSnap = await getDoc(adminDocRef);
+    console.log('Admin doc snap:', adminDocSnap);
 
-    if (!adminDocSnap.exists()) {
+    if (!adminDocSnap) {
       return NextResponse.json(
         { error: 'Access denied. Admin privileges required.' },
         { status: 403 }

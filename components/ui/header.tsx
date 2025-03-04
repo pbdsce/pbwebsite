@@ -13,8 +13,17 @@ import { auth } from "@/Firebase";
 export default function Header() {
   const [top, setTop] = useState<boolean>(true);
   const pathname = usePathname();
-  const [loggedIn, setLoggedIn] = useState(false);
   const { reset } = useStore();
+  const [loggedIn, setLoggedIn] = useState(false);
+  
+ 
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setLoggedIn(true);
+      }
+    });
+  }, []);
 
   const handleLogout = async () => {
     
@@ -23,15 +32,6 @@ export default function Header() {
     reset();
     
   }
-
- 
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setLoggedIn(true);
-      }
-    });
-  });
 
   // Detect whether the user has scrolled the page down by 10px
   const scrollHandler = () => {

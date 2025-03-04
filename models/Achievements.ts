@@ -21,23 +21,23 @@ const AchievementSchema: Schema<Achievement> = new Schema(
     },
     email: {
       type: String,
-      required: true,
+     
     },
     batch: {
       type: String,
-      required: true
+    
     },
     portfolio: {
       type: String,
-      required: true
+    
     },
     internship: {
       type:String,
-      required: true,
+    
     },
     companyPosition: {
       type: String,
-      required: true,
+  
     },
     achievements: {
       type: [String], // Array of strings
