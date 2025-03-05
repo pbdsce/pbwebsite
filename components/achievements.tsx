@@ -49,12 +49,12 @@ function Achievements() {
           Achievements
         </h2>
       </div>
-      <Marquee pauseOnHover className="[--duration:60s]">
+      <Marquee pauseOnHover className="[--duration:80s]">
         {firstRow.map((section) => (
           <Tile key={section.id} {...section} />
         ))}
       </Marquee>
-      <Marquee reverse pauseOnHover className="[--duration:60s]">
+      <Marquee reverse pauseOnHover className="[--duration:80s]">
         {secondRow.map((section) => (
           <Tile key={section.id} {...section} />
         ))}
