@@ -12,6 +12,66 @@ import { convertToWebP } from "@/utils/webpImages";
  * @param {Request} request - The incoming HTTP request
  * @returns {Promise<Response>} - A response containing the uploaded image URL or an error message
  */
+/**
+ * @swagger
+ * /api/upload:
+ *   post:
+ *     summary: Uploads an image to Cloudinary.
+ *     description: Receives an image file and uploads it to Cloudinary, returning the secure URL of the uploaded image.
+ *     tags:
+ *      - Upload
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: The image file to be uploaded.
+ *               name:
+ *                 type: string
+ *                 description: The desired name of the file in storage.
+ *     responses:
+ *       200:
+ *         description: Image uploaded successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 imageUrl:
+ *                   type: string
+ *                   example: "https://res.cloudinary.com/your-cloud-name/image/upload/v1234567890/images/image.jpg"
+ *       400:
+ *         description: Bad request, file or name not provided.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Bad Request"
+ *                 details:
+ *                   type: string
+ *                   example: "File and name are required"
+ *       500:
+ *         description: Internal server error during the upload process.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Cloudinary Upload Failed"
+ *                 details:
+ *                   type: string
+ *                   example: "Unknown upload error"
+ */
 export async function POST(request: Request): Promise<Response> {
   try {
     // Check if the Content-Type header is multipart/form-data
