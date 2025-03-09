@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { convertToWebP } from "@/utils/webpImages";
 import {
   FaCalendarAlt,
   FaMapMarkerAlt,
@@ -67,7 +68,7 @@ const Sidebar: React.FC<SidebarProps> = ({ event, onClose, registrationLink }) =
         {event.imageURL ? (
           <div className="mb-4 rounded-lg overflow-hidden shadow-lg">
             <Image
-              src={event.imageURL}
+              src={convertToWebP(event.imageURL)}
               alt={event.eventName}
               width={360}
               height={200}

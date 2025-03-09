@@ -55,7 +55,6 @@
     "swagger-ui-react": "^5.18.3",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "^5.3.3",
     "uuid": "^11.0.3",
     "zustand": "^5.0.2"
   },
@@ -71,6 +70,7 @@
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.13",
     "postcss": "^8.4.32",
-    "tailwindcss": "^3.3.6"
+    "tailwindcss": "^3.3.6",
+    "typescript": "5.8.2"
   }
 }

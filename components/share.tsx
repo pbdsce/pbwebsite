@@ -1,6 +1,7 @@
 /** @jsxImportSource react */
 import React from "react";
 import Image from "next/image"; // Assuming you are using next/image for optimization
+import { convertToWebP } from "@/utils/webpImages";
 import { ContributorsBtn } from "./ContributorsBtn";
 
 interface ShareProps {}
@@ -23,7 +24,7 @@ const Share: React.FC<ShareProps> = () => {
               <div className="flex justify-start mb-4">
                 {/* Replace the src with the actual Slack logo you use */}
                 <Image
-                  src="/images/ln.png"
+                  src="/images/ln.webp"
                   alt="Slack Logo"
                   width={150}
                   height={50}
@@ -51,7 +52,7 @@ const Share: React.FC<ShareProps> = () => {
               <div className="flex justify-start mb-4">
                 {/* Replace with Insta logo */}
                 <Image
-                  src="/images/ig.png"
+                  src="/images/ig.webp"
                   alt="Insta Logo"
                   width={150}
                   height={50}
@@ -78,7 +79,7 @@ const Share: React.FC<ShareProps> = () => {
             <div className="bg-gradient-to-tr from-cyan-500 to-blue-500 p-6 rounded-lg shadow-md text-white rounded-xl flex flex-col h-full">
               <div className="flex justify-start mb-4">
                 <Image
-                  src="https://img.icons8.com/ios/50/FFFFFF/blog.png"
+                  src="https://img.icons8.com/ios/50/FFFFFF/blog.webp"
                   alt="Blog Logo"
                   width={50}
                   height={50}
@@ -128,7 +129,7 @@ const Share: React.FC<ShareProps> = () => {
             <div
               className="relative p-6 rounded-lg shadow-md text-white rounded-xl flex flex-col h-full overflow-hidden"
               style={{
-                backgroundImage: `url(https://res.cloudinary.com/pbsite/image/upload/c_thumb,w_200,g_face/v1737399749/WhatsApp_Image_2025-01-14_at_11.24.24_k3xyj5.jpg)`,
+                backgroundImage: `url(https://res.cloudinary.com/pbsite/image/upload/c_thumb,w_200,g_face/v1737399749/WhatsApp_Image_2025-01-14_at_11.24.24_k3xyj5.webp)`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -140,7 +141,7 @@ const Share: React.FC<ShareProps> = () => {
               <div className="relative z-10">
                 <div className="flex justify-start mb-4">
                   <Image
-                    src="https://img.icons8.com/color/48/youtube-play.png"
+                    src="https://img.icons8.com/color/48/youtube-play.webp"
                     alt="YouTube Logo"
                     width={48}
                     height={48}
@@ -170,7 +171,7 @@ const Share: React.FC<ShareProps> = () => {
             <div className="bg-gradient-to-tr from-gray-900 to-indigo-800 p-6 rounded-lg shadow-md text-white rounded-xl flex flex-col h-full">
               <div className="flex justify-start mb-4 items-center">
                 <Image
-                  src="https://img.icons8.com/?size=100&id=62856&format=png&color=000000"
+                  src="https://img.icons8.com/?size=100&id=62856&format=webp&color=000000"
                   alt="GB Logo"
                   width={50}
                   height={50}

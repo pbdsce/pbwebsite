@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cloudinary } from "@/Cloudinary";
+import { convertToWebP } from "@/utils/webpImages"; 
 import connectMongoDB from "@/lib/dbConnect";
 import Membersmodel from "@/models/Members";
 import { ObjectId } from "mongodb";
@@ -59,7 +60,7 @@ export async function GET() {
       company: member.company || "",
       year: member.year,
       linkedInUrl: member.linkedInUrl || "",
-      imageUrl: member.imageUrl || "",
+      imageUrl: member.imageUrl ? convertToWebP(member.imageUrl) : "",
     }));
 
     return NextResponse.json(members);

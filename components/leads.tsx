@@ -1,23 +1,24 @@
 import "../app/css/additional-styles/landing.css";
+import { convertToWebP } from "@/utils/webpImages";
 
 const leads = [
   {
     id: 0,
     text: "Akash Singh",
     subtext: "CloudSek, Gsoc 24 ",
-    url: "/images/lead1.jpg",
+    url: "/images/lead1.webp",
   },
   {
     id: 1,
     text: "Saalim Quadri",
     subtext: "Vispero, LFX 23",
-    url: "/images/Lead2.jpg",
+    url: "/images/Lead2.webp",
   },
   {
     id: 2,
     text: "Pratyush Singh",
     subtext: "Ultrahuman, Gsoc 23,24",
-    url: "/images/lead3.jpg",
+    url: "/images/lead3.webp",
   },
 ];
 
@@ -32,7 +33,7 @@ const Leads = () => {
           <div
             key={lead.id}
             className="box card-wrapper transition-transform duration-1000 ease-in-out transform hover:scale-105 hover:shadow-2xl"
-            style={{ backgroundImage: `url(${lead.url})` }}
+            style={{ backgroundImage: `url(${convertToWebP(lead.url)})` }}
             title=""
           >
             <div className="absolute bottom-0 w-full p-4 bg-black bg-opacity-50 text-center text-white">

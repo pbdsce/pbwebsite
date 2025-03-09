@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import connectMongoDB from "@/lib/dbConnect";
 import Leadsmodel from "@/models/Leads";
 import { cloudinary } from '@/Cloudinary';
+import { convertToWebP } from "@/utils/webpImages"; 
+
 
 // Interface for Lead
 interface Lead {
@@ -58,6 +60,11 @@ export async function GET(request: Request) {
     const alumniLeads: Lead[] = [];
 
     leads.forEach((lead) => {
+      // Convert image URLs to WebP
+      if (lead.imageUrl) {
+        lead.imageUrl = convertToWebP(lead.imageUrl);
+      }
+
       if (lead.position === "Current") {
         currentLeads.push(lead);
       } else {
@@ -77,6 +84,7 @@ export async function GET(request: Request) {
     );
   }
 }
+
 /**
  * @swagger
  * /api/leads:
@@ -93,7 +101,6 @@ export async function GET(request: Request) {
  *       500:
  *         description: Error creating lead
  */
-// POST method: Add a new lead
 export async function POST(request: Request) {
   try {
     const leadData = await request.json();
@@ -104,11 +111,26 @@ export async function POST(request: Request) {
     }
 
     const leadID: string = uuidv4();
-
     const newLead = new Leadsmodel({
       id: leadID,
       ...leadData,
     });
+
+    // If image URL is provided, upload it to Cloudinary and convert to WebP
+    if (leadData.imageUrl) {
+      try {
+        const uploadResult = await cloudinary.uploader.upload(leadData.imageUrl, {
+          folder: "leads_images",
+          public_id: leadID,
+          format: "webp", // Force Cloudinary to return WebP image
+        });
+
+        newLead.imageUrl = convertToWebP(uploadResult.secure_url); // Ensure WebP URL format
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        return NextResponse.json({ error: "Failed to upload image" }, { status: 500 });
+      }
+    }
 
     const savedLead = await newLead.save();
     return NextResponse.json(savedLead, { status: 201 });
@@ -123,6 +145,7 @@ export async function POST(request: Request) {
     );
   }
 }
+
 /**
  * @swagger
  * /api/leads:
@@ -141,7 +164,6 @@ export async function POST(request: Request) {
  *       500:
  *         description: Error updating lead
  */
-// PUT method: Update an existing lead
 export async function PUT(request: Request) {
   try {
     const leadData = await request.json();
@@ -149,7 +171,7 @@ export async function PUT(request: Request) {
     const id = searchParams.get("id");
     const user = await Leadsmodel.findOne({ id });
     const _id = user._id;
-    
+
     if (!id) {
       return NextResponse.json(
         { error: "Lead ID is required" },
@@ -168,7 +190,23 @@ export async function PUT(request: Request) {
       { ...leadData },
       { new: true }
     );
-    
+
+    // If the image is updated, upload it to Cloudinary and convert to WebP
+    if (leadData.imageUrl) {
+      try {
+        const uploadResult = await cloudinary.uploader.upload(leadData.imageUrl, {
+          folder: "leads_images",
+          public_id: updatedLead.id, // Use the same public_id
+          format: "webp", // Force Cloudinary to return WebP image
+        });
+
+        updatedLead.imageUrl = convertToWebP(uploadResult.secure_url); // Ensure WebP URL format
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        return NextResponse.json({ error: "Failed to upload image" }, { status: 500 });
+      }
+    }
+
     if (!updatedLead) {
       return NextResponse.json({ error: "Lead not found" }, { status: 404 });
     }
@@ -186,7 +224,6 @@ export async function PUT(request: Request) {
   }
 }
 
-// DELETE method: Remove an existing lead
 /**
  * @swagger
  * /api/leads:
@@ -218,32 +255,27 @@ export async function DELETE(request: Request) {
     }
 
     const deletedLead = await Leadsmodel.findOne({ id });
-    
+
     if (!deletedLead) {
       return NextResponse.json({ error: "Lead not found" }, { status: 404 });
     }
 
     // If there's an image URL, delete it from Cloudinary
-    if (deletedLead.imageURL) {
+    if (deletedLead.imageUrl) {
       try {
-        // Extract public_id from the Cloudinary URL
-        const matches = deletedLead.imageURL.match(/\/v\d+\/(.+?)\./);
+        const matches = deletedLead.imageUrl.match(/\/v\d+\/(.+?)\./);
         const publicId = matches ? matches[1] : null;
 
         if (publicId) {
-          const result = await cloudinary.uploader.destroy(publicId);
+          await cloudinary.uploader.destroy(publicId);
         } else {
-          console.warn('Could not extract public ID from URL:', deletedLead.imageURL);
+          console.warn("Could not extract public ID from URL:", deletedLead.imageUrl);
         }
       } catch (cloudinaryError) {
         console.error("Error deleting image from Cloudinary:", cloudinaryError);
-        // Log detailed error for debugging
-        if (cloudinaryError instanceof Error) {
-          console.error("Error details:", cloudinaryError.message);
-        }
-        // Continue with lead deletion even if image deletion fails
       }
     }
+
 
     await Leadsmodel.deleteOne({ id });
     return NextResponse.json(
