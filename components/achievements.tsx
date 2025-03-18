@@ -5,7 +5,6 @@ import { cn } from "@/lib/server/utils";
 import Marquee from "@/components/magicui/marquee";
 import { achievementJson } from "./achievementList";
 import Image from 'next/image'
-import { convertToWebP } from "@/utils/webpImages";
 
 const Tile = ({
   img,
@@ -27,7 +26,7 @@ const Tile = ({
       )}
     >
       <div className="flex flex-row items-center gap-2">
-        <Image className="rounded-full" width={38} height={38} alt="" src={convertToWebP(`/images/${img}`)} />
+        <Image className="rounded-full" width={38} height={38} alt="" src={`/images/${img}`} />
         <div className="flex flex-col">
           <figcaption className="text-sm font-medium dark:text-white">
             {name}

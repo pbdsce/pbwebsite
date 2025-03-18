@@ -3,9 +3,6 @@ import { Readable } from "stream";
 import { cloudinary } from "@/Cloudinary";
 import { UploadApiResponse } from "cloudinary";
 
-// Assuming you have this function in an external file (import it here)
-import { convertToWebP } from "@/utils/webpImages";
-
 /**
  * Handles file uploads and uploads the file to Cloudinary.
  *
@@ -74,15 +71,6 @@ import { convertToWebP } from "@/utils/webpImages";
  */
 export async function POST(request: Request): Promise<Response> {
   try {
-    // Check if the Content-Type header is multipart/form-data
-    const contentType = request.headers.get("Content-Type");
-    if (!contentType || !contentType.startsWith("multipart/form-data")) {
-      return NextResponse.json(
-        { message: "Bad Request", details: "Content-Type must be multipart/form-data" },
-        { status: 400 }
-      );
-    }
-
     // Parse the form data from the incoming request
     const formData = await request.formData();
 
@@ -98,15 +86,6 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    // Optional: Validate file type (e.g., accept only images)
-    const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
-    if (!allowedMimeTypes.includes(image.type)) {
-      return NextResponse.json(
-        { message: "Bad Request", details: "Unsupported file type" },
-        { status: 400 } // HTTP 400 Bad Request
-      );
-    }
-
     // Convert the uploaded file (File object) to a Buffer
     const arrayBuffer = await image.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -115,14 +94,11 @@ export async function POST(request: Request): Promise<Response> {
     const stream = Readable.from(buffer);
 
     try {
-      // Upload the image to Cloudinary (including transformation to WebP)
+      // Upload the image to Cloudinary
       const uploadResult: UploadApiResponse = await new Promise(
         (resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
-            {
-              folder: "images", // Specify folder
-              public_id: name,  // Use name as public ID
-            },
+            { folder: "images", public_id: name }, // Specify folder and use `name` for the file name
             (error, result) => {
               if (error || !result) {
                 reject(error); // Handle upload errors
@@ -137,23 +113,9 @@ export async function POST(request: Request): Promise<Response> {
         }
       );
 
-      // After upload, get the image URL and apply the WebP transformation
-      let webpUrl = cloudinary.url(uploadResult.public_id, {
-        transformation: [
-          { width: 500, crop: "scale", format: "webp" } // Ensure the image is served in WebP format
-        ]
-      });
-
-      // Apply the external `convertToWebP` function if required
-      webpUrl = convertToWebP(webpUrl); // This ensures the URL is properly formatted
-
-      // Cache busting: add a query string to force Cloudinary to regenerate the image
-      const timestamp = new Date().getTime(); // Generate unique timestamp for cache busting
-      webpUrl = `${webpUrl}?v=${timestamp}`; // Adding query parameter to bust cache
-
-      // Return the final WebP URL with cache-busting as the response
+      // Return the secure URL of the uploaded image as the response
       return NextResponse.json({
-        imageUrl: webpUrl, // This will be the WebP URL with cache-busting
+        imageUrl: uploadResult.secure_url,
       });
     } catch (uploadError) {
       // Log and handle errors during the Cloudinary upload process
@@ -161,7 +123,10 @@ export async function POST(request: Request): Promise<Response> {
       return NextResponse.json(
         {
           message: "Cloudinary Upload Failed",
-          details: uploadError instanceof Error ? uploadError.message : "Unknown upload error",
+          details:
+            uploadError instanceof Error
+              ? uploadError.message
+              : "Unknown upload error",
         },
         { status: 500 } // HTTP 500 Internal Server Error
       );
@@ -172,7 +137,10 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json(
       {
         message: "Invalid Request",
-        details: parseError instanceof Error ? parseError.message : "Unable to process request",
+        details:
+          parseError instanceof Error
+            ? parseError.message
+            : "Unable to process request",
       },
       { status: 400 } // HTTP 400 Bad Request
     );

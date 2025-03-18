@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { convertToWebP } from "@/utils/webpImages";
 
 interface EventCardProps {
   event: {
@@ -47,7 +46,7 @@ const EventCard: React.FC<EventCardProps> = ({
       {/* Event Image */}
       <div className="relative">
         <Image
-          src={convertToWebP(event.imageURL)}
+          src={event.imageURL}
           alt={event.eventName}
           width={300}
           height={200}

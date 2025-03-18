@@ -1,7 +1,6 @@
 import { cn } from "@/lib/server/utils";
 import Marquee from "@/components/magicui/marquee";
 import Image from "next/image";
-import { convertToWebP } from "@/utils/webpImages";
 
 const domains = [
   {
@@ -55,7 +54,7 @@ const Card = ({ img, name }: { img: string; name: string }) => {
           width="64"
           height="64"
           alt=""
-          src={convertToWebP(img)}
+          src={img}
         />
         <figcaption className="font-bold">{name}</figcaption>
       </div>

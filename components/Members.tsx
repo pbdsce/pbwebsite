@@ -5,7 +5,6 @@ import { FaEllipsisV } from "react-icons/fa";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
 import Image from "next/image";
-import { convertToWebP } from "@/utils/webpImages";
 import Card from "./ui/Card";
 import CollapsibleSection from "./ui/CollapsibleSection";
 import { useStore } from "@/lib/zustand/store";
@@ -115,7 +114,7 @@ export default function Members() {
           const data = await response.json();
           if (!response.ok)
             throw new Error(data.message || "Image upload failed.");
-          imageUrl = convertToWebP(data.imageUrl);
+          imageUrl = data.imageUrl;
           console.log("Image uploaded successfully, URL:", imageUrl);
         } catch (error) {
           console.error("Error uploading image:", error);
