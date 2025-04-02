@@ -74,6 +74,160 @@ import connectMongoDB from "@/lib/dbConnect";
  *         description: Bad request, missing or invalid fields.
  *       500:
  *         description: Internal server error.
+ *   get:
+ *     summary: Retrieve achievements.
+ *     description: Fetch all achievements or filter by name if provided as a query parameter.
+ *     tags:
+ *       - Achievements
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *         description: Optional filter by person's name.
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved achievements.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       batch:
+ *                         type: string
+ *                       portfolio:
+ *                         type: string
+ *                       internship:
+ *                         type: string
+ *                       companyPosition:
+ *                         type: string
+ *                       achievements:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       imageUrl:
+ *                         type: string
+ *       404:
+ *         description: No member found with the specified name.
+ *       500:
+ *         description: Internal server error.
+ *   put:
+ *     summary: Update an existing achievement entry.
+ *     description: Update an achievement entry by name, including achievements and optionally uploading a new image.
+ *     tags:
+ *       - Achievements
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Name of the person to update (required).
+ *               email:
+ *                 type: string
+ *                 description: Updated email address.
+ *               batch:
+ *                 type: string
+ *                 description: Updated batch year.
+ *               portfolio:
+ *                 type: string
+ *                 description: Updated portfolio URL.
+ *               internship:
+ *                 type: string
+ *                 description: Updated internship details.
+ *               companyPosition:
+ *                 type: string
+ *                 description: Updated position at company.
+ *               achievements:
+ *                 type: string
+ *                 description: JSON string containing updated achievements.
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: New image file (optional).
+ *     responses:
+ *       200:
+ *         description: Achievement updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     batch:
+ *                       type: string
+ *                     portfolio:
+ *                       type: string
+ *                     internship:
+ *                       type: string
+ *                     companyPosition:
+ *                       type: string
+ *                     achievements:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                     imageUrl:
+ *                       type: string
+ *       400:
+ *         description: Bad request, missing name field.
+ *       404:
+ *         description: No member found with the specified name.
+ *       500:
+ *         description: Internal server error.
+ *   delete:
+ *     summary: Delete an achievement entry.
+ *     description: Delete an achievement entry by name and remove associated image from Cloudinary.
+ *     tags:
+ *       - Achievements
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Name of the person to delete.
+ *     responses:
+ *       200:
+ *         description: Achievement deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *       400:
+ *         description: Bad request, missing name parameter.
+ *       404:
+ *         description: No member found with the specified name.
+ *       500:
+ *         description: Internal server error.
  */
 
 // POST method: Create or add a new achievement
@@ -92,7 +246,7 @@ export async function POST(request: Request) {
     const formData = await request.formData();
 
     // Comprehensive input validation
-    const requiredFields = ['name', 'email', 'batch', 'achievements', 'image'];
+    const requiredFields = ['email', 'name', 'batch', 'achievements', 'image'];
     for (const field of requiredFields) {
       if (!formData.get(field)) {
         return NextResponse.json(
@@ -114,13 +268,13 @@ export async function POST(request: Request) {
     ) as string[];
     const image: File | null = formData.get("image") as File;
 
-    // Check if a person with the same name already exists in MongoDB
-    const existingMember = await Achievementmodel.findOne({ name });
+    // Check if a person with the same email already exists in MongoDB
+    const existingMember = await Achievementmodel.findOne({ email });
     if (existingMember) {
       return NextResponse.json(
         { 
           error: 'Duplicate Entry', 
-          details: `A member with the name ${name} already exists.` 
+          details: `A member with the email ${email} already exists.` 
         },
         { status: 409 }
       );
@@ -150,7 +304,7 @@ export async function POST(request: Request) {
       const uploadResult: UploadApiResponse = await new Promise(
         (resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: "achievements", public_id: name },
+            { folder: "achievements", public_id: email },
             (error, result) => {
               if (error || !result) {
                 reject(error || new Error('Upload to Cloudinary failed'));
@@ -217,7 +371,7 @@ export async function POST(request: Request) {
   }
 }
 
-// GET method: Fetch achievements based on name or fetch all if no name is provided
+// GET method: Fetch achievements based on email or fetch all if no email is provided
 export async function GET(request: NextRequest) {
   try {
     // Validate request method
@@ -230,19 +384,21 @@ export async function GET(request: NextRequest) {
 
     await connectMongoDB();
     const { searchParams } = new URL(request.url);
-    const name = searchParams.get("name");
+    const email = searchParams.get("email");
+
+    console.log("Received email in GET method:", email);
 
     let querySnapshot;
     try {
-      if (name) {
-        querySnapshot = await Achievementmodel.find({ name });
+      if (email) {
+        querySnapshot = await Achievementmodel.find({ email });
         
         // Handle case when no member is found
         if (querySnapshot.length === 0) {
           return NextResponse.json(
             { 
               error: 'Not Found', 
-              details: `No member found with name: ${name}` 
+              details: `No member found with email: ${email}` 
             },
             { status: 404 }
           );
@@ -291,7 +447,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// PUT method: Update an existing achievement based on name
+// PUT method: Update an existing achievement based on email
 export async function PUT(request: Request) {
   try {
     // Validate request method
@@ -304,59 +460,66 @@ export async function PUT(request: Request) {
 
     await connectMongoDB();
     const formData = await request.formData();
-    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
 
-    // Validate name is provided
-    if (!name) {
+    console.log("Received email in PUT method:", email);
+    
+    // Validate email is provided
+    if (!email) {
       return NextResponse.json(
         { 
           error: 'Validation Failed', 
-          details: 'Name is required for updating a member' 
+          details: 'Email is required for updating a member' 
         },
         { status: 400 }
       );
     }
 
-    // Fetch the existing document by name
-    const existingMember = await Achievementmodel.findOne({ name });
+    // Fetch the existing document by email
+    const existingMember = await Achievementmodel.findOne({ email });
     if (!existingMember) {
       return NextResponse.json(
         { 
           error: 'Not Found', 
-          details: `No member found with the name ${name}` 
+          details: `No member found with the email ${email}` 
         },
         { status: 404 }
       );
     }
-
-    // Extract data from the form, using existing values if new data is not provided
-    const email = (formData.get("email") as string) || existingMember.email;
-    const batch = (formData.get("batch") as string) || existingMember.batch;
-    const portfolio = (formData.get("portfolio") as string) || existingMember.portfolio;
-    const internship = (formData.get("internship") as string) || existingMember.internship;
-    const companyPosition = (formData.get("companyPosition") as string) || existingMember.companyPosition;
-    const achievements = formData.get("achievements")
-      ? JSON.parse(formData.get("achievements") as string)
-      : existingMember.achievements;
-    const image = formData.get("image") as File;
-
-    let imageUrl = existingMember.imageUrl;
-
+    
+    // Use findOneAndUpdate instead of modifying the existing document
+    const achievementsJson = formData.get("achievements") as string;
+    const updatedAchievements = JSON.parse(achievementsJson);
+    
+    // Prepare update data
+    const updateData: any = {
+      achievements: updatedAchievements,
+    };
+    
+    // Only add fields that are provided in the form data
+    if (formData.get("name")) updateData.name = formData.get("name") as string;
+    if (formData.get("batch")) updateData.batch = formData.get("batch") as string;
+    if (formData.get("portfolio")) updateData.portfolio = formData.get("portfolio") as string;
+    if (formData.get("internship")) updateData.internship = formData.get("internship") as string;
+    if (formData.get("companyPosition")) updateData.companyPosition = formData.get("companyPosition") as string;
+    
     // Handle image upload if a new image is provided
-    if (image) {
+    const image = formData.get("image") as File;
+    
+    if (image && image.size > 0) {
       try {
         // Convert the uploaded file (File object) to a Buffer
         const arrayBuffer = await image.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-
+        
         // Create a readable stream from the Buffer
         const stream = Readable.from(buffer);
-
+        
         // Upload the image to Cloudinary
         const uploadResult: UploadApiResponse = await new Promise(
           (resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
-              { folder: "achievements", public_id: name },
+              { folder: "achievements", public_id: email },
               (error, result) => {
                 if (error || !result) {
                   reject(error || new Error('Cloudinary upload failed'));
@@ -365,12 +528,12 @@ export async function PUT(request: Request) {
                 }
               }
             );
-
+            
             // Pipe the readable stream into the Cloudinary upload stream
             stream.pipe(uploadStream);
           }
         );
-        imageUrl = uploadResult.secure_url;
+        updateData.imageUrl = uploadResult.secure_url;
       } catch (uploadError) {
         return NextResponse.json(
           { 
@@ -381,23 +544,26 @@ export async function PUT(request: Request) {
         );
       }
     }
-
-    // Update the member data
+    
+    // Use findOneAndUpdate with { new: true, runValidators: false }
     try {
-      existingMember.email = email;
-      existingMember.batch = batch;
-      existingMember.portfolio = portfolio;
-      existingMember.internship = internship;
-      existingMember.companyPosition = companyPosition;
-      existingMember.achievements = achievements;
-      existingMember.imageUrl = imageUrl;
-
-      await existingMember.save(); // Save the updated document
-
+      const updatedMember = await Achievementmodel.findOneAndUpdate(
+        { email },
+        { $set: updateData },
+        { new: true, runValidators: false }
+      );
+      
+      if (!updatedMember) {
+        return NextResponse.json(
+          { error: 'Update Failed', details: 'Could not update the document' },
+          { status: 500 }
+        );
+      }
+      
       return NextResponse.json(
         { 
           message: 'Member Updated Successfully', 
-          data: existingMember 
+          data: updatedMember
         },
         { status: 200 }
       );
@@ -412,6 +578,100 @@ export async function PUT(request: Request) {
     }
   } catch (error) {
     console.error("Unexpected error in PUT method:", error);
+    return NextResponse.json(
+      { 
+        error: 'Internal Server Error', 
+        details: (error as Error).message 
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE method: Delete an achievement based on email
+export async function DELETE(request: NextRequest) {
+  try {
+    // Validate request method
+    if (request.method !== 'DELETE') {
+      return NextResponse.json(
+        { error: 'Method Not Allowed', details: 'Only DELETE requests are supported' },
+        { status: 405 }
+      );
+    }
+
+    await connectMongoDB();
+    
+    // Get email from query parameters
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get("email");
+
+    // Validate email is provided
+    if (!email) {
+      return NextResponse.json(
+        { 
+          error: 'Validation Failed', 
+          details: 'Email is required for deleting a member' 
+        },
+        { status: 400 }
+      );
+    }
+
+    // Find the member to be deleted
+    const existingMember = await Achievementmodel.findOne({ email });
+    if (!existingMember) {
+      return NextResponse.json(
+        { 
+          error: 'Not Found', 
+          details: `No member found with the email ${email}` 
+        },
+        { status: 404 }
+      );
+    }
+
+    // Get the image URL before deleting
+    const imageUrl = existingMember.imageUrl;
+    const publicId = imageUrl ? imageUrl.split('/').pop()?.split('.')[0] : null;
+
+    // Delete the document from MongoDB
+    try {
+      const deleteResult = await Achievementmodel.deleteOne({ email });
+      
+      if (deleteResult.deletedCount === 0) {
+        return NextResponse.json(
+          { 
+            error: 'Deletion Failed', 
+            details: 'Could not delete the document' 
+          },
+          { status: 500 }
+        );
+      }
+
+      // Delete image from Cloudinary if exists
+      if (publicId) {
+        try {
+          await cloudinary.uploader.destroy(`achievements/${email}`);
+        } catch (cloudinaryError) {
+          // Continue even if Cloudinary delete fails
+        }
+      }
+      
+      return NextResponse.json(
+        { 
+          message: 'Member Deleted Successfully', 
+          email: email 
+        },
+        { status: 200 }
+      );
+    } catch (deleteError) {
+      return NextResponse.json(
+        { 
+          error: 'Database Delete Failed', 
+          details: (deleteError as Error).message 
+        },
+        { status: 500 }
+      );
+    }
+  } catch (error) {
     return NextResponse.json(
       { 
         error: 'Internal Server Error', 

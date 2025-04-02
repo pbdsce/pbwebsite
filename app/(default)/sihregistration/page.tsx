@@ -12,14 +12,13 @@ const RegisterPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    router.push("/");
-  }
-)
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      router.push("/login");
-    }
-  });
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.push("/login");
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
 
   return (
     <FormProvider>

@@ -29,15 +29,15 @@ const AchievementSchema: Schema<Achievement> = new Schema(
     },
     portfolio: {
       type: String,
-      required: true
+      required: false
     },
     internship: {
       type:String,
-      required: true,
+      required: false,
     },
     companyPosition: {
       type: String,
-      required: true,
+      required: false,
     },
     achievements: {
       type: [String], // Array of strings

@@ -11,7 +11,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
 
 export default function Header() {
-  const [top, setTop] = useState<boolean>(true);
+  const [top, setTop] = useState(true);
   const pathname = usePathname();
   const [loggedIn, setLoggedIn] = useState(false);
   const { reset } = useStore();
@@ -24,14 +24,19 @@ export default function Header() {
     
   }
 
- 
+
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setLoggedIn(true);
+      } else {
+        setLoggedIn(false);
       }
     });
-  });
+    
+    // Clean up the listener when the component unmounts
+    return () => unsubscribe();
+  }, []);
 
   // Detect whether the user has scrolled the page down by 10px
   const scrollHandler = () => {
