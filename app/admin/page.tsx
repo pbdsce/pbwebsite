@@ -10,12 +10,13 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         router.push('/');
       }
     });
-  });
+    return () => unsubscribe();
+  }, []);
   return (
     <div className="flex flex-col items-center justify-center min-h-screen pt-20">
       <div className="flex space-x-4 mb-6">

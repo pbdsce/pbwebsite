@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     const adminDocRef = doc(db, "admin", uid);
     const adminDocSnap = await getDoc(adminDocRef);
 
-    if (!adminDocSnap.exists()) {
+    if (!adminDocSnap) {
       return NextResponse.json(
         { error: 'Access denied. Admin privileges required.' },
         { status: 403 }

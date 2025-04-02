@@ -16,7 +16,6 @@ const SwaggerUI = dynamic(() => import("swagger-ui-react"), {
 });
 
 export default function ApiDoc() {
-  // const [isLoggedIn, setLoggedIn] = useState(false);
   const { isLoggedIn, setLoggedIn } = useStore();
   const [isLoading, setIsLoading] = useState(true);
   const [swaggerConfig, setSwaggerConfig] = useState<any>(null);
