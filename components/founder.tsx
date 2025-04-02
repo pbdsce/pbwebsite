@@ -4,17 +4,17 @@ import React from 'react';
 export default function Teams() {
   const teamData = [
     {
-      url: '/images/founder1.png',
+      url: '/images/founder1.webp',
       name: "Mohit Agarwal",
       description: "Mohit, SDE2 at Glance, is the driving force behind Point Blank's Competitive Programming culture. He has won several contests, including the Nokia Collegiate Code Rally, and qualified for ACM-ICPC Regionals."
     },
     {
-      url: '/images/founder2.png',
+      url: '/images/founder2.webp',
       name: "Soumya Pattanayak",
       description: "A top coder at DSCE, Soumya has worked at Amazon and Verse Innovation. He's an ACM-ICPC regionalist known for his problem-solving skills and innovative projects."
     },
     {
-      url: '/images/founder3.jpg',
+      url: '/images/founder3.webp',
       name: "Ashutosh Pandey",
       description: "Ashutosh, Compiler Engineer at AMD, excelled in Open Source and Hackathons. As a student, he did GSoC with Arduino, won the Smart India Hackathon, and mentored students for prestigious programs."
     }

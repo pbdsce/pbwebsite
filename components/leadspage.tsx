@@ -4,6 +4,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
 import { useStore } from "@/lib/zustand/store";
 import LoadingBrackets from "@/components/ui/loading-brackets";
+import { convertToWebP } from "@/utils/webpImages";
 
 interface Lead {
   id?:string;
@@ -67,7 +68,7 @@ const Leads: React.FC = () => {
     }
 
     try {
-      let imageUrl = selectedLead.imageUrl;
+      let imageUrl = convertToWebP(selectedLead.imageUrl);
 
       if (selectedLead.imageUrl && selectedLead.imageUrl.startsWith("blob")) {
         console.log(
