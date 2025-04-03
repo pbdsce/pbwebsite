@@ -3,6 +3,7 @@ import { cloudinary } from "@/Cloudinary";
 import connectMongoDB from "@/lib/dbConnect";
 import Membersmodel from "@/models/Members";
 import { ObjectId } from "mongodb";
+import { convertToWebP } from "@/utils/webpImages";
 /**
  * @swagger
  * /api/members:
@@ -59,7 +60,7 @@ export async function GET() {
       company: member.company || "",
       year: member.year,
       linkedInUrl: member.linkedInUrl || "",
-      imageUrl: member.imageUrl || "",
+      imageUrl: member.imageUrl ? convertToWebP(member.imageUrl): "",
     }));
 
     return NextResponse.json(members);

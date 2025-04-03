@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import { convertToWebP } from "@/utils/webpImages";
 
 const eventCard = [
   {
@@ -42,7 +43,7 @@ const EventComponent = () => {
                 <Image
                   height={300}
                   width={300}
-                  src={ec.url}
+                  src={convertToWebP(ec.url)}
                   className="w-full h-full object-cover"
                   alt={ec.textt}
                 />

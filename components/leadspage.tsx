@@ -4,6 +4,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
 import { useStore } from "@/lib/zustand/store";
 import LoadingBrackets from "@/components/ui/loading-brackets";
+import { convertToWebP } from "@/utils/webpImages";
 
 interface Lead {
   id?:string;
@@ -282,7 +283,7 @@ const LeadSection: React.FC<LeadSectionProps> = ({
         <div
           key={lead.id}
           style={{
-            backgroundImage: `url(${lead.imageUrl})`,
+            backgroundImage: convertToWebP(`url(${lead.imageUrl})`),
             backgroundSize: "cover",
             backgroundPosition: "center",
             borderRadius: "15px",

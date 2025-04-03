@@ -23,7 +23,7 @@ const Share: React.FC<ShareProps> = () => {
               <div className="flex justify-start mb-4">
                 {/* Replace the src with the actual Slack logo you use */}
                 <Image
-                  src="/images/ln.png"
+                  src="/images/ln.webp"
                   alt="Slack Logo"
                   width={150}
                   height={50}
@@ -51,7 +51,7 @@ const Share: React.FC<ShareProps> = () => {
               <div className="flex justify-start mb-4">
                 {/* Replace with Insta logo */}
                 <Image
-                  src="/images/ig.png"
+                  src="/images/ig.webp"
                   alt="Insta Logo"
                   width={150}
                   height={50}
@@ -78,7 +78,7 @@ const Share: React.FC<ShareProps> = () => {
             <div className="bg-gradient-to-tr from-cyan-500 to-blue-500 p-6 rounded-lg shadow-md text-white rounded-xl flex flex-col h-full">
               <div className="flex justify-start mb-4">
                 <Image
-                  src="https://img.icons8.com/ios/50/FFFFFF/blog.png"
+                  src="https://res.cloudinary.com/pbsite/image/fetch/f_auto,q_auto/https://img.icons8.com/ios/50/FFFFFF/blog.png"
                   alt="Blog Logo"
                   width={50}
                   height={50}
@@ -128,7 +128,7 @@ const Share: React.FC<ShareProps> = () => {
             <div
               className="relative p-6 rounded-lg shadow-md text-white rounded-xl flex flex-col h-full overflow-hidden"
               style={{
-                backgroundImage: `url(https://res.cloudinary.com/pbsite/image/upload/c_thumb,w_200,g_face/v1737399749/WhatsApp_Image_2025-01-14_at_11.24.24_k3xyj5.jpg)`,
+                backgroundImage: `url(https://res.cloudinary.com/pbsite/image/upload/f_auto,q_auto,c_thumb,w_200,g_face/v1737399749/WhatsApp_Image_2025-01-14_at_11.24.24_k3xyj5.jpg)`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -140,7 +140,7 @@ const Share: React.FC<ShareProps> = () => {
               <div className="relative z-10">
                 <div className="flex justify-start mb-4">
                   <Image
-                    src="https://img.icons8.com/color/48/youtube-play.png"
+                   src="https://res.cloudinary.com/pbsite/image/fetch/f_auto,q_auto/https://img.icons8.com/color/48/youtube-play.png"
                     alt="YouTube Logo"
                     width={48}
                     height={48}

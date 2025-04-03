@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { convertToWebP } from "@/utils/webpImages";
 
 interface Achiever {
   imageUrl?: string;
@@ -19,7 +20,7 @@ export default function AchievementCard({ achiever }: { achiever: Achiever }) {
         <Image
           width={500}
           height={500}
-          src={achiever.imageUrl || ""}
+          src={convertToWebP(achiever.imageUrl || "")}
           alt={`${achiever.name}'s profile`}
           className="w-full h-[300px] object-cover object-center"
         />
