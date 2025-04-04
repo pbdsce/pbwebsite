@@ -285,20 +285,42 @@ export async function PUT(request: Request) {
       );
     }
 
+    // Find the existing member to get their current image URL
+    const existingMember = await Membersmodel.findOne({ _id: newid });
+    
+    if (!existingMember) {
+      return NextResponse.json(
+        { message: `No member found with ID: ${id}`, error: true },
+        { status: 404 }
+      );
+    }
+    
+    // Check if imageUrl is being updated
+    if (data.imageUrl && existingMember.imageUrl && data.imageUrl !== existingMember.imageUrl) {
+      try {
+        // Extract the name and timestamp from the URL
+        const urlParts = existingMember.imageUrl.split('/');
+        const filename = urlParts[urlParts.length - 1].split('.')[0];
+        
+        // Use the correct folder name "pbmembers" as used during upload
+        const publicId = `pbmembers/${filename}`;
+        
+        // Delete the old image from Cloudinary
+        await cloudinary.uploader.destroy(publicId);
+        console.log("Old Cloudinary image deleted:", publicId);
+      } catch (error) {
+        console.error("Error during Cloudinary image deletion:", error);
+        // Continue with member update even if image deletion fails
+        console.log("Continuing with member update despite image deletion failure");
+      }
+    }
+
     // Update the member in the database
     const updatedData = await Membersmodel.findOneAndUpdate(
       { _id: newid },
       { ...data },
       { new: true }
     );
-
-    // Check if the member was found and updated
-    if (!updatedData) {
-      return NextResponse.json(
-        { message: `No member found with ID: ${id}`, error: true },
-        { status: 404 }
-      );
-    }
 
     // Return success response
     return NextResponse.json(
@@ -376,28 +398,18 @@ export async function DELETE(request: Request) {
     // If the member has an associated image URL, delete it from Cloudinary
     if (imageUrl) {
       try {
-        // Extract the public_id from the Cloudinary image URL
-        const publicId = imageUrl.split("/").pop()?.split(".")[0]; // Extracts the file name without extension
-
-        if (publicId) {
-          // Delete the image from Cloudinary
-          await cloudinary.uploader.destroy(
-            `members/${publicId}`,
-            (error, result) => {
-              if (error) {
-                console.error("Error deleting image from Cloudinary:", error);
-                throw new Error("Failed to delete image from Cloudinary");
-              }
-              console.log("Cloudinary deletion result:", result);
-            }
-          );
-        }
+        // Extract the name and timestamp from the URL
+        const urlParts = imageUrl.split('/');
+        const filename = urlParts[urlParts.length - 1].split('.')[0];
+        const publicId = `pbmembers/${filename}`;
+        
+        // Delete the image from Cloudinary
+        await cloudinary.uploader.destroy(publicId);
+        console.log("Cloudinary image deleted:", publicId);
       } catch (error) {
         console.error("Error during Cloudinary image deletion:", error);
-        return NextResponse.json(
-          { message: "Failed to delete image from storage", error: true },
-          { status: 500 }
-        );
+        // Continue with member deletion even if image deletion fails
+        console.log("Continuing with member deletion despite image deletion failure");
       }
     }
 

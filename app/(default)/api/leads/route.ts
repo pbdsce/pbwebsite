@@ -224,23 +224,20 @@ export async function DELETE(request: Request) {
     }
 
     // If there's an image URL, delete it from Cloudinary
-    if (deletedLead.imageURL) {
+    if (deletedLead.imageUrl) {
       try {
-        // Extract public_id from the Cloudinary URL
-        const matches = deletedLead.imageURL.match(/\/v\d+\/(.+?)\./);
-        const publicId = matches ? matches[1] : null;
-
-        if (publicId) {
-          const result = await cloudinary.uploader.destroy(publicId);
-        } else {
-          console.warn('Could not extract public ID from URL:', deletedLead.imageURL);
-        }
+        // Extract the filename from URL
+        const urlParts = deletedLead.imageUrl.split('/');
+        const filename = urlParts[urlParts.length - 1].split('.')[0];
+        
+        // Format the public ID as shown in your console
+        const publicId = `leads/${deletedLead.name}-${filename.split('-').pop()}`;
+        
+        // Delete the image
+        const result = await cloudinary.uploader.destroy(publicId);
+        console.log("Cloudinary delete result:", result);
       } catch (cloudinaryError) {
         console.error("Error deleting image from Cloudinary:", cloudinaryError);
-        // Log detailed error for debugging
-        if (cloudinaryError instanceof Error) {
-          console.error("Error details:", cloudinaryError.message);
-        }
         // Continue with lead deletion even if image deletion fails
       }
     }

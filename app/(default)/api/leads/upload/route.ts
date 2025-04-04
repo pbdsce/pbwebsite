@@ -41,7 +41,7 @@ import { UploadApiResponse } from "cloudinary";
  *               properties:
  *                 imageUrl:
  *                   type: string
- *                   example: "https://res.cloudinary.com/your-cloud-name/image/upload/v1234567890/images/image.jpg"
+ *                   example: "https://res.cloudinary.com/your-cloud-name/image/upload/v1234567890/leads/image.jpg"
  *       400:
  *         description: Bad request, file or name not provided.
  *         content:
@@ -78,13 +78,19 @@ export async function POST(request: Request): Promise<Response> {
     const image: File | null = formData.get("file") as File;
     const name: string | null = formData.get("name") as string;
 
-    // Validate if a file and name were uploaded
+    // Validate if a file was uploaded
     if (!image || !name) {
       return NextResponse.json(
-        { message: "Bad Request", details: "File and name are required" },
+        {
+          message: "Bad Request",
+          details: "No file uploaded",
+        },
         { status: 400 } // HTTP 400 Bad Request
       );
     }
+    
+    // Generating a unique public_id using the name and timestamp
+    const uniquePublicId = `${name}-${Date.now()}`;
 
     // Convert the uploaded file (File object) to a Buffer
     const arrayBuffer = await image.arrayBuffer();
@@ -98,7 +104,11 @@ export async function POST(request: Request): Promise<Response> {
       const uploadResult: UploadApiResponse = await new Promise(
         (resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: "images", public_id: name }, // Specify folder and use `name` for the file name
+            { 
+              folder: "leads", 
+              public_id: uniquePublicId,
+              overwrite: false // Prevent accidental overwrites
+            },
             (error, result) => {
               if (error || !result) {
                 reject(error); // Handle upload errors
