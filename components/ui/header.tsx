@@ -1,4 +1,5 @@
 "use client";
+"use client";
 
 import { useStore } from "@/lib/zustand/store";
 
@@ -9,29 +10,46 @@ import Logo from "./logo";
 import MobileMenu from "./mobile-menu";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
 export default function Header() {
   const [top, setTop] = useState(true);
   const pathname = usePathname();
+  const [top, setTop] = useState(true);
+  const pathname = usePathname();
   const [loggedIn, setLoggedIn] = useState(false);
+  const { reset } = useStore();
   const { reset } = useStore();
 
   const handleLogout = async () => {
+    
     
     await auth.signOut();
     setLoggedIn(false);
     reset();
     
+    reset();
+    
   }
 
 
+
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setLoggedIn(true);
       } else {
         setLoggedIn(false);
+      } else {
+        setLoggedIn(false);
       }
+    });
+    
+    // Clean up the listener when the component unmounts
+    return () => unsubscribe();
+  }, []);
     });
     
     // Clean up the listener when the component unmounts
@@ -42,14 +60,25 @@ export default function Header() {
   const scrollHandler = () => {
     window.pageYOffset > 10 ? setTop(false) : setTop(true);
   };
+    window.pageYOffset > 10 ? setTop(false) : setTop(true);
+  };
 
   useEffect(() => {
     scrollHandler();
     window.addEventListener("scroll", scrollHandler);
     return () => window.removeEventListener("scroll", scrollHandler);
   }, [top]);
+    scrollHandler();
+    window.addEventListener("scroll", scrollHandler);
+    return () => window.removeEventListener("scroll", scrollHandler);
+  }, [top]);
 
   return (
+    <header
+      className={`fixed w-full z-30 md:bg-opacity-90 transition duration-300 ease-in-out ${
+        !top ? "bg-black backdrop-blur-sm shadow-lg" : ""
+      }`}
+    >
     <header
       className={`fixed w-full z-30 md:bg-opacity-90 transition duration-300 ease-in-out ${
         !top ? "bg-black backdrop-blur-sm shadow-lg" : ""
@@ -62,8 +91,25 @@ export default function Header() {
           </div>
           <nav className="hidden md:flex md:grow">
             <ul className="flex grow justify-end flex-wrap items-center">
+            <li>
+                <Link href="https://github.com/pbdsce" target="_blank" rel="noopener noreferrer">
+                  <p className="font-medium text-gray-300 hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out">
+                  <FontAwesomeIcon icon={faGithub} className="mr-2" size="lg" />
+                    GitHub
+                  </p>
+                </Link>
+              </li>
               <li>
                 <Link href="/events">
+                  <p
+                    className={`font-medium ${
+                      pathname === "/events"
+                        ? "font-extrabold text-white"
+                        : "text-gray-300"
+                    } hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}
+                  >
+                    Events
+                  </p>
                   <p
                     className={`font-medium ${
                       pathname === "/events"
@@ -86,10 +132,28 @@ export default function Header() {
                   >
                     Leads
                   </p>
+                  <p
+                    className={`font-medium ${
+                      pathname === "/leads"
+                        ? "font-extrabold text-white"
+                        : "text-gray-300"
+                    } hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}
+                  >
+                    Leads
+                  </p>
                 </Link>
               </li>
               <li>
                 <Link href="/members">
+                  <p
+                    className={`font-medium ${
+                      pathname === "/members"
+                        ? "font-extrabold text-white"
+                        : "text-gray-300"
+                    } hover:text-white px-5 py-3 flex items-center transition duration-150 ease-in-out`}
+                  >
+                    Members
+                  </p>
                   <p
                     className={`font-medium ${
                       pathname === "/members"
@@ -112,10 +176,28 @@ export default function Header() {
                   >
                     Achievements
                   </p>
+                  <p
+                    className={`font-medium ${
+                      pathname === "/achievements"
+                        ? "font-extrabold text-white"
+                        : "text-gray-300"
+                    } hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}
+                  >
+                    Achievements
+                  </p>
                 </Link>
               </li>
               <li>
                 <Link href="/hustle">
+                  <p
+                    className={`font-medium ${
+                      pathname === "/hustle"
+                        ? "font-extrabold text-white"
+                        : "text-gray-300"
+                    } hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}
+                  >
+                    Hustle Results
+                  </p>
                   <p
                     className={`font-medium ${
                       pathname === "/hustle"
@@ -144,8 +226,18 @@ export default function Header() {
                     >
                       Logout
                     </p>
+                    <p
+                      className={`font-medium ${
+                        pathname === "/logout"
+                          ? "font-extrabold text-white"
+                          : "text-gray-300"
+                      } hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}
+                    >
+                      Logout
+                    </p>
                   </button>
                 ) : (
+          <></>        
           <></>        
                 )}
               </li>
@@ -156,5 +248,6 @@ export default function Header() {
         </div>
       </div>
     </header>
+  );
   );
 }

@@ -5,6 +5,8 @@ import { Transition } from '@headlessui/react';
 import Link from 'next/link';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/Firebase';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { useStore } from "@/lib/zustand/store";
 
 
@@ -16,11 +18,15 @@ export default function MobileMenu() {
   const mobileNav = useRef<HTMLDivElement>(null);
   const [loggedIn, setLoggedIn] = useState(false);
   const { reset } = useStore();
+  const { reset } = useStore();
 
   const handleLogout = async () => {
     
+    
     await auth.signOut();
     setLoggedIn(false);
+    reset();
+    
     reset();
     
   }
@@ -61,11 +67,40 @@ export default function MobileMenu() {
       <button
 	ref={trigger}
         className="hamburger ml-5"
+	ref={trigger}
+        className="hamburger ml-5"
         aria-controls="mobile-nav"
+        aria-expanded={mobileNavOpen ? "true" : "false"}
         aria-expanded={mobileNavOpen ? "true" : "false"}
         onClick={() => setMobileNavOpen(!mobileNavOpen)}
       >
         <span className="sr-only">Menu</span>
+        <svg
+          className={`w-6 h-6 fill-current text-gray-100 transform transition-transform duration-300 ${
+            mobileNavOpen ? "rotate-90" : ""
+          }`}
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          {mobileNavOpen ? (
+            // Close button
+            <g
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+            >
+              <line x1="6" y1="6" x2="18" y2="18" />
+              <line x1="6" y1="18" x2="18" y2="6" />
+            </g>
+          ) : (
+            //three lines
+            <>
+              <rect y="4" width="24" height="2" fill="currentColor" />
+              <rect y="11" width="24" height="2" fill="currentColor" />
+              <rect y="18" width="24" height="2" fill="currentColor" />
+            </>
+          )}
         <svg
           className={`w-6 h-6 fill-current text-gray-100 transform transition-transform duration-300 ${
             mobileNavOpen ? "rotate-90" : ""
@@ -110,8 +145,20 @@ export default function MobileMenu() {
           leaveTo="opacity-0"
         >
           <ul className="px-5 py-2">
+          <li>
+              <Link 
+                href="https://github.com/pbdsce" 
+                className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center items-center" onClick={() => setMobileNavOpen(false)}
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <FontAwesomeIcon icon={faGithub} className="mr-2" size="lg" />
+                GitHub
+              </Link>
+            </li>
             <li>
               <Link href="/events" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Events</Link>
+            </li>
             </li>
             <li>
               <Link href="/leads" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Leads</Link>
@@ -138,6 +185,7 @@ export default function MobileMenu() {
               </li>
             ) : (
               <></>
+              <></>
             )}
           </ul>
         </Transition>
@@ -145,3 +193,4 @@ export default function MobileMenu() {
     </div>
   );
 }
+
