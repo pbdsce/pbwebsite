@@ -5,7 +5,6 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../Firebase'; 
 import { doc, setDoc } from 'firebase/firestore';
 import '../app/globals.css';
-// import { method } from 'lodash';
 
 
 const Signup = () => {
