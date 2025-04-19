@@ -7,14 +7,14 @@ import {
   signInWithPopup,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import { auth, googleProvider } from "../Firebase"; // Update the path
+import { auth, googleProvider } from "../Firebase"; 
 import Image from "next/image";
 const Login = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [resetMessage, setResetMessage] = useState(""); // State for reset message
+  const [resetMessage, setResetMessage] = useState(""); 
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -23,8 +23,25 @@ const Login = () => {
       return;
     } 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push("/"); // Redirect to a home-page after successful login
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const token = await userCredential.user.getIdToken();
+      const response = await fetch("/api/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+       
+        body: JSON.stringify({ token }),
+      });
+      if (response.ok) {
+        router.push("/"); 
+      } else {
+        setError("Failed to set token");
+      }
     } catch (error) {
       setError("Failed to log in");
       console.error(error);

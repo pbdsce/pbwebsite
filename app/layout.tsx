@@ -4,6 +4,7 @@ import Header from "@/components/ui/header";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { FirebaseTokenSync } from "@/components/FirebaseTokenSync"; 
 
 config.autoAddCss = false;
 
@@ -32,6 +33,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-inter antialiased bg-black text-white tracking-tight`}
       >
+       
+        <FirebaseTokenSync />
+        
         <NextThemesProvider>
           <div className="flex flex-col min-h-screen overflow-hidden supports-[overflow:clip]:overflow-clip">
             <Header />
