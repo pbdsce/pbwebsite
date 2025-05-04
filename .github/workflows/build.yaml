@@ -13,7 +13,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.repository == 'pbdsce/PB_Website'
+    if: |
+      github.repository == 'pbdsce/PB_Website' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
 
     strategy:
       matrix:
