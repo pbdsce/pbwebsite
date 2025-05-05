@@ -31,16 +31,6 @@ jobs:
         with:
           node-version: 18.x
 
-      - name: Verify environment variables
-        run: |
-          echo "Environment variables are set."
-          echo "NEXT_PUBLIC_FIREBASE_API_KEY starts with: ${NEXT_PUBLIC_FIREBASE_API_KEY:0:5}..."
-          echo "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}"
-          echo "NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${NEXT_PUBLIC_FIREBASE_PROJECT_ID}"
-          echo "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}"
-          echo "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}"
-          echo "NEXT_PUBLIC_FIREBASE_APP_ID: ${NEXT_PUBLIC_FIREBASE_APP_ID}"
-
       - name: Install dependencies
         run: npm install
 
