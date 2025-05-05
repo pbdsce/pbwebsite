@@ -5,6 +5,7 @@ on:
     branches:
       - prod
       - staging
+      - workflow
   pull_request:
     branches:
       - prod
