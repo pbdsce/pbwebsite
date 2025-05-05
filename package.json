@@ -66,6 +66,7 @@
     "@types/canvas-confetti": "^1.6.4",
     "@types/cookie": "^0.6.0",
     "@types/jquery": "^3.5.30",
+    "@types/lodash": "^4.17.16",
     "@types/swagger-jsdoc": "^6.0.4",
     "autoprefixer": "^10.4.16",
     "eslint": "8.57.1",
