@@ -3,17 +3,7 @@ name: Build and Test
 on:
   push:
     branches:
-      - main
-    paths-ignore:
-      - '**/README.md'
-      - '**/LICENSE'
-      - '**/.gitignore'
-      - '**/.eslintrc.json'
-      - '**/.infisical.json'
-      - '**/CODEOWNERS'
-      - '**/components.json'
-      - '**/test.json'
-      - '*.md'
+      - '**'
   pull_request:
     branches:
       - main
