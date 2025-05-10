@@ -1,0 +1,118 @@
+name: PR Quality Checks
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+
+jobs:
+  size-label:
+    name: Size Labeler
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Debug PR Event Data
+        run: |
+          echo "Base SHA: ${{ github.event.pull_request.base.sha }}"
+          echo "Head SHA: ${{ github.event.pull_request.head.sha }}"
+          echo "Pull Request: ${{ github.event.pull_request.number }}"
+      
+      - name: Calculate changed files
+        id: changed-files
+        run: |
+          # Count added/modified files only (excludes deletions)
+          CHANGES=$(git diff --name-only --diff-filter=AM ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | wc -l | tr -d ' ')
+          echo "changed_files=${CHANGES}" >> $GITHUB_OUTPUT
+          echo "Detected ${CHANGES} changed files"
+      
+      - name: Apply size label
+        uses: actions/github-script@v6
+        env:
+          CHANGES: ${{ steps.changed-files.outputs.changed_files }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              const size = 
+                process.env.CHANGES <= 9 ? 'XS' :
+                process.env.CHANGES <= 49 ? 'S' :
+                process.env.CHANGES <= 199 ? 'M' :
+                process.env.CHANGES <= 499 ? 'L' : 'XL';
+              
+              console.log(`Determined size label: size-${size}`);
+              
+              const labels = await github.rest.issues.listLabelsOnIssue({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number
+              });
+              
+              const sizeLabels = labels.data.filter(label => 
+                label.name.startsWith('size-')
+              );
+              
+              if (sizeLabels.length > 0) {
+                console.log(`Removing ${sizeLabels.length} existing size labels`);
+                
+                for (const label of sizeLabels) {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    name: label.name
+                  });
+                }
+              }
+              
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: `size-${size}`,
+                  color: '0e8a16',
+                  description: `Size label for PR with ${size} changes`
+                });
+              } catch (error) {
+                if (error.status !== 422) {
+                  throw error;
+                }
+              }
+              
+              console.log(`Adding size-${size} label`);
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: [`size-${size}`]
+              });
+              
+              console.log('Size labeling completed successfully');
+            } catch (error) {
+              console.error('Error in size labeling:', error);
+              core.setFailed(error.message);
+            }
+
+  check-merge-commits:
+    name: Merge Commit Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Verify no merge commits
+        run: |
+          if git log --merges ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} --pretty=format:"%h" | grep -q .; then
+            echo "::error::PR contains merge commits! Use rebase instead."
+            git log --merges ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} --oneline
+            exit 1
+          else
+            echo "No merge commits found - check passed!"
+          fi
