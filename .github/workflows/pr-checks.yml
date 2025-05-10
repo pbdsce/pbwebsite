@@ -1,0 +1,38 @@
+name: PR Checks
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  size-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add size labels
+        uses: pascalgn/size-label-action@v0.5.5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          sizes: '{"XS": 0, "S": 10, "M": 50, "L": 200, "XL": 500}'
+
+  check-merge-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Check for merge commits
+        run: |
+          git fetch --unshallow || true
+          if git log --merges | grep -q 'Merge'; then
+            echo "❌ Merge commit found!"
+            exit 1
+          else
+            echo "✅ No merge commits found."
+          fi

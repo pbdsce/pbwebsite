@@ -58,7 +58,7 @@ Use:
 ```bash
 infisical run -- npm run dev
 ```
-#### Tip: To simplify this process, you can create aliases for commonly used commands.** 
+#### Tip: To simplify this process, you can create aliases for commonly used commands. 
 ---
 
 ## **Contributing**  
@@ -83,11 +83,66 @@ infisical run -- npm run dev
 
 Check the [Issues](https://github.com/pbdsce/pbwebsite/issues) page for tasks you can pick up!  
 
+
+## ✅ Automated Pull Request Checks
+
+This repository uses GitHub Actions to enforce code hygiene and PR size tracking.
+
+### 🔹 PR Size Labels
+PRs are automatically labeled based on the number of added/changed lines:
+
+| Label | Lines of Code |
+|-------|----------------|
+| XS    | 0–9            |
+| S     | 10–49          |
+| M     | 50–199         |
+| L     | 200–499        |
+| XL    | 500+           |
+
+### 🔹 Merge Commit Check
+To avoid polluting the Git history, PRs are scanned for **merge commits**. If found, the workflow will fail.
+
+✅ **Use this instead of merging**:
+- `git pull --rebase`
+- `git rebase main` before pushing
+
+### 🔹 Git Fetch Depth
+The `checkout` step uses `fetch-depth: 0` to fetch the full commit history.  
+This is required for merge commit checks to work properly.
+
+
+---
+
+## **GitHub Bot Commands**
+
+Use these commands in comments on issues and pull requests to perform common tasks:
+
+### **Issue Command Bot (for GitHub Issues)**
+- `/assign [@username]` - Assigns the issue to yourself or a specified user
+- `/close` - Closes the issue
+- `/reopen` - Reopens the issue
+- `/label [label-name]` - Adds a custom label to the issue
+- `/help` - Adds the "help wanted" label to the issue
+- `/needs-triage` - Adds the "needs-triage" label to the issue
+- `/lgtm` - Adds the "LGTM" (Looks Good To Me) label to the issue (cannot be used by issue author)
+- `/cc @user1 @user2` - Mentions specified users in the issue to bring it to their attention
+
+### **PR Command Bot (for Pull Requests)**
+- `/assign [@username]` - Requests review from yourself or a specified user
+- `/close` - Closes the pull request
+- `/reopen` - Reopens the pull request
+- `/label [label-name]` - Adds a custom label to the pull request
+- `/help` - Adds the "help wanted" label to the pull request
+- `/needs-triage` - Adds the "needs-triage" label to the pull request
+- `/lgtm` - Adds the "LGTM" (Looks Good To Me) label to approve the PR (cannot be used by PR author)
+- `/cc @user1 @user2` - Requests reviews from specified users
+
+Additionally, the PR Command Bot automatically processes:
+- `/kind:[type]` or `/kind [type]` in PR descriptions to add kind labels (e.g., kind/bug, kind/feature)
+
 ---
 
 ## **Contact**  
 If you have any questions or need assistance, feel free to reach out to the maintainers.  
 
-Let’s build something amazing! 🚀  
-
----  
+Let's build something amazing! 🚀
