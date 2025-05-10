@@ -26,11 +26,11 @@ const Leadschema: Schema<Lead> = new Schema({
   },
   organization: {
     type: String,
-    required: true,
+    required: false,
   },
   additionalInfo: {
     type: String,
-    required: true,
+    required: false,
   },
   imageUrl: {
     type: String,

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import connectMongoDB from "@/lib/dbConnect";
 import Leadsmodel from "@/models/Leads";
 import { cloudinary } from '@/Cloudinary';
-
+export const dynamic = 'force-dynamic';
 // Interface for Lead
 interface Lead {
   id: string;
@@ -25,10 +25,10 @@ function validateLeadData(leadData: any): string | null {
   ) {
     return 'Position is required and should be either "Current" or "Alumni"';
   }
-  if (!leadData.organization || typeof leadData.organization !== "string") {
+  if (leadData.organization !== undefined && typeof leadData.organization !== "string") {
     return "Organization is required and should be a string";
   }
-  if (!leadData.additionalInfo || typeof leadData.additionalInfo !== "string") {
+  if (leadData.additionalInfo !== undefined && typeof leadData.additionalInfo !== "string") {
     return "Additional info is required and should be a string";
   }
   if (!leadData.imageUrl || typeof leadData.imageUrl !== "string") {
@@ -207,6 +207,7 @@ export async function PUT(request: Request) {
  */
 export async function DELETE(request: Request) {
   try {
+    await connectMongoDB();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
