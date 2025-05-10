@@ -1,0 +1,32 @@
+name: Weekly MongoDB Direct Backup
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'  # Runs at 2 AM UTC every Sunday
+  workflow_dispatch:
+
+jobs:
+  direct-backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install MongoDB tools
+        run: |
+          curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-archive-keyring.gpg
+          echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+          sudo apt-get update
+          sudo apt-get install -y mongodb-database-tools mongodb-org-shell
+
+      - name: Create temporary backup
+        run: |
+          set -e
+          mongodump --uri "${{ secrets.NEXT_PUBLIC_MONGODB_URI }}" --out ./temp_backup
+
+      - name: Restore to backup MongoDB
+        run: |
+          set -e
+          mongorestore --uri "${{ secrets.NEXT_PUBLIC_BACKUP_DB_URI }}" --drop ./temp_backup/pbdata
+          echo "Backup completed successfully"
+
+      - name: Clean up
+        run: |
+          rm -rf ./temp_backup
