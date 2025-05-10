@@ -18,25 +18,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Debug PR Event Data
+      - name: Calculate changed lines
+        id: changed-lines
         run: |
-          echo "Base SHA: ${{ github.event.pull_request.base.sha }}"
-          echo "Head SHA: ${{ github.event.pull_request.head.sha }}"
-          echo "Pull Request: ${{ github.event.pull_request.number }}"
-          echo "Full Event Payload:"
-          cat "$GITHUB_EVENT_PATH"
-
-      - name: Calculate changed files
-        id: changed-files
-        run: |
-          CHANGES=$(git diff --name-only --diff-filter=AM ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | wc -l | tr -d ' ')
-          echo "changed_files=${CHANGES}" >> $GITHUB_OUTPUT
-          echo "Detected ${CHANGES} changed files"
+          ADDED=$(git diff --shortstat ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -o '[0-9]\+ insertions' | grep -o '[0-9]\+')
+          DELETED=$(git diff --shortstat ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -o '[0-9]\+ deletions' | grep -o '[0-9]\+')
+          ADDED=${ADDED:-0}
+          DELETED=${DELETED:-0}
+          TOTAL_LINES=$((ADDED + DELETED))
+          echo "changed_lines=${TOTAL_LINES}" >> $GITHUB_OUTPUT
+          echo "Lines changed: $TOTAL_LINES"
 
       - name: Apply size label
         uses: actions/github-script@v6
         env:
-          CHANGES: ${{ steps.changed-files.outputs.changed_files }}
+          CHANGES: ${{ steps.changed-lines.outputs.changed_lines }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -59,7 +55,6 @@ jobs:
               label.name.startsWith('size-')
             );
 
-            // Remove old size labels
             for (const label of sizeLabels) {
               await github.rest.issues.removeLabel({
                 owner: context.repo.owner,
@@ -70,20 +65,18 @@ jobs:
             }
 
             try {
-              // Create the new size label
               await github.rest.issues.createLabel({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 name: `size-${size}`,
                 color: '0e8a16',
-                description: `Size label for PR with ${size} changes`
+                description: `Size label for PR with ${changeCount} lines changed`
               });
             } catch (error) {
               if (error.status !== 422) throw error;
-              console.log('Label already exists, skipping label creation');
+              console.log('Label already exists, skipping creation');
             }
 
-            // Add the size label
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -91,7 +84,7 @@ jobs:
               labels: [`size-${size}`]
             });
 
-            console.log('Size labeling completed successfully');
+            console.log('Size label based on lines changed applied');
 
   check-merge-commits:
     name: Merge Commit Check
@@ -102,12 +95,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Verify no merge commits
+      - name: Detect Merge Commits
         run: |
           if git log --merges ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} --pretty=format:"%h" | grep -q .; then
-            echo "::error::PR contains merge commits! Use rebase instead."
-            git log --merges ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} --oneline
+            echo "::error::PR contains merge commits. Use rebase instead."
             exit 1
           else
-            echo "No merge commits found - check passed!"
+            echo "No merge commits detected."
           fi
