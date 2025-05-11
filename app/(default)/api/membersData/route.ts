@@ -4,6 +4,8 @@ import connectMongoDB from "@/lib/dbConnect";
 import Membersmodel from "@/models/Members";
 import { ObjectId } from "mongodb";
 import { convertToWebP } from "@/utils/webpImages";
+import { cookies } from "next/headers";
+import admin from "@/Firebase-admin";
 /**
  * @swagger
  * /api/members:
@@ -155,6 +157,22 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+                   if (!sessionCookie) {
+                     return NextResponse.json(
+                     { error: "Unauthorized", details: "No session cookie found" },
+                     { status: 401 }
+                     );
+                    }
+                  // Verify the session cookie
+                     try {
+                       const decodedToken = await admin.auth().verifySessionCookie(sessionCookie, true);
+                     } catch (err) {
+                       return NextResponse.json(
+                       { error: "Unauthorized", details: "Invalid or expired session cookie" },
+                       { status: 401 }
+                       );
+                     }  
     const data = await request.json();
 
     const { name } = data;
@@ -272,6 +290,22 @@ export async function POST(request: Request) {
 // PUT handler to update an existing member
 export async function PUT(request: Request) {
   try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+                   if (!sessionCookie) {
+                     return NextResponse.json(
+                     { error: "Unauthorized", details: "No session cookie found" },
+                     { status: 401 }
+                     );
+                    }
+                  // Verify the session cookie
+                     try {
+                       const decodedToken = await admin.auth().verifySessionCookie(sessionCookie, true);
+                     } catch (err) {
+                       return NextResponse.json(
+                       { error: "Unauthorized", details: "Invalid or expired session cookie" },
+                       { status: 401 }
+                       );
+                     }  
     const data = await request.json();
     const { id, name } = data;
     const newid: Object = new ObjectId(id);
@@ -369,6 +403,22 @@ export async function PUT(request: Request) {
 // DELETE handler to delete a member and their image
 export async function DELETE(request: Request) {
   try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+                   if (!sessionCookie) {
+                     return NextResponse.json(
+                     { error: "Unauthorized", details: "No session cookie found" },
+                     { status: 401 }
+                     );
+                    }
+                  // Verify the session cookie
+                     try {
+                       const decodedToken = await admin.auth().verifySessionCookie(sessionCookie, true);
+                     } catch (err) {
+                       return NextResponse.json(
+                       { error: "Unauthorized", details: "Invalid or expired session cookie" },
+                       { status: 401 }
+                       );
+                     }  
     // Parse the request body to get the member ID
     const { id } = await request.json();
 

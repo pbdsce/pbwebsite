@@ -17,8 +17,12 @@ export default function Header() {
   const { reset } = useStore();
 
   const handleLogout = async () => {
-    
+    // Firebase client-side logout
     await auth.signOut();
+    // Call server-side session logout
+    await fetch('/api/logout', {
+      method: 'POST',
+    });
     setLoggedIn(false);
     reset();
     

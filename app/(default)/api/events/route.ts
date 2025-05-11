@@ -3,6 +3,9 @@ import Eventmodel from "@/models/Events";
 import connectMongoDB from "@/lib/dbConnect";
 import { v4 as uuidv4 } from "uuid";
 import { cloudinary } from '@/Cloudinary';
+import { cookies } from "next/headers";
+import admin from "@/Firebase-admin";
+
 /**
  * @swagger
  * /api/events:
@@ -235,6 +238,22 @@ export async function GET(request: Request) {
 // POST request
 export async function POST(request: Request) {
   try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+               if (!sessionCookie) {
+                 return NextResponse.json(
+                 { error: "Unauthorized", details: "No session cookie found" },
+                 { status: 401 }
+                 );
+                }
+              // Verify the session cookie
+                 try {
+                   const decodedToken = await admin.auth().verifySessionCookie(sessionCookie, true);
+                 } catch (err) {
+                   return NextResponse.json(
+                   { error: "Unauthorized", details: "Invalid or expired session cookie" },
+                   { status: 401 }
+                   );
+                 }  
     const newEvent = await request.json();
     const validationErrors = validateEvent(newEvent);
     if (validationErrors.length > 0) {
@@ -290,6 +309,22 @@ export async function POST(request: Request) {
 // PUT request
 export async function PUT(request: Request) {
   try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+               if (!sessionCookie) {
+                 return NextResponse.json(
+                 { error: "Unauthorized", details: "No session cookie found" },
+                 { status: 401 }
+                 );
+                }
+              // Verify the session cookie
+                 try {
+                   const decodedToken = await admin.auth().verifySessionCookie(sessionCookie, true);
+                 } catch (err) {
+                   return NextResponse.json(
+                   { error: "Unauthorized", details: "Invalid or expired session cookie" },
+                   { status: 401 }
+                   );
+                 }  
     const { searchParams } = new URL(request.url);
     const eventid = searchParams.get("eventid");
     console.log(eventid);
@@ -345,6 +380,22 @@ export async function PUT(request: Request) {
 // DELETE request
 export async function DELETE(request: Request) {
   try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+               if (!sessionCookie) {
+                 return NextResponse.json(
+                 { error: "Unauthorized", details: "No session cookie found" },
+                 { status: 401 }
+                 );
+                }
+              // Verify the session cookie
+                 try {
+                   const decodedToken = await admin.auth().verifySessionCookie(sessionCookie, true);
+                 } catch (err) {
+                   return NextResponse.json(
+                   { error: "Unauthorized", details: "Invalid or expired session cookie" },
+                   { status: 401 }
+                   );
+                 }  
     const { searchParams } = new URL(request.url);
     const eventid = searchParams.get("eventid");
 

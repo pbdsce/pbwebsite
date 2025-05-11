@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import connectMongoDB from "@/lib/dbConnect";
 import Leadsmodel from "@/models/Leads";
 import { cloudinary } from '@/Cloudinary';
+import { cookies } from "next/headers";
+import admin from "@/Firebase-admin";
 
 // Interface for Lead
 interface Lead {
@@ -96,6 +98,22 @@ export async function GET(request: Request) {
 // POST method: Add a new lead
 export async function POST(request: Request) {
   try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+                   if (!sessionCookie) {
+                     return NextResponse.json(
+                     { error: "Unauthorized", details: "No session cookie found" },
+                     { status: 401 }
+                     );
+                    }
+                  // Verify the session cookie
+                     try {
+                       const decodedToken = await admin.auth().verifySessionCookie(sessionCookie, true);
+                     } catch (err) {
+                       return NextResponse.json(
+                       { error: "Unauthorized", details: "Invalid or expired session cookie" },
+                       { status: 401 }
+                       );
+                     }  
     const leadData = await request.json();
 
     const validationError = validateLeadData(leadData);
@@ -144,6 +162,22 @@ export async function POST(request: Request) {
 // PUT method: Update an existing lead
 export async function PUT(request: Request) {
   try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+                   if (!sessionCookie) {
+                     return NextResponse.json(
+                     { error: "Unauthorized", details: "No session cookie found" },
+                     { status: 401 }
+                     );
+                    }
+                  // Verify the session cookie
+                     try {
+                       const decodedToken = await admin.auth().verifySessionCookie(sessionCookie, true);
+                     } catch (err) {
+                       return NextResponse.json(
+                       { error: "Unauthorized", details: "Invalid or expired session cookie" },
+                       { status: 401 }
+                       );
+                     }  
     const leadData = await request.json();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -207,6 +241,22 @@ export async function PUT(request: Request) {
  */
 export async function DELETE(request: Request) {
   try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+                   if (!sessionCookie) {
+                     return NextResponse.json(
+                     { error: "Unauthorized", details: "No session cookie found" },
+                     { status: 401 }
+                     );
+                    }
+                  // Verify the session cookie
+                     try {
+                       const decodedToken = await admin.auth().verifySessionCookie(sessionCookie, true);
+                     } catch (err) {
+                       return NextResponse.json(
+                       { error: "Unauthorized", details: "Invalid or expired session cookie" },
+                       { status: 401 }
+                       );
+                     }  
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 

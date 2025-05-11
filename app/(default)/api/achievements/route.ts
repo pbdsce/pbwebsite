@@ -4,6 +4,9 @@ import { cloudinary } from "@/Cloudinary";
 import { Readable } from "stream";
 import { UploadApiResponse } from "cloudinary";
 import connectMongoDB from "@/lib/dbConnect";
+import { cookies } from "next/headers";
+import admin from "@/Firebase-admin";
+
 /**
  * @swagger
  * /api/achievements:
@@ -233,6 +236,22 @@ import connectMongoDB from "@/lib/dbConnect";
 // POST method: Create or add a new achievement
 export async function POST(request: Request) {
   try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+           if (!sessionCookie) {
+             return NextResponse.json(
+             { error: "Unauthorized", details: "No session cookie found" },
+             { status: 401 }
+             );
+            }
+          // Verify the session cookie
+             try {
+               const decodedToken = await admin.auth().verifySessionCookie(sessionCookie, true);
+             } catch (err) {
+               return NextResponse.json(
+               { error: "Unauthorized", details: "Invalid or expired session cookie" },
+               { status: 401 }
+               );
+             }  
     // Validate request method
     if (request.method !== 'POST') {
       return NextResponse.json(
@@ -450,6 +469,22 @@ export async function GET(request: NextRequest) {
 // PUT method: Update an existing achievement based on email
 export async function PUT(request: Request) {
   try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+           if (!sessionCookie) {
+             return NextResponse.json(
+             { error: "Unauthorized", details: "No session cookie found" },
+             { status: 401 }
+             );
+            }
+          // Verify the session cookie
+             try {
+               const decodedToken = await admin.auth().verifySessionCookie(sessionCookie, true);
+             } catch (err) {
+               return NextResponse.json(
+               { error: "Unauthorized", details: "Invalid or expired session cookie" },
+               { status: 401 }
+               );
+             }  
     // Validate request method
     if (request.method !== 'PUT') {
       return NextResponse.json(
@@ -591,6 +626,22 @@ export async function PUT(request: Request) {
 // DELETE method: Delete an achievement based on email
 export async function DELETE(request: NextRequest) {
   try {
+    const sessionCookie = (await cookies()).get("session")?.value;
+           if (!sessionCookie) {
+             return NextResponse.json(
+             { error: "Unauthorized", details: "No session cookie found" },
+             { status: 401 }
+             );
+            }
+          // Verify the session cookie
+             try {
+               const decodedToken = await admin.auth().verifySessionCookie(sessionCookie, true);
+             } catch (err) {
+               return NextResponse.json(
+               { error: "Unauthorized", details: "Invalid or expired session cookie" },
+               { status: 401 }
+               );
+             }  
     // Validate request method
     if (request.method !== 'DELETE') {
       return NextResponse.json(

@@ -19,6 +19,7 @@
     "cloudinary": "^2.5.1",
     "clsx": "^2.1.1",
     "firebase": "^11.6.0",
+    "firebase-admin": "^13.3.0",
     "framer-motion": "^11.11.10",
     "lodash": "^4.17.21",
     "lucide-react": "^0.419.0",

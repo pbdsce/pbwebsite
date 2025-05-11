@@ -23,7 +23,13 @@ const Login = () => {
       return;
     } 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+      const idToken = await user.getIdToken();
+      const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken}),
+      });
       router.push("/"); // Redirect to a home-page after successful login
     } catch (error) {
       setError("Failed to log in");
