@@ -294,7 +294,7 @@ export default function AchievementsPage() {
                 transition={{ duration: 0.5 }}
                 className="text-center text-lg md:text-xl text-gray-300 mb-8"
               >
-                Pushing the boundaries of technology, one hack at a time.
+                A showcase of achievements by the talented members of PointBlank
               </motion.p>
             )}
           </div>
