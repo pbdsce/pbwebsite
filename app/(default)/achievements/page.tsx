@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
@@ -7,6 +7,15 @@ import AchievementCard from "@/components/AchievementCard";
 import { useStore} from "@/lib/zustand/store";
 import LoadingBrackets from "@/components/ui/loading-brackets";
 import toast from "react-hot-toast";
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface Achievement {
+  title: string;
+  description: string;
+  stipend: number | null;
+  year: number;
+}
 
 interface Achiever {
   id?: string;
@@ -14,28 +23,114 @@ interface Achiever {
   image?: File;
   email: string;
   name: string;
-  batch: number;
+  batch: string;
   portfolio: string;
-  internship: string;
-  companyPosition: string;
-  achievements: string[];
+  achievements: {
+    GSoC?: Achievement[];
+    Hackathon?: Achievement[];
+    CP?: Achievement[];
+    [key: string]: Achievement[] | undefined;
+  };
 }
+
+const headingText = "We Build. We Win. We Ship.";
+const TYPING_SPEED = 90; // ms per character
 
 export default function AchievementsPage() {
   const [achievers, setAchievers] = useState<Achiever[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newAchievement, setNewAchievement] = useState<Partial<Achiever>>({
-    achievements: [""],
+    achievements: {},
   });
-  const { isLoggedIn , setLoggedIn } = useStore();
+  const { isLoggedIn, setLoggedIn } = useStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editEmail, setEditEmail] = useState("");
   const [editAchievements, setEditAchievements] = useState<Partial<Achiever>>({
-    achievements: [""],
+    achievements: {},
   });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [gliderStyle, setGliderStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [typedLength, setTypedLength] = useState(0);
+
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.5,
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5 }
+    }
+  };
+
+  const typingVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        staggerChildren: 0.15
+      }
+    }
+  };
+
+  const typewriterVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const letterVariants = {
+    hidden: { 
+      opacity: 0,
+      y: 20
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.1,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const cursorVariants = {
+    blinking: {
+      opacity: [0, 1, 0],
+      transition: {
+        duration: 0.8,
+        repeat: Infinity,
+        repeatDelay: 0.2
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (typedLength < headingText.length) {
+      const timeout = setTimeout(() => setTypedLength(typedLength + 1), TYPING_SPEED);
+      return () => clearTimeout(timeout);
+    }
+  }, [typedLength]);
 
   // Strict auth state change handler
   useEffect(() => {
@@ -56,24 +151,14 @@ export default function AchievementsPage() {
     async function fetchAchievers() {
       try {
         setIsLoading(true);
-        const response = await fetch("/api/achievements");
+        const response = await fetch("/api/test-achievements");
         
-        // Validate response
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log(data.data);
-        
-        // Ensure data is an array and validate each achiever
-        // const validAchievers = (Array.isArray(data) ? data : [])
-        
         setAchievers(data.data);
-        
-        // if (validAchievers.length === 0) {
-        //   toast.success("No achievements found");
-        // }
       } catch (error) {
         console.error("Error fetching achievements:", error);
         toast.error("Failed to fetch achievements");
@@ -86,36 +171,95 @@ export default function AchievementsPage() {
     fetchAchievers();
   }, []);
 
-  const handleAddAchievement = () => {
+  // Set default selectedCategory to 'All' after achievers load
+  useEffect(() => {
+    const categories = Object.keys(achievers[0]?.achievements || {});
+    if (categories.length > 0 && (!selectedCategory || !categories.includes(selectedCategory))) {
+      setSelectedCategory('All');
+    }
+  }, [achievers]);
+
+  // Update glider position and width when selectedCategory or achievers change
+  useEffect(() => {
+    const categories = Object.keys(achievers[0]?.achievements || {});
+    const idx = categories.indexOf(selectedCategory || "");
+    if (idx !== -1 && tabRefs.current[idx]) {
+      const tab = tabRefs.current[idx];
+      if (tab) {
+        const { offsetLeft, offsetWidth } = tab;
+        setGliderStyle({ left: offsetLeft, width: offsetWidth });
+      }
+    }
+  }, [selectedCategory, achievers]);
+
+  const handleAddAchievement = (category: string) => {
     setNewAchievement((prev) => ({
       ...prev,
-      achievements: [...(prev.achievements || []), ""],
+      achievements: {
+        ...prev.achievements,
+        [category]: [
+          ...(prev.achievements?.[category] || []),
+          { title: "", description: "", stipend: null, year: new Date().getFullYear() }
+        ]
+      }
     }));
   };
 
-  const handleChangeAchievement = (index: number, value: string) => {
-    const updatedAchievements = [...(newAchievement.achievements || [])];
-    updatedAchievements[index] = value;
-    setNewAchievement((prev) => ({
+  const handleChangeAchievement = (category: string, index: number, field: keyof Achievement, value: string | number | null) => {
+    setNewAchievement((prev) => {
+      const categoryAchievements = [...(prev.achievements?.[category] || [])];
+      if (categoryAchievements[index]) {
+        const achievement = categoryAchievements[index];
+        if (achievement) {
+          categoryAchievements[index] = {
+            ...achievement,
+            [field]: value
+          };
+        }
+      }
+      return {
       ...prev,
-      achievements: updatedAchievements,
-    }));
+        achievements: {
+          ...prev.achievements,
+          [category]: categoryAchievements
+        }
+      };
+    });
   };
 
-  const handleEditAddAchievement = () => {
+  const handleEditAddAchievement = (category: string) => {
     setEditAchievements((prev) => ({
       ...prev,
-      achievements: [...(prev.achievements || []), ""],
+      achievements: {
+        ...prev.achievements,
+        [category]: [
+          ...(prev.achievements?.[category] || []),
+          { title: "", description: "", stipend: null, year: new Date().getFullYear() }
+        ]
+      }
     }));
   };
 
-  const handleEditChangeAchievement = (index: number, value: string) => {
-    const updatedAchievements = [...(editAchievements.achievements || [])];
-    updatedAchievements[index] = value;
-    setEditAchievements((prev) => ({
+  const handleEditChangeAchievement = (category: string, index: number, field: keyof Achievement, value: string | number | null) => {
+    setEditAchievements((prev) => {
+      const categoryAchievements = [...(prev.achievements?.[category] || [])];
+      if (categoryAchievements[index]) {
+        const achievement = categoryAchievements[index];
+        if (achievement) {
+          categoryAchievements[index] = {
+            ...achievement,
+            [field]: value
+          };
+        }
+      }
+      return {
       ...prev,
-      achievements: updatedAchievements,
-    }));
+        achievements: {
+          ...prev.achievements,
+          [category]: categoryAchievements
+        }
+      };
+    });
   };
 
   const handleCloseModal = () => {
@@ -124,7 +268,7 @@ export default function AchievementsPage() {
     setIsDeleteModalOpen(false);
     setEditEmail("");
     setDeleteConfirmEmail("");
-    setEditAchievements({ achievements: [""] });
+    setEditAchievements({ achievements: {} });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -142,7 +286,7 @@ export default function AchievementsPage() {
     }
 
     // Validate achievements
-    if (!newAchievement.achievements || newAchievement.achievements.length === 0) {
+    if (!newAchievement.achievements || Object.keys(newAchievement.achievements).length === 0) {
       toast.error("Please add at least one achievement");
       return;
     }
@@ -150,25 +294,18 @@ export default function AchievementsPage() {
     try {
       const formData = new FormData();
       
-      // Strict null checks and type conversions
       formData.append("image", newAchievement.image || "");
       formData.append("email", newAchievement.email || "");
       formData.append("name", newAchievement.name || "");
-      formData.append("batch", String(newAchievement.batch || ""));
+      formData.append("batch", newAchievement.batch || "");
       formData.append("portfolio", newAchievement.portfolio || "");
-      formData.append("internship", newAchievement.internship || "No");
-      formData.append("companyPosition", newAchievement.companyPosition || "");
       formData.append(
         "achievements", 
-        JSON.stringify(
-          (newAchievement.achievements || [])
-            .filter(ach => ach && ach.trim() !== "")
-        )
+        JSON.stringify(newAchievement.achievements)
       );
 
-      const response = await axios.post("/api/achievements", formData);
+      const response = await axios.post("/api/test-achievements", formData);
       
-      // Validate response data
       if (response.data && response.data.data) {
         setAchievers(prev => [...prev, response.data.data]);
         setIsModalOpen(false);
@@ -192,18 +329,17 @@ export default function AchievementsPage() {
     }
 
     try {
-      const response = await axios.get(`/api/achievements?email=${encodeURIComponent(editEmail)}`);
+      const response = await axios.get(`/api/test-achievements?email=${encodeURIComponent(editEmail)}`);
       
-      // The API returns { message, data } where data is the array of members
       if (!response.data.data || response.data.data.length === 0) {
         toast.error("No user found");
         return;
       }
 
-      const user = response.data.data[0]; // Access the first item in the data array
+      const user = response.data.data[0];
       setEditAchievements({
         ...user,
-        achievements: user.achievements || [""]
+        achievements: user.achievements || {}
       });
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -213,47 +349,34 @@ export default function AchievementsPage() {
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const updatedAchievements =
-      editAchievements.achievements?.filter((ach) => ach.trim() !== "") || [];
-    if (updatedAchievements.length === 0) {
+    
+    if (!editAchievements.achievements || Object.keys(editAchievements.achievements).length === 0) {
       toast.error("Please add at least one achievement");
       return;
     }
+
     try {
       const formData = new FormData();
       
-      // Always include email as the primary identifier
       formData.append("email", editEmail);
+      formData.append("achievements", JSON.stringify(editAchievements.achievements));
 
-      // Include existing data for additional fields
+      if (editAchievements.image instanceof File) {
+        formData.append("image", editAchievements.image);
+      }
       if (editAchievements.name) {
         formData.append("name", editAchievements.name);
       }
       if (editAchievements.batch) {
-        formData.append("batch", String(editAchievements.batch));
+        formData.append("batch", editAchievements.batch);
       }
       if (editAchievements.portfolio) {
         formData.append("portfolio", editAchievements.portfolio);
       }
-      if (editAchievements.internship) {
-        formData.append("internship", editAchievements.internship);
-      }
-      if (editAchievements.companyPosition) {
-        formData.append("companyPosition", editAchievements.companyPosition);
-      }
-      
-      formData.append("achievements", JSON.stringify(updatedAchievements));
-      
-      // Only include the image if it's a new upload
-      if (editAchievements.image instanceof File) {
-        formData.append("image", editAchievements.image);
-      }
-  
-      console.log("Submitting edit form...");
-      const response = await axios.put("/api/achievements", formData);
+
+      const response = await axios.put("/api/test-achievements", formData);
       
       if (response.data && response.data.data) {
-        // Update the achievers list with the edited data
         setAchievers(prev => 
           prev.map(achiever => 
             achiever.email === editEmail ? response.data.data : achiever
@@ -266,13 +389,7 @@ export default function AchievementsPage() {
       }
     } catch (error) {
       console.error("Error updating achievements:", error);
-      
-      if (axios.isAxiosError(error) && error.response) {
-        const errorDetails = error.response.data?.details || error.response.data?.error || error.message;
-        toast.error(`Update failed: ${errorDetails}`);
-      } else {
         toast.error("Failed to update achievement. Please try again.");
-      }
     }
   };
 
@@ -285,10 +402,9 @@ export default function AchievementsPage() {
     }
 
     try {
-      const response = await axios.delete(`/api/achievements?email=${encodeURIComponent(deleteConfirmEmail)}`);
+      const response = await axios.delete(`/api/test-achievements?email=${encodeURIComponent(deleteConfirmEmail)}`);
       
       if (response.data && response.data.message) {
-        // Remove the deleted item from the achievements list
         setAchievers(prev => prev.filter(achiever => achiever.email !== deleteConfirmEmail));
         setIsDeleteModalOpen(false);
         setDeleteConfirmEmail("");
@@ -298,337 +414,310 @@ export default function AchievementsPage() {
       }
     } catch (error) {
       console.error("Error deleting achievement:", error);
-      
-      if (axios.isAxiosError(error) && error.response) {
-        const errorDetails = error.response.data?.details || error.response.data?.error || error.message;
-        toast.error(`Deletion failed: ${errorDetails}`);
-      } else {
         toast.error("Failed to delete achievement. Please try again.");
-      }
     }
   };
 
   return (
-    <div className="container w-full mx-auto pt-32">
-      <h1 className="text-center text-4xl font-bold mb-8">Achievements</h1>
-
-      {isLoading ? (
-        <div className="flex justify-center items-center min-h-[200px]">
-          <LoadingBrackets />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 2gl:grid-cols-2 3gl:grid-cols-3 gap-x-5 gap-y-5 max-w-[1030px] mx-auto justify-items-center">
-          {[...Array(3)].map((_, colIndex) => (
-            <div key={colIndex} className="flex flex-col gap-y-5">
-              {achievers
-                .filter((_, index) => index % 3 === colIndex)
-                .map((achiever) => (
-                  <AchievementCard key={achiever.email} achiever={achiever} />
-                ))}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {isLoggedIn ? (
-        <div className="text-center my-8 space-y-4">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-white text-black py-2 px-4 rounded shadow-lg mx-2"
-          >
-            Add Achievements
-          </button>
-          <button
-            onClick={() => setIsEditModalOpen(true)}
-            className="bg-white text-black py-2 px-4 rounded shadow-lg mx-2"
-          >
-            Edit Achievements
-          </button>
-          <button
-            onClick={() => setIsDeleteModalOpen(true)}
-            className="bg-red-500 text-white py-2 px-4 rounded shadow-lg mx-2"
-          >
-            Delete Achievement
-          </button>
-        </div>
-      ) : null}
-
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
-          <div className="bg-black text-white p-8 rounded-lg w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-6">Add Achievement</h2>
-            <form
-              className="space-y-6 overflow-y-auto max-h-[80vh]"
-              onSubmit={handleSubmit}
-            >
-              <div className="mb-4">
-                <label className="block mb-2">Email:</label>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  value={newAchievement.email || ""}
-                  onChange={(e) =>
-                    setNewAchievement((prev) => ({
-                      ...prev,
-                      email: e.target.value,
-                    }))
-                  }
-                  className="w-full p-3 bg-gray-800 rounded"
-                  placeholder="Add Email"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2">Name:</label>
-                <input
-                  type="text"
-                  name="name"
-                  id="name"
-                  value={newAchievement.name || ""}
-                  onChange={(e) =>
-                    setNewAchievement((prev) => ({
-                      ...prev,
-                      name: e.target.value,
-                    }))
-                  }
-                  className="w-full p-3 bg-gray-800 rounded"
-                  placeholder="Add Name"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2">Batch:</label>
-                <input
-                  type="number"
-                  name="batch"
-                  id="batch"
-                  value={newAchievement.batch || ""}
-                  onChange={(e) =>
-                    setNewAchievement((prev) => ({
-                      ...prev,
-                      batch: Number(e.target.value),
-                    }))
-                  }
-                  className="w-full p-3 bg-gray-800 rounded"
-                  placeholder="Add Year"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2">Portfolio:</label>
-                <input
-                  type="text"
-                  name="portfolio"
-                  id="portfolio"
-                  value={newAchievement.portfolio || ""}
-                  onChange={(e) =>
-                    setNewAchievement((prev) => ({
-                      ...prev,
-                      portfolio: e.target.value,
-                    }))
-                  }
-                  className="w-full p-3 bg-gray-800 rounded"
-                  placeholder="Add GitHub Link"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2">
-                  Doing internship or have done in past:
-                </label>
-                <div className="flex gap-4">
-                  <label>
-                    <input
-                      type="radio"
-                      name="internship"
-                      value="Yes"
-                      checked={newAchievement.internship === "Yes"}
-                      onChange={(e) =>
-                        setNewAchievement((prev) => ({
-                          ...prev,
-                          internship: e.target.value,
-                        }))
-                      }
-                      className="mr-2"
-                    />
-                    Yes
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="internship"
-                      value="No"
-                      checked={newAchievement.internship === "No"}
-                      onChange={(e) =>
-                        setNewAchievement((prev) => ({
-                          ...prev,
-                          internship: e.target.value,
-                        }))
-                      }
-                      className="mr-2"
-                    />
-                    No
-                  </label>
-                </div>
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2">Company & Position:</label>
-                <input
-                  type="text"
-                  name="companyPosition"
-                  id="companyPosition"
-                  value={newAchievement.companyPosition || ""}
-                  onChange={(e) =>
-                    setNewAchievement((prev) => ({
-                      ...prev,
-                      companyPosition: e.target.value,
-                    }))
-                  }
-                  className="w-full p-3 bg-gray-800 rounded"
-                  placeholder="Position, Company"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2">
-                  Select an image of the person:
-                </label>
-                <input
-                  type="file"
-                  name="image"
-                  id="image"
-                  accept="image/jpeg, image/png, image/jpg"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setNewAchievement((prev) => ({
-                        ...prev,
-                        image: file,
-                        imageUrl: URL.createObjectURL(file),
-                      }));
-                    }
-                  }}
-                  className="w-full p-3 bg-gray-800 rounded"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2">Achievements:</label>
-                {newAchievement.achievements?.map((achievement, index) => (
-                  <div key={index} className="mb-2">
-                    <input
-                      type="text"
-                      name="achievements"
-                      value={achievement}
-                      onChange={(e) =>
-                        handleChangeAchievement(index, e.target.value)
-                      }
-                      className="w-full p-3 bg-gray-800 rounded"
-                      placeholder="Add an achievement"
-                    />
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={handleAddAchievement}
-                  className="bg-gray-600 text-white py-2 px-4 rounded"
-                >
-                  Add More
-                </button>
-              </div>
-              <div className="flex gap-4 mt-4">
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white py-2 px-4 rounded"
-                >
-                  Submit
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="bg-red-500 text-white py-2 px-4 rounded"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+    <>
+      <div className="container w-full mx-auto pt-32 min-h-screen bg-black">
+        <div className="relative">
+          <div className="flex justify-center items-center text-center text-4xl md:text-5xl font-extrabold mb-4 text-white tracking-tight min-h-[2.5em]">
+            <span>
+              {headingText.slice(0, typedLength)}
+              <span className="inline-block w-[2px] h-[1em] align-middle bg-white animate-blink ml-1" />
+            </span>
           </div>
-        </div>
-      )}
-
-      {isEditModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
-          <div className="bg-black text-white p-8 rounded-lg w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-6">Edit Achievements</h2>
-            <form
-              className="space-y-6 overflow-y-auto max-h-[50vh] mb-4"
-              onSubmit={handleFetch}
+          {typedLength === headingText.length && (
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-center text-lg md:text-xl text-gray-300 mb-8"
             >
-              <div className="mb-4">
-                <label className="block mb-2">Email:</label>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  value={editEmail}
-                  onChange={(e) => setEditEmail(e.target.value)}
-                  className="w-full p-3 bg-gray-800 rounded"
-                  placeholder="Enter Email"
-                />
-              </div>
-              <div className="flex gap-4 mt-4">
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white py-2 px-4 rounded"
+              Pushing the boundaries of technology, one hack at a time.
+            </motion.p>
+          )}
+        </div>
+
+        <motion.div 
+          className="flex flex-col items-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.7 }}
+        >
+          <div className="flex gap-4 mb-8">
+            <motion.button
+              key="All"
+              onClick={() => setSelectedCategory('All')}
+              className={`px-6 py-2 rounded-full font-semibold transition text-base focus:outline-none border border-transparent shadow-sm
+                ${selectedCategory === 'All'
+                  ? "bg-green-500 text-black shadow-lg scale-105"
+                  : "bg-gray-900 text-gray-200 hover:bg-gray-800 hover:text-green-400"}
+              `}
+              style={{ minWidth: 120 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              All
+            </motion.button>
+            {Object.keys(achievers[0]?.achievements || {}).map((category, idx) => {
+              const isActive = selectedCategory === category;
+              return (
+                <motion.button
+                  key={category}
+                  ref={el => { tabRefs.current[idx] = el; }}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-6 py-2 rounded-full font-semibold transition text-base focus:outline-none border border-transparent shadow-sm
+                    ${isActive
+                      ? "bg-green-500 text-black shadow-lg scale-105"
+                      : "bg-gray-900 text-gray-200 hover:bg-gray-800 hover:text-green-400"}
+                  `}
+                  style={{ minWidth: 120 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  Fetch
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="bg-red-500 text-white py-2 px-4 rounded"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-            {editAchievements.name && (
+                  {category}
+                </motion.button>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        <AnimatePresence mode="wait">
+          {selectedCategory && (
+            <motion.div 
+              key={selectedCategory}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            >
+              {achievers
+                .filter(achiever => {
+                  if (selectedCategory === 'All') {
+                    // Show achievers with any achievements
+                    return Object.values(achiever.achievements || {}).some(arr => arr && arr.length > 0);
+                  }
+                  const categoryAchievements = achiever.achievements?.[selectedCategory];
+                  return categoryAchievements && categoryAchievements.length > 0;
+                })
+                .map((achiever, idx) => (
+                  <motion.div
+                    key={achiever.email}
+                    className="relative flex items-stretch group"
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.1 * idx }}
+                  >
+                    <div className="relative group rounded-2xl w-full transition-all duration-300 hover:scale-105">
+                      {/* Large gradient rectangle behind card on hover */}
+                      <div
+                        className="pointer-events-none absolute inset-0 z-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        style={{
+                          transform: "scaleY(1.04) scaleX(1.02)",
+                          background: "linear-gradient(-45deg, #00ff88 0%, #00e676 50%, #005533 100%)"
+                        }}
+                      ></div>
+                      {/* Card content */}
+                      <div className="relative z-10 bg-[#101214] border border-transparent rounded-2xl h-full w-full p-6 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center gap-3 mb-4">
+                            {achiever.imageUrl && (
+                              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-800">
+                                <img src={achiever.imageUrl} alt={achiever.name} className="w-full h-full object-cover" />
+                              </div>
+                            )}
+                            <div className="flex flex-col justify-center">
+                              <h3 className="text-base font-bold text-green-400 leading-tight">{achiever.name}</h3>
+                              <p className="text-xs text-gray-400 leading-tight">{achiever.batch}</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-4 w-full mt-2">
+                            {selectedCategory === 'All' ? (
+                              // Show all achievements from all categories in a single card
+                              (() => {
+                                const allAchievements = Object.values(achiever.achievements || {}).flat().filter(Boolean);
+                                const rows = [];
+                                for (let i = 0; i < allAchievements.length; i += 3) {
+                                  rows.push(allAchievements.slice(i, i + 3));
+                                }
+                                return rows.map((row, rowIdx) => (
+                                  <div key={rowIdx} className="flex flex-row items-stretch gap-0">
+                                    {row.map((achievement, i) => (
+                                      achievement ? (
+                                        <React.Fragment key={i}>
+                                          <div className="flex-1 flex flex-col min-w-0 px-2">
+                                            <span className="font-semibold text-green-500 text-sm break-words">{achievement.title}</span>
+                                            <span className="text-gray-400 text-sm mt-1 break-words whitespace-pre-line">{achievement.description}</span>
+                                          </div>
+                                          {i < row.length - 1 && (
+                                            <div className="flex items-stretch justify-center">
+                                              <div className="w-px h-full bg-gray-600 mx-2" style={{ minHeight: '40px' }} />
+                                            </div>
+                                          )}
+                                        </React.Fragment>
+                                      ) : null
+                                    ))}
+                                  </div>
+                                ));
+                              })()
+                            ) : (
+                              (() => {
+                                const achievements = achiever.achievements[selectedCategory] || [];
+                                const rows = [];
+                                for (let i = 0; i < achievements.length; i += 3) {
+                                  rows.push(achievements.slice(i, i + 3));
+                                }
+                                return rows.map((row, rowIdx) => (
+                                  <div key={rowIdx} className="flex flex-row items-stretch gap-0">
+                                    {row.map((achievement, i) => (
+                                      achievement ? (
+                                        <React.Fragment key={i}>
+                                          <div className="flex-1 flex flex-col min-w-0 px-2">
+                                            <span className="font-semibold text-green-500 text-sm break-words">{achievement.title}</span>
+                                            <span className="text-gray-400 text-sm mt-1 break-words whitespace-pre-line">{achievement.description}</span>
+                                          </div>
+                                          {i < row.length - 1 && (
+                                            <div className="flex items-stretch justify-center">
+                                              <div className="w-px h-full bg-gray-600 mx-2" style={{ minHeight: '40px' }} />
+                                            </div>
+                                          )}
+                                        </React.Fragment>
+                                      ) : null
+                                    ))}
+                                  </div>
+                                ));
+                              })()
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {isLoggedIn && (
+          <div className="text-center my-12 space-y-4">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-gradient-to-r from-[#00C853] to-[#00E676] text-black py-3 px-6 rounded-full 
+                       font-bold shadow-lg hover:shadow-[#00C853]/50 transition-all duration-300 
+                       hover:scale-105 active:scale-95 mx-2"
+            >
+              Add Achievements
+            </button>
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="bg-gradient-to-r from-[#00C853] to-[#00E676] text-black py-3 px-6 rounded-full 
+                       font-bold shadow-lg hover:shadow-[#00C853]/50 transition-all duration-300 
+                       hover:scale-105 active:scale-95 mx-2"
+            >
+              Edit Achievements
+            </button>
+            <button
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="bg-gradient-to-r from-red-500 to-red-600 text-white py-3 px-6 rounded-full 
+                       font-bold shadow-lg hover:shadow-red-500/50 transition-all duration-300 
+                       hover:scale-105 active:scale-95 mx-2"
+            >
+              Delete Achievement
+            </button>
+          </div>
+        )}
+
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-gradient-to-br from-gray-900 to-black text-white p-8 rounded-xl w-full max-w-md 
+                          border border-gray-800 shadow-2xl">
+              <h2 className="text-2xl font-bold mb-6">Add Achievement</h2>
               <form
-                className="space-y-6 overflow-y-auto max-h-[50vh]"
-                onSubmit={handleEditSubmit}
+                className="space-y-6 overflow-y-auto max-h-[80vh]"
+                onSubmit={handleSubmit}
               >
                 <div className="mb-4">
-                  <label className="block mb-2">Company & Position:</label>
+                  <label className="block mb-2">Email:</label>
                   <input
-                    type="text"
-                    name="companyPosition"
-                    id="companyPosition"
-                    value={editAchievements.companyPosition || ""}
+                    type="email"
+                    name="email"
+                    id="email"
+                    value={newAchievement.email || ""}
                     onChange={(e) =>
-                      setEditAchievements((prev) => ({
+                      setNewAchievement((prev) => ({
                         ...prev,
-                        companyPosition: e.target.value,
+                        email: e.target.value,
                       }))
                     }
                     className="w-full p-3 bg-gray-800 rounded"
-                    placeholder="Position, Company"
+                    placeholder="Add Email"
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block mb-2">Update Image:</label>
-                  {editAchievements.imageUrl && (
-                    <div className="mb-2">
-                      <img 
-                        src={editAchievements.imageUrl} 
-                        alt={editAchievements.name} 
-                        className="w-20 h-20 object-cover rounded-full mb-2"
-                      />
-                      <p className="text-xs text-gray-400">Current image</p>
-                    </div>
-                  )}
+                  <label className="block mb-2">Name:</label>
+                  <input
+                    type="text"
+                    name="name"
+                    id="name"
+                    value={newAchievement.name || ""}
+                    onChange={(e) =>
+                      setNewAchievement((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
+                    className="w-full p-3 bg-gray-800 rounded"
+                    placeholder="Add Name"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block mb-2">Batch:</label>
+                  <input
+                    type="text"
+                    name="batch"
+                    id="batch"
+                    value={newAchievement.batch || ""}
+                    onChange={(e) =>
+                      setNewAchievement((prev) => ({
+                        ...prev,
+                        batch: e.target.value,
+                      }))
+                    }
+                    className="w-full p-3 bg-gray-800 rounded"
+                    placeholder="Add Year"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block mb-2">Portfolio:</label>
+                  <input
+                    type="text"
+                    name="portfolio"
+                    id="portfolio"
+                    value={newAchievement.portfolio || ""}
+                    onChange={(e) =>
+                      setNewAchievement((prev) => ({
+                        ...prev,
+                        portfolio: e.target.value,
+                      }))
+                    }
+                    className="w-full p-3 bg-gray-800 rounded"
+                    placeholder="Add GitHub Link"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block mb-2">Select an image:</label>
                   <input
                     type="file"
                     name="image"
+                    id="image"
                     accept="image/jpeg, image/png, image/jpg"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        setEditAchievements((prev) => ({
+                        setNewAchievement((prev) => ({
                           ...prev,
                           image: file,
                           imageUrl: URL.createObjectURL(file),
@@ -638,36 +727,74 @@ export default function AchievementsPage() {
                     className="w-full p-3 bg-gray-800 rounded"
                   />
                 </div>
+
                 <div className="mb-4">
-                  <label className="block mb-2">Achievements:</label>
-                  {editAchievements.achievements?.map((achievement, index) => (
-                    <div key={index} className="mb-2">
-                      <input
-                        type="text"
-                        name="achievements"
-                        value={achievement}
-                        onChange={(e) =>
-                          handleEditChangeAchievement(index, e.target.value)
-                        }
-                        className="w-full p-3 bg-gray-800 rounded"
-                        placeholder="Add an achievement"
-                      />
+                  <label className="block mb-2">Achievements by Category:</label>
+                  {Object.entries(newAchievement.achievements || {}).map(([category, achievements = []]) => (
+                    <div key={category} className="mb-4">
+                      <h3 className="text-lg font-semibold mb-2">{category}</h3>
+                      {achievements.map((achievement, index) => (
+                        <div key={index} className="mb-4 p-4 bg-gray-800 rounded">
+                          <input
+                            type="text"
+                            value={achievement.title}
+                            onChange={(e) => handleChangeAchievement(category, index, 'title', e.target.value)}
+                            className="w-full p-2 mb-2 bg-gray-700 rounded"
+                            placeholder="Achievement Title"
+                          />
+                          <textarea
+                            value={achievement.description}
+                            onChange={(e) => handleChangeAchievement(category, index, 'description', e.target.value)}
+                            className="w-full p-2 mb-2 bg-gray-700 rounded"
+                            placeholder="Achievement Description"
+                          />
+                          <input
+                            type="number"
+                            value={achievement.stipend || ''}
+                            onChange={(e) => handleChangeAchievement(category, index, 'stipend', e.target.value ? Number(e.target.value) : null)}
+                            className="w-full p-2 mb-2 bg-gray-700 rounded"
+                            placeholder="Stipend Amount (optional)"
+                          />
+                          <input
+                            type="number"
+                            value={achievement.year}
+                            onChange={(e) => handleChangeAchievement(category, index, 'year', Number(e.target.value))}
+                            className="w-full p-2 bg-gray-700 rounded"
+                            placeholder="Year"
+                          />
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => handleAddAchievement(category)}
+                        className="bg-gray-600 text-white py-2 px-4 rounded"
+                      >
+                        Add More to {category}
+                      </button>
                     </div>
                   ))}
-                  <button
-                    type="button"
-                    onClick={handleEditAddAchievement}
-                    className="bg-gray-600 text-white py-2 px-4 rounded"
-                  >
-                    Add More
-                  </button>
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const category = prompt("Enter category name (e.g., GSoC, Hackathon, CP):");
+                        if (category) {
+                          handleAddAchievement(category);
+                        }
+                      }}
+                      className="bg-blue-600 text-white py-2 px-4 rounded"
+                    >
+                      Add New Category
+                    </button>
+                  </div>
                 </div>
+
                 <div className="flex gap-4 mt-4">
                   <button
                     type="submit"
                     className="bg-blue-500 text-white py-2 px-4 rounded"
                   >
-                    Update
+                    Submit
                   </button>
                   <button
                     type="button"
@@ -678,55 +805,179 @@ export default function AchievementsPage() {
                   </button>
                 </div>
               </form>
-            )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {isDeleteModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
-          <div className="bg-black text-white p-8 rounded-lg w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-6">Delete Achievement</h2>
-            <form
-              className="space-y-6"
-              onSubmit={handleDeleteSubmit}
-            >
-              <div className="mb-4">
-                <label className="block mb-2">
-                  Enter email to confirm deletion:
-                </label>
-                <input
-                  type="email"
-                  value={deleteConfirmEmail}
-                  onChange={(e) => setDeleteConfirmEmail(e.target.value)}
-                  className="w-full p-3 bg-gray-800 rounded"
-                  placeholder="Enter email to delete"
-                />
-              </div>
-              <div className="p-4 bg-red-900 bg-opacity-50 rounded-md mb-4">
-                <p className="text-red-300">
-                  Warning: This action cannot be undone. This will permanently delete the achievement record.
-                </p>
-              </div>
-              <div className="flex gap-4 mt-4">
-                <button
-                  type="submit"
-                  className="bg-red-600 text-white py-2 px-4 rounded"
+        {isEditModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
+            <div className="bg-black text-white p-8 rounded-lg w-full max-w-md">
+              <h2 className="text-2xl font-bold mb-6">Edit Achievements</h2>
+              <form
+                className="space-y-6 overflow-y-auto max-h-[50vh] mb-4"
+                onSubmit={handleFetch}
+              >
+                <div className="mb-4">
+                  <label className="block mb-2">Email:</label>
+                  <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value)}
+                    className="w-full p-3 bg-gray-800 rounded"
+                    placeholder="Enter Email"
+                  />
+                </div>
+                <div className="flex gap-4 mt-4">
+                  <button
+                    type="submit"
+                    className="bg-blue-500 text-white py-2 px-4 rounded"
+                  >
+                    Fetch
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCloseModal}
+                    className="bg-red-500 text-white py-2 px-4 rounded"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+
+              {Object.keys(editAchievements.achievements || {}).length > 0 && (
+                <form
+                  className="space-y-6 overflow-y-auto max-h-[50vh]"
+                  onSubmit={handleEditSubmit}
                 >
-                  Delete
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="bg-gray-500 text-white py-2 px-4 rounded"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+                  <div className="mb-4">
+                    <label className="block mb-2">Achievements by Category:</label>
+                    {Object.entries(editAchievements.achievements || {}).map(([category, achievements = []]) => (
+                      <div key={category} className="mb-4">
+                        <h3 className="text-lg font-semibold mb-2">{category}</h3>
+                        {achievements.map((achievement, index) => (
+                          <div key={index} className="mb-4 p-4 bg-gray-800 rounded">
+                            <input
+                              type="text"
+                              value={achievement.title}
+                              onChange={(e) => handleEditChangeAchievement(category, index, 'title', e.target.value)}
+                              className="w-full p-2 mb-2 bg-gray-700 rounded"
+                              placeholder="Achievement Title"
+                            />
+                            <textarea
+                              value={achievement.description}
+                              onChange={(e) => handleEditChangeAchievement(category, index, 'description', e.target.value)}
+                              className="w-full p-2 mb-2 bg-gray-700 rounded"
+                              placeholder="Achievement Description"
+                            />
+                            <input
+                              type="number"
+                              value={achievement.stipend || ''}
+                              onChange={(e) => handleEditChangeAchievement(category, index, 'stipend', e.target.value ? Number(e.target.value) : null)}
+                              className="w-full p-2 mb-2 bg-gray-700 rounded"
+                              placeholder="Stipend Amount (optional)"
+                            />
+                            <input
+                              type="number"
+                              value={achievement.year}
+                              onChange={(e) => handleEditChangeAchievement(category, index, 'year', Number(e.target.value))}
+                              className="w-full p-2 bg-gray-700 rounded"
+                              placeholder="Year"
+                            />
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => handleEditAddAchievement(category)}
+                          className="bg-gray-600 text-white py-2 px-4 rounded"
+                        >
+                          Add More to {category}
+                        </button>
+                      </div>
+                    ))}
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const category = prompt("Enter category name (e.g., GSoC, Hackathon, CP):");
+                          if (category) {
+                            handleEditAddAchievement(category);
+                          }
+                        }}
+                        className="bg-blue-600 text-white py-2 px-4 rounded"
+                      >
+                        Add New Category
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 mt-4">
+                    <button
+                      type="submit"
+                      className="bg-blue-500 text-white py-2 px-4 rounded"
+                    >
+                      Update
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCloseModal}
+                      className="bg-red-500 text-white py-2 px-4 rounded"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+
+        {isDeleteModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
+            <div className="bg-black text-white p-8 rounded-lg w-full max-w-md">
+              <h2 className="text-2xl font-bold mb-6">Delete Achievement</h2>
+              <form
+                className="space-y-6"
+                onSubmit={handleDeleteSubmit}
+              >
+                <div className="mb-4">
+                  <label className="block mb-2">
+                    Enter email to confirm deletion:
+                  </label>
+                  <input
+                    type="email"
+                    value={deleteConfirmEmail}
+                    onChange={(e) => setDeleteConfirmEmail(e.target.value)}
+                    className="w-full p-3 bg-gray-800 rounded"
+                    placeholder="Enter email to delete"
+                  />
+                </div>
+                <div className="p-4 bg-red-900 bg-opacity-50 rounded-md mb-4">
+                  <p className="text-red-300">
+                    Warning: This action cannot be undone. This will permanently delete the achievement record.
+                  </p>
+                </div>
+                <div className="flex gap-4 mt-4">
+                  <button
+                    type="submit"
+                    className="bg-red-600 text-white py-2 px-4 rounded"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCloseModal}
+                    className="bg-gray-500 text-white py-2 px-4 rounded"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
