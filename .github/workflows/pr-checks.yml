@@ -1,14 +1,22 @@
 name: PR Checks
 
-on: [pull_request]
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   size-label:
     runs-on: ubuntu-latest
     steps:
-      - uses: pascalgn/size-label-action@v0.4.3
+      - name: Add size labels
+        uses: pascalgn/size-label-action@v0.5.5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           sizes: '{"XS": 0, "S": 10, "M": 50, "L": 200, "XL": 500}'
 
   check-merge-commits:
@@ -17,12 +25,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Fetch entire git history  
+          fetch-depth: 0
 
       - name: Check for merge commits
         run: |
-          git fetch origin ${{ github.base_ref }}
-          if git log origin/${{ github.base_ref }}..HEAD --merges | grep -q 'Merge'; then
+          git fetch --unshallow || true
+          if git log --merges | grep -q 'Merge'; then
             echo "❌ Merge commit found!"
             exit 1
           else
