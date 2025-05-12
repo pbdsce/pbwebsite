@@ -308,7 +308,7 @@ export default function AchievementsPage() {
             className="flex flex-col items-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
+            transition={{ duration: 0.7, delay: 2, ease: [0.22, 1, 0.36, 1] }}
           >
             <div
               className="w-full overflow-x-auto whitespace-nowrap flex md:justify-center"
@@ -355,7 +355,7 @@ export default function AchievementsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.7, delay: 2, ease: [0.22, 1, 0.36, 1] }}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16"
               >
                 {achievers
