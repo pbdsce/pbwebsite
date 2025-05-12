@@ -296,7 +296,7 @@ export default function AchievementsPage() {
                     delay: 1.2,
                     ease: [0.16, 1, 0.3, 1]
                   }}
-                  className="text-lg font-light md:text-xl text-gray-300 mt-8"
+                  className="text-lg font-light md:text-xl text-gray-400"
                 >
                   {subtitleText}
                 </motion.p>
