@@ -270,17 +270,18 @@ export default function AchievementsPage() {
           <div className="relative">
             <div className="flex flex-col items-center text-center text-4xl md:text-5xl font-extrabold mb-4 text-white tracking-tight min-h-[2.5em]">
               <div className="flex flex-col items-center">
-                <div className="flex flex-wrap justify-center gap-2">
+                <div className="flex flex-wrap justify-center gap-2 max-w-[90vw] md:max-w-none">
                   {headingText.split(". ").map((phrase, idx) => (
                     <motion.span
                       key={idx}
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      initial={{ opacity: 0, y: 6, filter: "blur(8px)" }}
+                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                       transition={{ 
-                        duration: 0.8,
-                        delay: idx * 0.3,
+                        duration: 1,
+                        delay: idx * 0.4,
                         ease: [0.22, 1, 0.36, 1]
                       }}
+                      className="whitespace-normal"
                     >
                       {phrase}
                       {idx < headingText.split(". ").length - 1 ? "." : ""}
@@ -291,9 +292,9 @@ export default function AchievementsPage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ 
-                    duration: 0.5,
+                    duration: 1,
                     delay: 1.2,
-                    ease: [0.22, 1, 0.36, 1]
+                    ease: [0.16, 1, 0.3, 1]
                   }}
                   className="text-lg font-light md:text-xl text-gray-300 mt-8"
                 >
