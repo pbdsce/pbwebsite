@@ -6,7 +6,7 @@ import { auth } from "@/Firebase";
 import { useStore } from "@/lib/zustand/store";
 import toast from "react-hot-toast";
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, stagger } from "framer-motion";
 import LoadingBrackets from "@/components/ui/loading-brackets";
 
 interface Achievement {
@@ -33,7 +33,7 @@ interface Achiever {
 }
 
 const headingText = "We Build. We Ship. We Win.";
-const TYPING_SPEED = 90; // ms per character
+const subtitleText = "A showcase of achievements by the talented members of PointBlank";
 
 export default function AchievementsPage() {
   const [achievers, setAchievers] = useState<Achiever[]>([]);
@@ -47,14 +47,6 @@ export default function AchievementsPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [typedLength, setTypedLength] = useState(0);
-
-  useEffect(() => {
-    if (typedLength < headingText.length) {
-      const timeout = setTimeout(() => setTypedLength(typedLength + 1), TYPING_SPEED);
-      return () => clearTimeout(timeout);
-    }
-  }, [typedLength]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user: any) => {
@@ -276,27 +268,39 @@ export default function AchievementsPage() {
       ) : (
         <div className="container w-full mx-auto pt-32 min-h-screen bg-black">
           <div className="relative">
-            <div className="flex justify-center items-center text-center text-4xl md:text-5xl font-extrabold mb-4 text-white tracking-tight min-h-[2.5em]">
-              <span>
-                {headingText.slice(0, typedLength)}
-                {typedLength < headingText.length && (
-                  <span
-                    className="inline-block w-[2px] h-[1em] align-middle bg-white ml-1 animate-blink"
-                    style={{ animation: "blinker 1s steps(2, start) infinite" }}
-                  />
-                )}
-              </span>
+            <div className="flex flex-col items-center text-center text-4xl md:text-5xl font-extrabold mb-4 text-white tracking-tight min-h-[2.5em]">
+              <div className="flex flex-col items-center">
+                <div className="flex flex-wrap justify-center gap-2">
+                  {headingText.split(". ").map((phrase, idx) => (
+                    <motion.span
+                      key={idx}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ 
+                        duration: 0.8,
+                        delay: idx * 0.3,
+                        ease: [0.22, 1, 0.36, 1]
+                      }}
+                    >
+                      {phrase}
+                      {idx < headingText.split(". ").length - 1 ? "." : ""}
+                    </motion.span>
+                  ))}
+                </div>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ 
+                    duration: 0.5,
+                    delay: 1.2,
+                    ease: [0.22, 1, 0.36, 1]
+                  }}
+                  className="text-lg font-light md:text-xl text-gray-300 mt-8"
+                >
+                  {subtitleText}
+                </motion.p>
+              </div>
             </div>
-            {typedLength === headingText.length && (
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="text-center text-lg md:text-xl text-gray-300 mb-8"
-              >
-                A showcase of achievements by the talented members of PointBlank
-              </motion.p>
-            )}
           </div>
 
           <motion.div 
@@ -371,9 +375,9 @@ export default function AchievementsPage() {
                     >
                       <div className="relative group rounded-2xl w-full transition-all duration-300 hover:scale-105">
                         <div
-                          className="pointer-events-none absolute inset-0 z-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          className="pointer-events-none absolute inset-0 z-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                           style={{
-                            transform: "scaleY(1.04) scaleX(1.02)",
+                            transform: "scaleX(1.02) scaleY(1.04)",
                             background: "linear-gradient(-45deg, #00ff88 0%, #00e676 50%, #005533 100%)"
                           }}
                         ></div>                      
