@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import TestAchievements from "@/models/TestAchievements";
 import connectMongoDB from "@/lib/dbConnect";
+import { Readable } from "stream";
+import { cloudinary } from "@/Cloudinary";
 
 // POST method: Create or add a new achievement
 export async function POST(request: Request) {
@@ -30,6 +32,7 @@ export async function POST(request: Request) {
     const batch = formData.get("batch") as string;
     const portfolio = formData.get("portfolio") as string;
     const achievements = JSON.parse(formData.get("achievements") as string);
+    const image = formData.get("image") as File;
 
     const existingMember = await TestAchievements.findOne({ email });
     if (existingMember) {
@@ -42,6 +45,38 @@ export async function POST(request: Request) {
       );
     }
 
+    let imageUrl = null;
+    if (image) {
+      try {
+        const arrayBuffer = await image.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const stream = Readable.from(buffer);
+        
+        const uploadResult = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "achievements", public_id: email },
+            (error, result) => {
+              if (error || !result) {
+                reject(error || new Error('Upload to Cloudinary failed'));
+              } else {
+                resolve(result);
+              }
+            }
+          );
+          stream.pipe(uploadStream);
+        });
+        imageUrl = (uploadResult as any).secure_url;
+      } catch (uploadError) {
+        return NextResponse.json(
+          { 
+            error: 'Image Upload Failed', 
+            details: (uploadError as Error).message 
+          },
+          { status: 500 }
+        );
+      }
+    }
+
     try {
       const newAchievement = new TestAchievements({
         name,
@@ -49,6 +84,7 @@ export async function POST(request: Request) {
         batch,
         portfolio,
         achievements,
+        imageUrl,
       });
 
       const result = await newAchievement.save();
@@ -128,6 +164,7 @@ export async function GET(request: NextRequest) {
       batch: member.batch || null,
       portfolio: member.portfolio || null,
       achievements: member.achievements || {},
+      imageUrl: member.imageUrl || null,
     }));
 
     return NextResponse.json(
