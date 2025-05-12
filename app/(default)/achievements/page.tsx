@@ -268,7 +268,7 @@ export default function AchievementsPage() {
       ) : (
         <div className="container w-full mx-auto pt-32 min-h-screen bg-black">
           <div className="relative">
-            <div className="flex flex-col items-center text-center text-4xl md:text-5xl font-extrabold mb-4 text-white tracking-tight min-h-[2.5em]">
+            <div className="flex flex-col items-center text-center text-3xl md:text-5xl font-extrabold mb-4 text-white tracking-tight min-h-[2.5em]">
               <div className="flex flex-col items-center">
                 <div className="flex flex-wrap justify-center gap-2 max-w-[90vw] md:max-w-none">
                   {headingText.split(". ").map((phrase, idx) => (
