@@ -1,0 +1,53 @@
+# Please see https://github.com/actions/labeler for reference
+GitHub Actions:
+  - changed-files:
+    - any-glob-to-any-file: '.github/**/*'
+
+Documentation:
+  - changed-files:
+    - any-glob-to-any-file: '*.md'
+
+CI/CD:
+  - changed-files:
+    - any-glob-to-any-file: '.github/workflows/*'
+    - any-glob-to-any-file: '.infisical.json'
+    - any-glob-to-any-file: 'next.config.mjs'
+
+Frontend:
+  - changed-files:
+    - any-glob-to-any-file: 'components/**/*'
+    - any-glob-to-any-file: 'app/**/*.tsx'
+    - any-glob-to-any-file: 'app/**/*.ts'
+    - any-glob-to-any-file: 'public/**/*'
+
+API:
+  - changed-files:
+    - any-glob-to-any-file: 'app/**/api/**/*'
+    - any-glob-to-any-file: 'lib/swagger.ts'
+
+Styling:
+  - changed-files:
+    - any-glob-to-any-file: '**/*.css'
+    - any-glob-to-any-file: 'tailwind.config.*'
+    - any-glob-to-any-file: 'postcss.config.*'
+
+Dependencies:
+  - changed-files:
+    - any-glob-to-any-file: 'package.json'
+    - any-glob-to-any-file: 'package-lock.json'
+
+Config:
+  - changed-files:
+    - any-glob-to-any-file: '*.config.*'
+    - any-glob-to-any-file: '.eslintrc.*'
+    - any-glob-to-any-file: 'tsconfig.json'
+    - any-glob-to-any-file: '.gitignore'
+
+Models:
+  - changed-files:
+    - any-glob-to-any-file: 'models/**/*'
+
+Utils:
+  - changed-files:
+    - any-glob-to-any-file: 'utils/**/*'
+    - any-glob-to-any-file: 'lib/**/*'
