@@ -55,6 +55,7 @@ jobs:
               label.name.startsWith('size-')
             );
 
+            // Remove existing size labels
             for (const label of sizeLabels) {
               await github.rest.issues.removeLabel({
                 owner: context.repo.owner,
@@ -64,19 +65,21 @@ jobs:
               });
             }
 
+            // Create the size label if it doesn't exist
             try {
               await github.rest.issues.createLabel({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 name: `size-${size}`,
-                color: '0e8a16',
+                color: '0e8a16',  # You can customize this color if needed
                 description: `Size label for PR with ${changeCount} lines changed`
               });
             } catch (error) {
-              if (error.status !== 422) throw error;
+              if (error.status !== 422) throw error; // Only skip if label already exists
               console.log('Label already exists, skipping creation');
             }
 
+            // Add the size label to the PR
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
               repo: context.repo.repo,
