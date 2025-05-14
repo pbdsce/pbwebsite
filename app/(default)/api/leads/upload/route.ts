@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Readable } from "stream";
 import { cloudinary } from "@/Cloudinary";
 import { UploadApiResponse } from "cloudinary";
-
+export const dynamic = 'force-dynamic'; 
 /**
  * Handles file uploads and uploads the file to Cloudinary.
  *
