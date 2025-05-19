@@ -9,6 +9,8 @@ import Logo from "./logo";
 import MobileMenu from "./mobile-menu";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
 export default function Header() {
   const [top, setTop] = useState(true);
@@ -62,6 +64,14 @@ export default function Header() {
           </div>
           <nav className="hidden md:flex md:grow">
             <ul className="flex grow justify-end flex-wrap items-center">
+            <li>
+                <Link href="https://github.com/pbdsce" target="_blank" rel="noopener noreferrer">
+                  <p className="font-medium text-gray-300 hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out">
+                  <FontAwesomeIcon icon={faGithub} className="mr-2" size="lg" />
+                    GitHub
+                  </p>
+                </Link>
+              </li>
               <li>
                 <Link href="/events">
                   <p
