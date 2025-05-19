@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/Firebase';
 import { useStore } from "@/lib/zustand/store";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGithub } from '@fortawesome/free-brands-svg-icons'; 
 
 
 export default function MobileMenu() {
@@ -110,6 +112,17 @@ export default function MobileMenu() {
           leaveTo="opacity-0"
         >
           <ul className="px-5 py-2">
+            <li>
+              <Link 
+                href="https://github.com/pbdsce" 
+                className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center items-center" onClick={() => setMobileNavOpen(false)}
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <FontAwesomeIcon icon={faGithub} className="mr-2" size="lg" />
+                GitHub
+              </Link>
+            </li>
             <li>
               <Link href="/events" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Events</Link>
             </li>
