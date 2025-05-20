@@ -1,0 +1,118 @@
+.embla {
+  --slide-spacing: 1rem;
+  --slide-size: 100%;
+  --slide-height: 19rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.embla__viewport {
+  overflow: hidden;
+}
+
+.embla__container {
+  backface-visibility: hidden;
+  display: flex;
+  touch-action: pan-y;
+  margin-left: calc(var(--slide-spacing) * -1);
+}
+
+.embla__slide {
+  flex: 0 0 var(--slide-size);
+  min-width: 0;
+  padding-left: var(--slide-spacing);
+  position: relative;
+}
+
+.embla__slide__img {
+  display: block;
+  height: var(--slide-height);
+  width: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.embla__button {
+  touch-action: manirgba(10, 57, 29, 0.444)n;
+  display: inline-flex;
+  text-decoration: none;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  margin: 1rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  width: 3rem;
+  height: 3rem;
+  z-index: 1;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.embla__viewport:hover .embla__button {
+  opacity: 0.9;
+}
+
+.embla__button:hover {
+  opacity: 1;
+}
+
+.embla__button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.embla__button__svg {
+  width: 65%;
+  height: 65%;
+}
+.embla__dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.embla__dot {
+  background-color: transparent;
+  touch-action: manipulation;
+  display: inline-flex;
+  text-decoration: none;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.embla__viewport:hover .embla__dot {
+  opacity: 0.9;
+}
+
+.embla__dot:hover {
+  opacity: 1;
+}
+
+.embla__dot:after {
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 0.2rem;
+  width: 100%;
+  height: 0.3rem;
+  content: '';
+}
+
+.embla__dot--selected:after {
+  background-color: #00c853;
+}
