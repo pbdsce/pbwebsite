@@ -46,7 +46,7 @@ const Heading = () => {
         >
           Every line of code tells a story, but our greatest tales are written
           in the adventures we share. Here are the chronicles of our coding
-          club's journeys, where friendship and innovation intertwine.
+          club&apos;s journeys, where friendship and innovation intertwine.
         </motion.p>
       </motion.div>
     </div>
