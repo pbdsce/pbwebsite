@@ -47,6 +47,8 @@ export default function AchievementsPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isInitialRender, setIsInitialRender] = useState(true);
+  const [showAchievementsGrid, setShowAchievementsGrid] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user: any) => {
@@ -78,7 +80,15 @@ export default function AchievementsPage() {
     if (categories.length > 0 && (!selectedCategory || !categories.includes(selectedCategory))) {
       setSelectedCategory('All');
     }
+    if (isInitialRender) {
+      setIsInitialRender(false);
+    }
   }, [achievers]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowAchievementsGrid(true), 2500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleAddAchievement = (category: string) => {
     setNewAchievement(prev => ({
@@ -293,7 +303,7 @@ export default function AchievementsPage() {
                   animate={{ opacity: 1 }}
                   transition={{ 
                     duration: 1,
-                    delay: 1.2,
+                    delay: 1.5,
                     ease: [0.16, 1, 0.3, 1]
                   }}
                   className="text-lg font-light md:text-xl text-gray-400"
@@ -308,7 +318,7 @@ export default function AchievementsPage() {
             className="flex flex-col items-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 2, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.7, delay: 2.5, ease: [0.22, 1, 0.36, 1] }}
           >
             <div
               className="w-full overflow-x-auto whitespace-nowrap flex md:justify-center"
@@ -349,13 +359,13 @@ export default function AchievementsPage() {
           </motion.div>
 
           <AnimatePresence mode="wait">
-            {selectedCategory && (
+            {selectedCategory && showAchievementsGrid && (
               <motion.div 
                 key={selectedCategory}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.7, delay: 2, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16"
               >
                 {achievers
