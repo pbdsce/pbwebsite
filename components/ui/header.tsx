@@ -99,6 +99,19 @@ export default function Header() {
                 </Link>
               </li>
               <li>
+                <Link href="/lore">
+                  <p
+                    className={`font-medium ${
+                      pathname === "/lore"
+                        ? "font-extrabold text-white"
+                        : "text-gray-300"
+                    } hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}
+                  >
+                    Lore
+                  </p>
+                </Link>
+              </li>
+              <li>
                 <Link href="/members">
                   <p
                     className={`font-medium ${

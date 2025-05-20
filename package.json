@@ -20,6 +20,8 @@
     "axios": "^1.7.7",
     "cloudinary": "^2.5.1",
     "clsx": "^2.1.1",
+    "embla-carousel": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
     "firebase": "^11.6.0",
     "framer-motion": "^11.11.10",
     "lodash": "^4.17.21",
