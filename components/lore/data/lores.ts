@@ -24,5 +24,28 @@ export const Lores: Lore[] = [
       'https://res.cloudinary.com/pbsite/image/upload/v1745004384/IMG_1351_oop1r6.webp',
       'https://res.cloudinary.com/pbsite/image/upload/v1745004385/IMG_20250411_190650938_HDR_kvyrwq.webp',
     ]
+  },
+  {
+    id: 'trek',
+    title: 'trek',
+    date: 'February 2024',
+    location: 'Coorg, Karnataka',
+    preview: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+    story: [
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+      'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source.',
+      'Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.'
+    ],
+    images: [
+      'https://res.cloudinary.com/pbsite/image/upload/v1746900659/IMG_3116_loovxj.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1746900659/IMG_2877_eaohrn.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1746900659/IMG_3141_rzhvu0.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1746900659/IMG_3068_twjnrg.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1746900659/IMG_2892_l9pfiv.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1746900659/IMG_2870_eervqd.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1746900660/IMG_6452_q5ouxx.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1746900660/IMG_3148_zz7m59.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1746900660/IMG_6438_lb7xud.webp',
+    ]    
   }
 ];
