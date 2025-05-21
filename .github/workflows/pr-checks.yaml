@@ -26,8 +26,8 @@ jobs:
         id: changed-lines
         run: |
           git checkout ${{ github.event.pull_request.head.ref }}
-          ADDED=$(git diff --shortstat origin/${{ github.event.pull_request.base.ref }}..HEAD | grep -o '[0-9]\+ insertions' | grep -o '[0-9]\+' || echo 0)
-          DELETED=$(git diff --shortstat origin/${{ github.event.pull_request.base.ref }}..HEAD | grep -o '[0-9]\+ deletions' | grep -o '[0-9]\+' || echo 0)
+          ADDED=$(git diff --shortstat origin/${{ github.event.pull_request.base.ref }}..HEAD | grep -o '[0-9]\+ insertions' | grep -o '[0-9]\+' || true)
+          DELETED=$(git diff --shortstat origin/${{ github.event.pull_request.base.ref }}..HEAD | grep -o '[0-9]\+ deletions' | grep -o '[0-9]\+' || true)
           ADDED=${ADDED:-0}
           DELETED=${DELETED:-0}
           TOTAL_LINES=$((ADDED + DELETED))
