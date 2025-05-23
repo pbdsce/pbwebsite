@@ -6,31 +6,32 @@ import { auth } from "@/Firebase";
 import { useStore } from "@/lib/zustand/store";
 import toast from "react-hot-toast";
 import React from "react";
-import { motion, AnimatePresence, stagger } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import LoadingBrackets from "@/components/ui/loading-brackets";
 
 interface Achievement {
   title: string;
   description: string;
-  stipend: number | null;
-  year: number;
 }
 
 interface Achiever {
   id?: string;
   imageUrl?: string;
   image?: File;
-  email: string;
   name: string;
-  batch: string;
-  portfolio: string;
   achievements: {
     GSoC?: Achievement[];
-    Hackathon?: Achievement[];
+    LFX?: Achievement[];
+    SIH?: Achievement[];
+    LIFT?: Achievement[];
+    Hackathons?: Achievement[];
     CP?: Achievement[];
     [key: string]: Achievement[] | undefined;
   };
 }
+
+const VALID_CATEGORIES = ['GSoC', 'LFX', 'SIH', 'LIFT', 'Hackathons', 'CP'] as const;
+type ValidCategory = typeof VALID_CATEGORIES[number];
 
 const headingText = "We Build. We Ship. We Win.";
 const subtitleText = "A showcase of achievements by the talented members of PointBlank";
@@ -42,26 +43,35 @@ export default function AchievementsPage() {
   const [newAchievement, setNewAchievement] = useState<Partial<Achiever>>({ achievements: {} });
   const { isLoggedIn, setLoggedIn } = useStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editEmail, setEditEmail] = useState("");
+  const [editName, setEditName] = useState("");
   const [editAchievements, setEditAchievements] = useState<Partial<Achiever>>({ achievements: {} });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
+  const [deleteConfirmName, setDeleteConfirmName] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isInitialRender, setIsInitialRender] = useState(true);
   const [showAchievementsGrid, setShowAchievementsGrid] = useState(false);
 
+  //Strict auth state change handler
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user: any) => {
-      setLoggedIn(!!user);
+      try {
+        setLoggedIn(!!user);
+      } catch (error) {
+        console.error("Auth state change error:", error);
+        toast.error("Authentication error occurred");
+      }
     });
     return () => unsubscribe();
   }, [setLoggedIn]);
 
+  // Strict achievements fetching with comprehensive error handling
   useEffect(() => {
     async function fetchAchievers() {
       try {
         setIsLoading(true);
-        const response = await fetch("/api/test-achievements");
+        const response = await fetch("/api/achievements-category");
+
+        // Validate response
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setAchievers(data.data);
@@ -76,7 +86,8 @@ export default function AchievementsPage() {
   }, []);
 
   useEffect(() => {
-    const categories = Object.keys(achievers[0]?.achievements || {});
+    const categories = Object.keys(achievers[0]?.achievements || {})
+      .filter(category => VALID_CATEGORIES.includes(category as ValidCategory));
     if (categories.length > 0 && (!selectedCategory || !categories.includes(selectedCategory))) {
       setSelectedCategory('All');
     }
@@ -84,6 +95,14 @@ export default function AchievementsPage() {
       setIsInitialRender(false);
     }
   }, [achievers]);
+
+  // Function to check if a category has any achievements
+  const hasCategoryAchievements = (category: string) => {
+    return achievers.some(achiever => {
+      const categoryAchievements = achiever.achievements?.[category];
+      return categoryAchievements && categoryAchievements.length > 0;
+    });
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => setShowAchievementsGrid(true), 2500);
@@ -97,13 +116,13 @@ export default function AchievementsPage() {
         ...prev.achievements,
         [category]: [
           ...(prev.achievements?.[category] || []),
-          { title: "", description: "", stipend: null, year: new Date().getFullYear() }
+          { title: "", description: "" }
         ]
       }
     }));
   };
 
-  const handleChangeAchievement = (category: string, index: number, field: keyof Achievement, value: string | number | null) => {
+  const handleChangeAchievement = (category: string, index: number, field: keyof Achievement, value: string) => {
     setNewAchievement(prev => {
       const categoryAchievements = [...(prev.achievements?.[category] || [])];
       if (categoryAchievements[index]) {
@@ -129,13 +148,13 @@ export default function AchievementsPage() {
         ...prev.achievements,
         [category]: [
           ...(prev.achievements?.[category] || []),
-          { title: "", description: "", stipend: null, year: new Date().getFullYear() }
+          { title: "", description: "" }
         ]
       }
     }));
   };
 
-  const handleEditChangeAchievement = (category: string, index: number, field: keyof Achievement, value: string | number | null) => {
+  const handleEditChangeAchievement = (category: string, index: number, field: keyof Achievement, value: string) => {
     setEditAchievements(prev => {
       const categoryAchievements = [...(prev.achievements?.[category] || [])];
       if (categoryAchievements[index]) {
@@ -158,14 +177,14 @@ export default function AchievementsPage() {
     setIsModalOpen(false);
     setIsEditModalOpen(false);
     setIsDeleteModalOpen(false);
-    setEditEmail("");
-    setDeleteConfirmEmail("");
+    setEditName("");
+    setDeleteConfirmName("");
     setEditAchievements({ achievements: {} });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const requiredFields = ['email', 'name', 'batch'];
+    const requiredFields = ['name'];
     const missingFields = requiredFields.filter(field => !newAchievement[field as keyof Achiever]);
     if (missingFields.length > 0) {
       toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
@@ -178,12 +197,9 @@ export default function AchievementsPage() {
     try {
       const formData = new FormData();
       formData.append("image", newAchievement.image || "");
-      formData.append("email", newAchievement.email || "");
       formData.append("name", newAchievement.name || "");
-      formData.append("batch", newAchievement.batch || "");
-      formData.append("portfolio", newAchievement.portfolio || "");
       formData.append("achievements", JSON.stringify(newAchievement.achievements));
-      const response = await axios.post("/api/test-achievements", formData);
+      const response = await axios.post("/api/achievements-category", formData);
       if (response.data && response.data.data) {
         setAchievers(prev => [...prev, response.data.data]);
         setIsModalOpen(false);
@@ -198,12 +214,12 @@ export default function AchievementsPage() {
 
   const handleFetch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editEmail || editEmail.trim() === "") {
-      toast.error("Please enter an email");
+    if (!editName || editName.trim() === "") {
+      toast.error("Please enter a name");
       return;
     }
     try {
-      const response = await axios.get(`/api/test-achievements?email=${encodeURIComponent(editEmail)}`);
+      const response = await axios.get(`/api/achievements-category?name=${encodeURIComponent(editName)}`);
       if (!response.data.data || response.data.data.length === 0) {
         toast.error("No user found");
         return;
@@ -223,15 +239,12 @@ export default function AchievementsPage() {
     }
     try {
       const formData = new FormData();
-      formData.append("email", editEmail);
+      formData.append("name", editName);
       formData.append("achievements", JSON.stringify(editAchievements.achievements));
       if (editAchievements.image instanceof File) formData.append("image", editAchievements.image);
-      if (editAchievements.name) formData.append("name", editAchievements.name);
-      if (editAchievements.batch) formData.append("batch", editAchievements.batch);
-      if (editAchievements.portfolio) formData.append("portfolio", editAchievements.portfolio);
-      const response = await axios.put("/api/test-achievements", formData);
+      const response = await axios.put("/api/achievements-category", formData);
       if (response.data && response.data.data) {
-        setAchievers(prev => prev.map(achiever => achiever.email === editEmail ? response.data.data : achiever));
+        setAchievers(prev => prev.map(achiever => achiever.name === editName ? response.data.data : achiever));
         setIsEditModalOpen(false);
         toast.success("Achievement updated successfully");
       } else {
@@ -244,16 +257,15 @@ export default function AchievementsPage() {
 
   const handleDeleteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!deleteConfirmEmail || deleteConfirmEmail.trim() === "") {
-      toast.error("Please enter an email to confirm deletion");
+    if (!deleteConfirmName || deleteConfirmName.trim() === "") {
+      toast.error("Please enter a name to confirm deletion");
       return;
     }
     try {
-      const response = await axios.delete(`/api/test-achievements?email=${encodeURIComponent(deleteConfirmEmail)}`);
-      if (response.data && response.data.message) {
-        setAchievers(prev => prev.filter(achiever => achiever.email !== deleteConfirmEmail));
+      const response = await axios.delete(`/api/achievements-category?name=${encodeURIComponent(deleteConfirmName)}`);
+      if (response.data) {
+        setAchievers(prev => prev.filter(achiever => achiever.name !== deleteConfirmName));
         setIsDeleteModalOpen(false);
-        setDeleteConfirmEmail("");
         toast.success("Achievement deleted successfully");
       } else {
         throw new Error("Invalid response from server");
@@ -337,7 +349,10 @@ export default function AchievementsPage() {
                 >
                   All
                 </motion.button>
-                {Object.keys(achievers[0]?.achievements || {}).map((category) => {
+                {VALID_CATEGORIES.map((category) => {
+                  // Only show category button if it has achievements
+                  if (!hasCategoryAchievements(category)) return null;
+                  
                   const isActive = selectedCategory === category;
                   return (
                     <motion.button
@@ -378,7 +393,7 @@ export default function AchievementsPage() {
                   })
                   .map((achiever, idx) => (
                     <motion.div
-                      key={achiever.email}
+                      key={achiever.name}
                       className="relative flex items-stretch group"
                       initial={{ opacity: 0, y: 40 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -402,7 +417,6 @@ export default function AchievementsPage() {
                               )}
                               <div className="flex flex-col justify-center">
                                 <h3 className="text-base font-bold text-green-400 leading-tight">{achiever.name}</h3>
-                                <p className="text-xs text-gray-400 leading-tight">{achiever.batch}</p>
                               </div>
                             </div>
                             <div className="flex flex-col gap-4 w-full mt-2">
@@ -504,23 +518,6 @@ export default function AchievementsPage() {
                   onSubmit={handleSubmit}
                 >
                   <div className="mb-4">
-                    <label className="block mb-2">Email:</label>
-                    <input
-                      type="email"
-                      name="email"
-                      id="email"
-                      value={newAchievement.email || ""}
-                      onChange={(e) =>
-                        setNewAchievement((prev) => ({
-                          ...prev,
-                          email: e.target.value,
-                        }))
-                      }
-                      className="w-full p-3 bg-gray-800 rounded"
-                      placeholder="Add Email"
-                    />
-                  </div>
-                  <div className="mb-4">
                     <label className="block mb-2">Name:</label>
                     <input
                       type="text"
@@ -535,40 +532,6 @@ export default function AchievementsPage() {
                       }
                       className="w-full p-3 bg-gray-800 rounded"
                       placeholder="Add Name"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block mb-2">Batch:</label>
-                    <input
-                      type="text"
-                      name="batch"
-                      id="batch"
-                      value={newAchievement.batch || ""}
-                      onChange={(e) =>
-                        setNewAchievement((prev) => ({
-                          ...prev,
-                          batch: e.target.value,
-                        }))
-                      }
-                      className="w-full p-3 bg-gray-800 rounded"
-                      placeholder="Add Year"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block mb-2">Portfolio:</label>
-                    <input
-                      type="text"
-                      name="portfolio"
-                      id="portfolio"
-                      value={newAchievement.portfolio || ""}
-                      onChange={(e) =>
-                        setNewAchievement((prev) => ({
-                          ...prev,
-                          portfolio: e.target.value,
-                        }))
-                      }
-                      className="w-full p-3 bg-gray-800 rounded"
-                      placeholder="Add GitHub Link"
                     />
                   </div>
                   <div className="mb-4">
@@ -612,20 +575,6 @@ export default function AchievementsPage() {
                               className="w-full p-2 mb-2 bg-gray-700 rounded"
                               placeholder="Achievement Description"
                             />
-                            <input
-                              type="number"
-                              value={achievement.stipend || ''}
-                              onChange={(e) => handleChangeAchievement(category, index, 'stipend', e.target.value ? Number(e.target.value) : null)}
-                              className="w-full p-2 mb-2 bg-gray-700 rounded"
-                              placeholder="Stipend Amount (optional)"
-                            />
-                            <input
-                              type="number"
-                              value={achievement.year}
-                              onChange={(e) => handleChangeAchievement(category, index, 'year', Number(e.target.value))}
-                              className="w-full p-2 bg-gray-700 rounded"
-                              placeholder="Year"
-                            />
                           </div>
                         ))}
                         <button
@@ -641,9 +590,11 @@ export default function AchievementsPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          const category = prompt("Enter category name (e.g., GSoC, Hackathon, CP):");
-                          if (category) {
+                          const category = prompt("Enter category name (GSoC, LFX, SIH, LIFT, Hackathons, CP):");
+                          if (category && VALID_CATEGORIES.includes(category as ValidCategory)) {
                             handleAddAchievement(category);
+                          } else if (category) {
+                            toast.error("Invalid category. Please use one of: " + VALID_CATEGORIES.join(", "));
                           }
                         }}
                         className="bg-blue-600 text-white py-2 px-4 rounded"
@@ -682,15 +633,15 @@ export default function AchievementsPage() {
                   onSubmit={handleFetch}
                 >
                   <div className="mb-4">
-                    <label className="block mb-2">Email:</label>
+                    <label className="block mb-2">Name:</label>
                     <input
-                      type="email"
-                      name="email"
-                      id="email"
-                      value={editEmail}
-                      onChange={(e) => setEditEmail(e.target.value)}
+                      type="text"
+                      name="name"
+                      id="name"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
                       className="w-full p-3 bg-gray-800 rounded"
-                      placeholder="Enter Email"
+                      placeholder="Enter Name"
                     />
                   </div>
                   <div className="flex gap-4 mt-4">
@@ -735,20 +686,6 @@ export default function AchievementsPage() {
                                 className="w-full p-2 mb-2 bg-gray-700 rounded"
                                 placeholder="Achievement Description"
                               />
-                              <input
-                                type="number"
-                                value={achievement.stipend || ''}
-                                onChange={(e) => handleEditChangeAchievement(category, index, 'stipend', e.target.value ? Number(e.target.value) : null)}
-                                className="w-full p-2 mb-2 bg-gray-700 rounded"
-                                placeholder="Stipend Amount (optional)"
-                              />
-                              <input
-                                type="number"
-                                value={achievement.year}
-                                onChange={(e) => handleEditChangeAchievement(category, index, 'year', Number(e.target.value))}
-                                className="w-full p-2 bg-gray-700 rounded"
-                                placeholder="Year"
-                              />
                             </div>
                           ))}
                           <button
@@ -764,9 +701,11 @@ export default function AchievementsPage() {
                         <button
                           type="button"
                           onClick={() => {
-                            const category = prompt("Enter category name (e.g., GSoC, Hackathon, CP):");
-                            if (category) {
+                            const category = prompt("Enter category name (GSoC, LFX, SIH, LIFT, Hackathons, CP):");
+                            if (category && VALID_CATEGORIES.includes(category as ValidCategory)) {
                               handleEditAddAchievement(category);
+                            } else if (category) {
+                              toast.error("Invalid category. Please use one of: " + VALID_CATEGORIES.join(", "));
                             }
                           }}
                           className="bg-blue-600 text-white py-2 px-4 rounded"
@@ -807,14 +746,14 @@ export default function AchievementsPage() {
                 >
                   <div className="mb-4">
                     <label className="block mb-2">
-                      Enter email to confirm deletion:
+                      Enter name to confirm deletion:
                     </label>
                     <input
-                      type="email"
-                      value={deleteConfirmEmail}
-                      onChange={(e) => setDeleteConfirmEmail(e.target.value)}
+                      type="text"
+                      value={deleteConfirmName}
+                      onChange={(e) => setDeleteConfirmName(e.target.value)}
                       className="w-full p-3 bg-gray-800 rounded"
-                      placeholder="Enter email to delete"
+                      placeholder="Enter name to delete"
                     />
                   </div>
                   <div className="p-4 bg-red-900 bg-opacity-50 rounded-md mb-4">

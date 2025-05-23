@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import TestAchievements from "@/models/TestAchievements";
+import AchievementsCategory from "@/models/AchievementsCategory";
 import connectMongoDB from "@/lib/dbConnect";
 import { Readable } from "stream";
 import { cloudinary } from "@/Cloudinary";
@@ -14,10 +14,12 @@ export async function POST(request: Request) {
       );
     }
 
+    // Validate form data
     await connectMongoDB();
     const formData = await request.formData();
 
-    const requiredFields = ['email', 'name', 'batch', 'achievements'];
+    // Comprehensive input validation
+    const requiredFields = ['name', 'achievements'];
     for (const field of requiredFields) {
       if (!formData.get(field)) {
         return NextResponse.json(
@@ -28,18 +30,15 @@ export async function POST(request: Request) {
     }
 
     const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
-    const batch = formData.get("batch") as string;
-    const portfolio = formData.get("portfolio") as string;
     const achievements = JSON.parse(formData.get("achievements") as string);
     const image = formData.get("image") as File;
 
-    const existingMember = await TestAchievements.findOne({ email });
+    const existingMember = await AchievementsCategory.findOne({ name });
     if (existingMember) {
       return NextResponse.json(
         { 
           error: 'Duplicate Entry', 
-          details: `A member with the email ${email} already exists.` 
+          details: `A member with the name ${name} already exists.` 
         },
         { status: 409 }
       );
@@ -54,7 +53,7 @@ export async function POST(request: Request) {
         
         const uploadResult = await new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: "achievements", public_id: email },
+            { folder: "achievements", public_id: name },
             (error, result) => {
               if (error || !result) {
                 reject(error || new Error('Upload to Cloudinary failed'));
@@ -78,11 +77,8 @@ export async function POST(request: Request) {
     }
 
     try {
-      const newAchievement = new TestAchievements({
+      const newAchievement = new AchievementsCategory({
         name,
-        email,
-        batch,
-        portfolio,
         achievements,
         imageUrl,
       });
@@ -116,7 +112,7 @@ export async function POST(request: Request) {
   }
 }
 
-// GET method: Fetch achievements based on email or fetch all if no email is provided
+// GET method: Fetch achievements based on name or fetch all if no name is provided
 export async function GET(request: NextRequest) {
   try {
     if (request.method !== 'GET') {
@@ -128,24 +124,24 @@ export async function GET(request: NextRequest) {
 
     await connectMongoDB();
     const { searchParams } = new URL(request.url);
-    const email = searchParams.get("email");
+    const name = searchParams.get("name");
 
     let querySnapshot;
     try {
-      if (email) {
-        querySnapshot = await TestAchievements.find({ email });
+      if (name) {
+        querySnapshot = await AchievementsCategory.find({ name });
         
         if (querySnapshot.length === 0) {
           return NextResponse.json(
             { 
               error: 'Not Found', 
-              details: `No member found with email: ${email}` 
+              details: `No member found with name: ${name}` 
             },
             { status: 404 }
           );
         }
       } else {
-        querySnapshot = await TestAchievements.find();
+        querySnapshot = await AchievementsCategory.find();
       }
     } catch (queryError) {
       return NextResponse.json(
@@ -160,9 +156,6 @@ export async function GET(request: NextRequest) {
     const members = querySnapshot.map((member: any) => ({
       id: member._id,
       name: member.name,
-      email: member.email || null,
-      batch: member.batch || null,
-      portfolio: member.portfolio || null,
       achievements: member.achievements || {},
       imageUrl: member.imageUrl || null,
     }));
@@ -186,7 +179,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// PUT method: Update an existing achievement based on email
+// PUT method: Update an existing achievement based on name
 export async function PUT(request: Request) {
   try {
     if (request.method !== 'PUT') {
@@ -198,24 +191,24 @@ export async function PUT(request: Request) {
 
     await connectMongoDB();
     const formData = await request.formData();
-    const email = formData.get("email") as string;
+    const name = formData.get("name") as string;
 
-    if (!email) {
+    if (!name) {
       return NextResponse.json(
         { 
           error: 'Validation Failed', 
-          details: 'Email is required for updating a member' 
+          details: 'Name is required for updating a member' 
         },
         { status: 400 }
       );
     }
 
-    const existingMember = await TestAchievements.findOne({ email });
+    const existingMember = await AchievementsCategory.findOne({ name });
     if (!existingMember) {
       return NextResponse.json(
         { 
           error: 'Not Found', 
-          details: `No member found with the email ${email}` 
+          details: `No member found with the name ${name}` 
         },
         { status: 404 }
       );
@@ -225,13 +218,41 @@ export async function PUT(request: Request) {
       achievements: JSON.parse(formData.get("achievements") as string),
     };
 
-    if (formData.get("name")) updateData.name = formData.get("name") as string;
-    if (formData.get("batch")) updateData.batch = formData.get("batch") as string;
-    if (formData.get("portfolio")) updateData.portfolio = formData.get("portfolio") as string;
+    const image = formData.get("image") as File;
+    if (image) {
+      try {
+        const arrayBuffer = await image.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const stream = Readable.from(buffer);
+        
+        const uploadResult = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "achievements", public_id: name },
+            (error, result) => {
+              if (error || !result) {
+                reject(error || new Error('Upload to Cloudinary failed'));
+              } else {
+                resolve(result);
+              }
+            }
+          );
+          stream.pipe(uploadStream);
+        });
+        updateData.imageUrl = (uploadResult as any).secure_url;
+      } catch (uploadError) {
+        return NextResponse.json(
+          { 
+            error: 'Image Upload Failed', 
+            details: (uploadError as Error).message 
+          },
+          { status: 500 }
+        );
+      }
+    }
 
     try {
-      const updatedMember = await TestAchievements.findOneAndUpdate(
-        { email },
+      const updatedMember = await AchievementsCategory.findOneAndUpdate(
+        { name },
         { $set: updateData },
         { new: true, runValidators: false }
       );
@@ -250,11 +271,11 @@ export async function PUT(request: Request) {
         },
         { status: 200 }
       );
-    } catch (saveError) {
+    } catch (updateError) {
       return NextResponse.json(
         { 
-          error: 'Database Update Failed', 
-          details: (saveError as Error).message 
+          error: 'Update Failed', 
+          details: (updateError as Error).message 
         },
         { status: 500 }
       );
@@ -271,7 +292,7 @@ export async function PUT(request: Request) {
   }
 }
 
-// DELETE method: Delete an achievement based on email
+// DELETE method: Remove a member's achievements based on name
 export async function DELETE(request: NextRequest) {
   try {
     if (request.method !== 'DELETE') {
@@ -283,42 +304,41 @@ export async function DELETE(request: NextRequest) {
 
     await connectMongoDB();
     const { searchParams } = new URL(request.url);
-    const email = searchParams.get("email");
+    const name = searchParams.get("name");
 
-    if (!email) {
+    if (!name) {
       return NextResponse.json(
         { 
           error: 'Validation Failed', 
-          details: 'Email is required for deletion' 
+          details: 'Name is required for deleting a member' 
         },
         { status: 400 }
       );
     }
 
-    const existingMember = await TestAchievements.findOne({ email });
+    const existingMember = await AchievementsCategory.findOne({ name });
     if (!existingMember) {
       return NextResponse.json(
         { 
           error: 'Not Found', 
-          details: `No member found with the email ${email}` 
+          details: `No member found with the name ${name}` 
         },
         { status: 404 }
       );
     }
 
     try {
-      await TestAchievements.deleteOne({ email });
+      await AchievementsCategory.deleteOne({ name });
       return NextResponse.json(
         { 
-          message: 'Member Deleted Successfully',
-          email 
+          message: 'Member Deleted Successfully' 
         },
         { status: 200 }
       );
     } catch (deleteError) {
       return NextResponse.json(
         { 
-          error: 'Database Delete Failed', 
+          error: 'Delete Failed', 
           details: (deleteError as Error).message 
         },
         { status: 500 }
