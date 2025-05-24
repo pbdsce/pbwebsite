@@ -60,11 +60,25 @@ jobs:
             try {
               if (comment?.includes("/assign")) {
                 try {
+                  let assignee = commenter; 
+                  
+                  const assigneeParam = parseCommand(comment, "/assign");
+                  if (assigneeParam && assigneeParam.startsWith("@")) {
+                    assignee = assigneeParam.substring(1).trim();
+                  }
+                  
                   await github.rest.issues.addAssignees({
                     owner: repoOwner,
                     repo: repoName,
                     issue_number: issueNumber,
-                    assignees: [commenter]
+                    assignees: [assignee]
+                  });
+                  
+                  await github.rest.issues.createComment({
+                    owner: repoOwner,
+                    repo: repoName,
+                    issue_number: issueNumber,
+                    body: `✅ Issue assigned to @${assignee}`
                   });
                 } catch (error) {
                   await github.rest.issues.createComment({
@@ -143,6 +157,7 @@ jobs:
               }
 
               if (comment?.includes("/needs-triage")) {
+              // commenting hello world to find out why action fail
                 try {
                   await handleLabel("needs-triage", "d73a4a", "This issue needs triage");
                 } catch (error) {
@@ -151,6 +166,35 @@ jobs:
                     repo: repoName,
                     issue_number: issueNumber,
                     body: `❌ Failed to add triage label: ${error.message} !`
+                  });
+                }
+              }
+              
+              if (comment?.includes("/cc")) {
+                try {
+                  const mentionedUsers = comment.split("/cc")[1]
+                    ?.trim()
+                    .split(/[\s,]+/)
+                    .filter(user => user.startsWith('@'))
+                    .map(user => user.substring(1).trim());
+                  
+                  if (!mentionedUsers || mentionedUsers.length === 0) {
+                    throw new Error("No valid users mentioned to CC");
+                  }
+                  
+                  const mentionText = mentionedUsers.map(user => `@${user}`).join(', ');
+                  await github.rest.issues.createComment({
+                    owner: repoOwner,
+                    repo: repoName,
+                    issue_number: issueNumber,
+                    body: `👋 ${mentionText} - you've been mentioned in this issue by @${commenter}`
+                  });
+                } catch (error) {
+                  await github.rest.issues.createComment({
+                    owner: repoOwner,
+                    repo: repoName,
+                    issue_number: issueNumber,
+                    body: `❌ Failed to mention users: ${error.message} !`
                   });
                 }
               }

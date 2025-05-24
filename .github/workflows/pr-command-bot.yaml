@@ -101,13 +101,19 @@ jobs:
               }
             }
 
+            function parseCommand(comment, cmd) {
+              if (!comment?.includes(cmd)) return null;
+              const cmdIndex = comment.indexOf(cmd);
+              return comment.substring(cmdIndex + cmd.length).trim() || null;
+            }
+
             async function requestReviews(reviewers) {
               const validReviewers = reviewers
                 .map(r => r.replace(/^@/, '').trim())
-                .filter(r => r);
+                .filter(r => r && r !== prAuthor);  // Filter out empty reviewers and PR author
 
               if (validReviewers.length === 0) {
-                throw new Error('No valid reviewers specified');
+                throw new Error('No valid reviewers specified or only author was specified');
               }
 
               await github.rest.pulls.requestReviewers({
@@ -126,7 +132,15 @@ jobs:
               if (comment?.includes("/cc") && action === "created") {
                 try {
                   const reviewers = comment.substring(3).trim().split(/[\s,]+/);
-                  await requestReviews(reviewers);
+                  const requestedReviewers = await requestReviews(reviewers);
+                  
+                  // Display success message with the list of requested reviewers
+                  await github.rest.issues.createComment({
+                    owner: repoOwner,
+                    repo: repoName,
+                    issue_number: prNumber,
+                    body: `✅ Review requested from: ${requestedReviewers.map(r => `@${r}`).join(', ')}`
+                  });
                 } catch (error) {
                   await github.rest.issues.createComment({
                     owner: repoOwner,
@@ -154,12 +168,35 @@ jobs:
               }
 
               if (comment?.includes("/assign") && isPR && action === "created") {
-                await github.rest.pulls.requestReviewers({
-                  owner: repoOwner,
-                  repo: repoName,
-                  pull_number: prNumber,
-                  reviewers: [commenter]
-                });
+                try {
+                  let assignee = commenter; 
+                  
+                  const assigneeParam = parseCommand(comment, "/assign");
+                  if (assigneeParam && assigneeParam.startsWith("@")) {
+                    assignee = assigneeParam.substring(1).trim();
+                  }
+                  
+                  await github.rest.pulls.requestReviewers({
+                    owner: repoOwner,
+                    repo: repoName,
+                    pull_number: prNumber,
+                    reviewers: [assignee]
+                  });
+                  
+                  await github.rest.issues.createComment({
+                    owner: repoOwner,
+                    repo: repoName,
+                    issue_number: prNumber,
+                    body: `✅ Review requested from @${assignee}`
+                  });
+                } catch (error) {
+                  await github.rest.issues.createComment({
+                    owner: repoOwner,
+                    repo: repoName,
+                    issue_number: prNumber,
+                    body: `❌ Failed to request reviewer: ${error.message} !`
+                  });
+                }
               }
 
               if (comment?.includes("/close") && action === "created") {
@@ -184,6 +221,32 @@ jobs:
                 const labelName = comment.split("/label")[1]?.trim();
                 if (labelName) {
                   await handleLabel(labelName, "0e8a16");
+                }
+              }
+
+              if (comment?.includes("/needs-triage") && action === "created") {
+                try {
+                  await handleLabel("needs-triage", "d73a4a", "This pull request needs triage");
+                } catch (error) {
+                  await github.rest.issues.createComment({
+                    owner: repoOwner,
+                    repo: repoName,
+                    issue_number: prNumber,
+                    body: `❌ Failed to add triage label: ${error.message} !`
+                  });
+                }
+              }
+              
+              if (comment?.includes("/help") && action === "created") {
+                try {
+                  await handleLabel("help wanted", "008672", "Extra attention is needed");
+                } catch (error) {
+                  await github.rest.issues.createComment({
+                    owner: repoOwner,
+                    repo: repoName,
+                    issue_number: prNumber,
+                    body: `❌ Failed to add help label: ${error.message} !`
+                  });
                 }
               }
 
