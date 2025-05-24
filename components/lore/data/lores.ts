@@ -3,14 +3,38 @@ import { Lore } from '@/components/lore/types/lore';
 export const Lores: Lore[] = [
   {
     id: 'coorg',
-    title: 'Trip to Coorg',
-    date: 'February 2024',
+    title: 'Escape to Coorg',
+    date: 'April 2025',
     location: 'Coorg, Karnataka',
-    preview: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
-    story: [
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-      'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source.',
-      'Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.'
+    preview: 'What did Point Blank do after submitting their GSoC proposals?',
+    story: [ "I mean logically speaking, after grinding for 6 months straight, the only logical escape was in the middle of the mountains. What PB did was simple, Click on the submit button, book a bus and run straight to the middle of nowhere."
+            ,"The Coorg lore consists of the campfire at 1am, The 10km long trek to the middle of the clouds, the nights we spent dancing in the bus, the thousands of inside jokes and the relief that now the results are no longer in our hands.",
+            "That year, PB produced 8 Mentees and 3 Mentors in GSOC, the highest in PB History. As one of the leads of the time Sky Said 'May the lore finally find its peace here', hinting to the fact that when he submitted his propopsal in 2024, the first thing he also did was run straight to Coorg."
+            ,"Point Blank is pretty sure the people at the coffee plantation and the leeches on the Tadiandamol Trek will remember us, that Coorg will remain a piece of PB lore for years to come."
+    ],
+    images: [
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004377/IMG_0123_awx0jq.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004378/IMG_0282_ixp2jr.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004379/IMG_0945_ck9k3b.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004379/IMG_0946_vco3wg.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004380/IMG_0961_uq9t1u.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004382/IMG_1230_hgikcu.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004383/IMG_8480_fwrmxg.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004383/IMG_1173_yrzp1f.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004384/IMG_1351_oop1r6.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004385/IMG_20250411_190650938_HDR_kvyrwq.webp',
+    ]
+  },
+  {
+    id: 'ntik',
+    title: 'Victory at NTIK',
+    date: 'January 2025',
+    location: 'Surathkal, Karnataka',
+    preview: 'How Point Blank claimed their position at the biggest NIT in India',
+    story: [ "Now the NITK Hackverse Hackathon is a big deal for Point Blank. Not only is it the biggest hackathon of the top NIT in India, the lore goes that our seniors had previously gone to this hackathon during their college days but were defeated. Hence, this battle was personal.",
+      "Point Blank not only went and coded for 24 hours straight in the hackathon, they also got the time to build lore in the infamous NITK Beach, where they frequently ran away to when their code was not working",
+      "That Year, PB had 3 winning teams at NITK, With Point Blank also becoming the grand winners of NITK. We simply followed the instructions of our seniors : 'Win so much that they never invite us again!'.",
+      "We are pretty sure that the NITK Students were left puzzled, that what is this group of arrogant elitists wearing this Point Blank Merch doing here and why are they winning so much? Well needless to say,the post hackathon celebration in Manglore was one to remember."            
     ],
     images: [
       'https://res.cloudinary.com/pbsite/image/upload/v1745004377/IMG_0123_awx0jq.webp',
@@ -27,14 +51,14 @@ export const Lores: Lore[] = [
   },
   {
     id: 'trek',
-    title: 'trek',
-    date: 'February 2024',
-    location: 'Coorg, Karnataka',
-    preview: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+    title: 'Shivagange Trek',
+    date: 'September 2024',
+    location: 'Shivagange, Karnataka',
+    preview: 'Post SIH 2024 and IICT 2024, Point Blank deserved a break again.',
     story: [
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-      'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source.',
-      'Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.'
+      "Beleive it or not, Organising the internal round of SIH has been something Point Blank has been doing for years and years. Just that this time, the sheer number of teams and the number of projects was something that was never seen before. That combined with organising IICT 2024 meant that Point Blank was exhausted and needed a break again.",
+      "Somehow it is our natural tendency to find a grind even in our relaxation arc. We ended up booking a bus to Shivagange Trek and that too when the rain from previous night had made the trek slippery and dangerous.Well that didnt stop us from starting from banglore at 4am and climbing all the way to the top, fighting monkeys and the urge to simply jump off.",
+      "That year, PB had 3 teams winning the Smart India Hackathon, once again beating the records of all the previous years. Point Blank strongly feels like the monkeys had something to do with it.",
     ],
     images: [
       'https://res.cloudinary.com/pbsite/image/upload/v1746900659/IMG_3116_loovxj.webp',
