@@ -1,14 +1,15 @@
+import type { Viewport } from "next";
+import { PinContainer } from "../(default)/Credits/creditcards/credits";
+
 export const metadata = {
   title: "Point Blank",
   description: "Point Blank is a student-run tech community at Dayananda Sagar College of Engineering, Bangalore. We are a group of tech enthusiasts who love to learn and grow together.",
 };
 
-// Define the viewport settings separately
-export const viewport = {
+export const viewport: Viewport = {
+  width: "device-width",
   initialScale: 1,
-  width: 'device-width',
 };
-import { PinContainer } from "../(default)/Credits/creditcards/credits";
 import Hero from "@/components/hero";
 import WhatWeDo from "@/components/whatwedo";
 import Domains from "@/components/domains";
