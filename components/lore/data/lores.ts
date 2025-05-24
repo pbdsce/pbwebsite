@@ -37,16 +37,16 @@ export const Lores: Lore[] = [
       "We are pretty sure that the NITK Students were left puzzled, that what is this group of arrogant elitists wearing this Point Blank Merch doing here and why are they winning so much? Well needless to say,the post hackathon celebration in Manglore was one to remember."            
     ],
     images: [
-      'https://res.cloudinary.com/pbsite/image/upload/v1748082149/lore/kf8dpjie1xqgt9zuxcla.jpg',
-      'https://res.cloudinary.com/pbsite/image/upload/v1748082149/lore/csmnssfmbhr1vrtdzobs.jpg',
-      'https://res.cloudinary.com/pbsite/image/upload/v1748082148/lore/rebv9mo0ah25vnotcsca.jpg',
-      'https://res.cloudinary.com/pbsite/image/upload/v1748082148/lore/hyus6dww01xqgthaj7ny.jpg',
-      'https://res.cloudinary.com/pbsite/image/upload/v1748082148/lore/xculiidg8inarqnsyx2w.jpg',
-      'https://res.cloudinary.com/pbsite/image/upload/v1748082147/lore/qoxv6hatp53hwbvcpdsi.jpg',
-      'https://res.cloudinary.com/pbsite/image/upload/v1748082147/lore/r6gab1bs9xabggi5ksdi.jpg',
-      'https://res.cloudinary.com/pbsite/image/upload/v1748082147/lore/zrjrgup50m4gj0zomzfu.jpg',
-      'https://res.cloudinary.com/pbsite/image/upload/v1748082147/lore/rp22prmjxxm84tfqihdn.jpg',
-      'https://res.cloudinary.com/pbsite/image/upload/v1748082147/lore/muvpupc59yfidptxuhh5.jpg',
+      'https://res.cloudinary.com/pbsite/image/upload/v1748082147/lore/muvpupc59yfidptxuhh5.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1748082147/lore/zrjrgup50m4gj0zomzfu.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1748082149/lore/kf8dpjie1xqgt9zuxcla.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1748082149/lore/csmnssfmbhr1vrtdzobs.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1748082148/lore/rebv9mo0ah25vnotcsca.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1748082148/lore/hyus6dww01xqgthaj7ny.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1748082148/lore/xculiidg8inarqnsyx2w.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1748082147/lore/qoxv6hatp53hwbvcpdsi.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1748082147/lore/r6gab1bs9xabggi5ksdi.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1748082147/lore/rp22prmjxxm84tfqihdn.webp',
     ]    
   },
   {
