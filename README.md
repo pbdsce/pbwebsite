@@ -61,6 +61,33 @@ infisical run -- npm run dev
 #### Tip: To simplify this process, you can create aliases for commonly used commands. 
 ---
 
+### Code Quality
+
+This repository uses [Husky](https://typicode.github.io/husky/) to enforce code quality standards.
+
+#### Automatic Setup
+When you clone this repository and run `npm install`, Husky will automatically set up Git hooks for you.
+
+#### Pre-commit Hooks
+Before each commit, the following checks will run automatically:
+- **ESLint**: Checks for code style and potential errors
+- **TypeScript**: Validates type safety (if applicable)
+
+If any of these checks fail, your commit will be blocked until you fix the issues.
+
+#### Manual Code Quality Checks
+You can also run these checks manually:
+
+```bash
+# Run linter
+npm run lint
+
+# Fix linting issues automatically
+npm run lint:fix
+
+# Check TypeScript types
+npm run type-check
+
 ## **Contributing**  
 
 1. Fork this repository.  
