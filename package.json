@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-brands-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "@headlessui/react": "^1.7.17",
     "@types/node": "^20.10.4",
     "@types/react": "^18.2.42",
@@ -18,6 +20,8 @@
     "axios": "^1.7.7",
     "cloudinary": "^2.5.1",
     "clsx": "^2.1.1",
+    "embla-carousel": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
     "firebase": "^11.6.0",
     "framer-motion": "^11.11.10",
     "lodash": "^4.17.21",
