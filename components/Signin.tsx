@@ -29,17 +29,16 @@ const SignIn = () => {
     setResetMessage("");
     setSuccess("");
 
-    if (!email.endsWith("@pointblank.club")) {
-      setSignupError("Access not granted!");
-      return;
-    }
-
-    try {
-      const methods = await fetchSignInMethodsForEmail(auth, email);
-      console.log("Fetched methods: ", methods);
-      if (methods.length > 0) {
-        setSignupError("You are already registered. Please log in instead.");
-        router.push("/");
+    try{
+      const res = await fetch('/api/signin_validation',{
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({email}),
+      });
+      
+      if(!res.ok){
+        const {error} = await res.json();
+        setSignupError(error || "Email validation failed");
         return;
       }
 
