@@ -5,29 +5,18 @@ import { useRouter } from "next/navigation";
 import {
   isSignInWithEmailLink,
   signInWithEmailLink,
-  fetchSignInMethodsForEmail,
   sendSignInLinkToEmail,
-  onAuthStateChanged,
 } from "firebase/auth";
 import { auth } from "../Firebase";
 import "../app/globals.css";
+import toast from "react-hot-toast";
 
 const SignIn = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const [resetMessage, setResetMessage] = useState("");
-  const [signupError, setSignupError] = useState("");
-  const [dbError, setDbError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const handleSignIn = async (event: React.FormEvent) => {
     event.preventDefault();
-    setSignupError("");
-    setDbError("");
-    setError("");
-    setResetMessage("");
-    setSuccess("");
 
     try{
       const res = await fetch('/api/signin_validation',{
@@ -38,7 +27,7 @@ const SignIn = () => {
       
       if(!res.ok){
         const {error} = await res.json();
-        setSignupError(error || "Email validation failed");
+        toast.error(error || "Email validation failed");
         return;
       }
 
@@ -49,9 +38,9 @@ const SignIn = () => {
 
       await sendSignInLinkToEmail(auth, email, actionCodeSettings);
       window.localStorage.setItem("emailForSignIn", email);
-      setSuccess("Verification link sent to your email!");
+      toast.success("Verification link sent to your email!");
     } catch (signupErr: any) {
-      setSignupError(signupErr.message || "Failed to sign up");
+      toast.error(signupErr.message || "Failed to sign up");
       console.error("Email link error:", signupErr);
     }
   };
@@ -61,22 +50,21 @@ const SignIn = () => {
       if (isSignInWithEmailLink(auth, window.location.href)) {
         let email = window.localStorage.getItem("emailForSignIn");
 
-        if (!email) {
-          email = window.prompt("Please enter your email to complete sign-in:");
-        }
-
-        if (!email) {
-          setError("Email is required to complete sign-in.");
+        if (!email && !(email = window.prompt("Please enter your email to complete sign-in:"))) {
+          setTimeout(() => {
+            toast.error("Email is required to complete sign-in.");
+          },100);
           return;
         }
 
         try {
           await signInWithEmailLink(auth, email, window.location.href);
           window.localStorage.removeItem("emailForSignIn");
+          toast.success("Signed in successfully!");
           router.push("/");
         } catch (err) {
           console.error("Sign-in failed:", err);
-          setError("Sign-in failed. Try again.");
+          toast.error("Sign-in failed. Try again.");
         }
       }
     };
@@ -84,22 +72,10 @@ const SignIn = () => {
     signInWithEmail();
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log("User is signed in:", user.email);
-        router.push("/");
-      } else {
-        console.log("No user is signed in");
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
   return (
     <div className="max-w-md bg-[#151916] p-12 rounded-xl shadow-lg shadow-green-600/100">
       <div className="text-3xl font-semibold text-center mb-8 text-white">
-        SignIn
+        Sign In
       </div>
       <form onSubmit={handleSignIn}>
         <div className="relative mb-6">
@@ -124,14 +100,9 @@ const SignIn = () => {
             type="submit"
             className="w-full p-3 bg-green-600 text-white rounded-md hover:bg-green-500"
           >
-            SignIn
+            Sign In
           </button>
         </div>
-        {signupError && <p className="text-red-500">{signupError}</p>}
-        {dbError && <p className="text-yellow-500">{dbError}</p>}
-        {success && <p className="text-green-500">{success}</p>}
-        {error && <p className="text-red-500">{error}</p>}
-        {resetMessage && <p className="text-green-500">{resetMessage}</p>}
       </form>
     </div>
   );
