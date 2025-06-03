@@ -6,7 +6,7 @@ export default function SignInLayout({ children }: { children: React.ReactNode }
   return (
     <>
       <main>{children}</main>
-      <Toaster position="top-center"
+      <Toaster position="top-right"
       toastOptions={{
           style: {
             marginTop: '3rem',

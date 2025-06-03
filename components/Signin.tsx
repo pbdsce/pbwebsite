@@ -50,10 +50,8 @@ const SignIn = () => {
       if (isSignInWithEmailLink(auth, window.location.href)) {
         let email = window.localStorage.getItem("emailForSignIn");
 
-        if (!email && !(email = window.prompt("Please enter your email to complete sign-in:"))) {
-          setTimeout(() => {
-            toast.error("Email is required to complete sign-in.");
-          },100);
+        if (!email) {
+          toast.error("Email is required to complete sign-in.");
           return;
         }
 
