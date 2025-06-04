@@ -7,13 +7,6 @@ import { cloudinary } from "@/Cloudinary";
 // POST method: Create or add a new achievement
 export async function POST(request: Request) {
   try {
-    if (request.method !== 'POST') {
-      return NextResponse.json(
-        { error: 'Method Not Allowed', details: 'Only POST requests are supported' },
-        { status: 405 }
-      );
-    }
-
     // Validate form data
     await connectMongoDB();
     const formData = await request.formData();
@@ -115,13 +108,6 @@ export async function POST(request: Request) {
 // GET method: Fetch achievements based on name or fetch all if no name is provided
 export async function GET(request: NextRequest) {
   try {
-    if (request.method !== 'GET') {
-      return NextResponse.json(
-        { error: 'Method Not Allowed', details: 'Only GET requests are supported' },
-        { status: 405 }
-      );
-    }
-
     await connectMongoDB();
     const { searchParams } = new URL(request.url);
     const name = searchParams.get("name");
@@ -182,13 +168,6 @@ export async function GET(request: NextRequest) {
 // PUT method: Update an existing achievement based on name
 export async function PUT(request: Request) {
   try {
-    if (request.method !== 'PUT') {
-      return NextResponse.json(
-        { error: 'Method Not Allowed', details: 'Only PUT requests are supported' },
-        { status: 405 }
-      );
-    }
-
     await connectMongoDB();
     const formData = await request.formData();
     const name = formData.get("name") as string;
@@ -295,13 +274,6 @@ export async function PUT(request: Request) {
 // DELETE method: Remove a member's achievements based on name
 export async function DELETE(request: NextRequest) {
   try {
-    if (request.method !== 'DELETE') {
-      return NextResponse.json(
-        { error: 'Method Not Allowed', details: 'Only DELETE requests are supported' },
-        { status: 405 }
-      );
-    }
-
     await connectMongoDB();
     const { searchParams } = new URL(request.url);
     const name = searchParams.get("name");

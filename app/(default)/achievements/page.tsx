@@ -49,7 +49,7 @@ export default function AchievementsPage() {
   const [deleteConfirmName, setDeleteConfirmName] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isInitialRender, setIsInitialRender] = useState(true);
-  const [showAchievementsGrid, setShowAchievementsGrid] = useState(false);
+  const [buttonsRendered, setButtonsRendered] = useState(false);
 
   //Strict auth state change handler
   useEffect(() => {
@@ -103,11 +103,6 @@ export default function AchievementsPage() {
       return categoryAchievements && categoryAchievements.length > 0;
     });
   };
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowAchievementsGrid(true), 2500);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleAddAchievement = (category: string) => {
     setNewAchievement(prev => ({
@@ -331,6 +326,7 @@ export default function AchievementsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 2.5, ease: [0.22, 1, 0.36, 1] }}
+            onAnimationComplete={() => setButtonsRendered(true)}
           >
             <div
               className="w-full overflow-x-auto whitespace-nowrap flex md:justify-center"
@@ -373,13 +369,11 @@ export default function AchievementsPage() {
             </div>
           </motion.div>
 
-          <AnimatePresence mode="wait">
-            {selectedCategory && showAchievementsGrid && (
+            {selectedCategory && buttonsRendered &&(
               <motion.div 
                 key={selectedCategory}
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                whileInView={{ opacity: 1, y:0 }}
                 transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16"
               >
@@ -396,7 +390,8 @@ export default function AchievementsPage() {
                       key={achiever.name}
                       className="relative flex items-stretch group"
                       initial={{ opacity: 0, y: 40 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.2 }}
                       transition={{ duration: 0.6, delay: 0.1 * idx }}
                     >
                       <div className="relative group rounded-2xl w-full transition-all duration-300 hover:scale-105">
@@ -410,9 +405,15 @@ export default function AchievementsPage() {
                         <div className="relative z-10 bg-[#101214] border border-transparent rounded-2xl h-full w-full p-6 flex flex-col justify-between">
                           <div>
                             <div className="flex items-center gap-3 mb-4">
-                              {achiever.imageUrl && (
+                              {achiever.imageUrl ? (
                                 <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-800">
                                   <img src={achiever.imageUrl} alt={achiever.name} className="w-full h-full object-cover" />
+                                </div>
+                              ) : (
+                                <div className="w-12 h-12 rounded-full bg-gray-800 border-2 border-gray-700 flex items-center justify-center">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                  </svg>
                                 </div>
                               )}
                               <div className="flex flex-col justify-center">
@@ -483,25 +484,24 @@ export default function AchievementsPage() {
                   ))}
               </motion.div>
             )}
-          </AnimatePresence>
 
           {isLoggedIn && (
             <div className="text-center my-12 space-y-4">
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="bg-blue-600 text-white py-2 px-6 rounded-full font-bold mx-2"
+                className="bg-blue-600 text-white py-2 px-6 font-bold mx-2"
               >
                 Add Achievements
               </button>
               <button
                 onClick={() => setIsEditModalOpen(true)}
-                className="bg-yellow-500 text-white py-2 px-6 rounded-full font-bold mx-2"
+                className="bg-yellow-500 text-white py-2 px-6 font-bold mx-2"
               >
                 Edit Achievements
               </button>
               <button
                 onClick={() => setIsDeleteModalOpen(true)}
-                className="bg-red-600 text-white py-2 px-6 rounded-full font-bold mx-2"
+                className="bg-red-600 text-white py-2 px-6 font-bold mx-2"
               >
                 Delete Achievement
               </button>
@@ -628,38 +628,70 @@ export default function AchievementsPage() {
             <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
               <div className="bg-black text-white p-8 rounded-lg w-full max-w-md">
                 <h2 className="text-2xl font-bold mb-6">Edit Achievements</h2>
-                <form
-                  className="space-y-6 overflow-y-auto max-h-[50vh] mb-4"
-                  onSubmit={handleFetch}
-                >
-                  <div className="mb-4">
-                    <label className="block mb-2">Name:</label>
-                    <input
-                      type="text"
-                      name="name"
-                      id="name"
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="w-full p-3 bg-gray-800 rounded"
-                      placeholder="Enter Name"
-                    />
+                {Object.keys(editAchievements.achievements || {}).length === 0 ? (
+                  <form
+                    className="space-y-6 overflow-y-auto max-h-[50vh] mb-4"
+                    onSubmit={handleFetch}
+                  >
+                    <div className="mb-4">
+                      <label className="block mb-2">Select or Enter Name:</label>
+                      <div className="flex flex-col gap-2">
+                        <select
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="w-full p-3 bg-gray-800 rounded mb-2"
+                        >
+                          <option value="">Select a name</option>
+                          {achievers.map((achiever) => (
+                            <option key={achiever.name} value={achiever.name}>
+                              {achiever.name}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="text-gray-400 text-sm">or</span>
+                        <input
+                          type="text"
+                          name="name"
+                          id="name"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="w-full p-3 bg-gray-800 rounded"
+                          placeholder="Enter Name"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-4 mt-4">
+                      <button
+                        type="submit"
+                        className="bg-blue-500 text-white py-2 px-4 rounded"
+                      >
+                        Fetch
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCloseModal}
+                        className="bg-red-500 text-white py-2 px-4 rounded"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xl font-semibold text-green-400">Editing: {editName}</h3>
+                      <button
+                        onClick={() => {
+                          setEditName("");
+                          setEditAchievements({ achievements: {} });
+                        }}
+                        className="text-gray-400 hover:text-white text-sm"
+                      >
+                        Change Name
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex gap-4 mt-4">
-                    <button
-                      type="submit"
-                      className="bg-blue-500 text-white py-2 px-4 rounded"
-                    >
-                      Fetch
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCloseModal}
-                      className="bg-red-500 text-white py-2 px-4 rounded"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
+                )}
 
                 {Object.keys(editAchievements.achievements || {}).length > 0 && (
                   <form
