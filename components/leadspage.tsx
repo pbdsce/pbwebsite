@@ -68,43 +68,11 @@ const Leads: React.FC = () => {
     }
 
     try {
-      let imageUrl = selectedLead.imageUrl;
-
-      if (selectedLead.imageUrl && selectedLead.imageUrl.startsWith("blob")) {
-        console.log(
-          "Image file detected, preparing for upload to Cloudinary Storage..."
-        );
-
-        // Create a new FormData object
-        const formData = new FormData();
-        if (image) {
-          formData.append("file", image);
-          formData.append("name", selectedLead.name);
-        }
-
-        const response = await fetch("/api/leads/upload", {
-          method: "POST",
-          body: formData, // FormData automatically sets the correct headers
-        });
-
-        let data;
-        try {
-          data = await response.json();
-        } catch (error) {
-          console.error("Failed to parse JSON response:", error);
-          throw new Error("Unexpected response from the server");
-        }
-        imageUrl = data.imageUrl;
-        if (!response.ok) {
-          console.error("Error uploading file:", data);
-          throw new Error(data.message || "Error uploading file");
-        }
-        console.log("Image uploaded successfully, URL:", imageUrl);
-      }
+     
 
       const leadData = {
         ...selectedLead,
-        imageUrl: imageUrl, // Ensure the Cludinary URL is used
+        // imageUrl: imageUrl, // Ensure the Cludinary URL is used
       };
 
       if (selectedLead.id) {
@@ -373,7 +341,9 @@ const LeadForm: React.FC<LeadFormProps> = ({
     }
   );
   const { setImage } = useStore();
-
+  const [isUploading,setIsUploading] = useState(false);
+  const [uploadSuccess,setUploadSuccess] = useState(false);
+  const [selectedFile,setSelectedFile] = useState<File|null>(null);
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -391,18 +361,67 @@ const LeadForm: React.FC<LeadFormProps> = ({
 
     if (files && files.length > 0) {
       const file = files[0];
+      setSelectedFile(file);
       setImage(file);
+      setUploadSuccess(false);
+      // setLead((prevLead) => ({
+      //   ...prevLead,
+      //   imageUrl: URL.createObjectURL(file),
+      // }));
+    }else{
+      console.error("No file selected");
+      setSelectedFile(null);
+    }
+  };
+   const handleImageUpload = async()=>{
+    if(!selectedFile){
+      alert("Please select an image to upload");
+      return;
+    }
+    setIsUploading(true);
+    try{
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("name", lead.name || "unnamed");
+
+      const response = await fetch("/api/leads/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (error) {
+        console.error("Failed to parse JSON response:", error);
+        throw new Error("Unexpected response from the server");
+      }
+
+      if (!response.ok) {
+        console.error("Error uploading file:", data);
+        throw new Error(data.message || "Error uploading file");
+      }
+      console.log("Image uploaded successfully, URL:", data.imageUrl);
       setLead((prevLead) => ({
         ...prevLead,
-        imageUrl: URL.createObjectURL(file),
+        imageUrl: data.imageUrl,
       }));
-    } else {
-      console.error("No file selected or invalid file input");
+      setUploadSuccess(true);
+    }catch(error){
+      console.error("Error in uploading image:", error);
+      alert("Failed to upload image");
+      setUploadSuccess(false);
+    }finally{
+      setIsUploading(false);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+       if(selectedFile && !uploadSuccess && !lead.imageUrl){
+      alert("Please upload the image first");
+      return;
+    }
     await handleAddOrEditLead(lead); // Call onLeadUpdate to refresh the leads
     closeForm(); // Close the form after submission
   };
@@ -424,6 +443,7 @@ const LeadForm: React.FC<LeadFormProps> = ({
         maxWidth: "90%",
         maxHeight: "90vh",
         color: "black",
+        overflowY: "auto",
       }}
     >
       <h2
@@ -575,12 +595,44 @@ const LeadForm: React.FC<LeadFormProps> = ({
               boxSizing: "border-box",
             }}
           />
+           <button
+              type="button"
+              onClick={handleImageUpload}
+              disabled={!selectedFile || isUploading}
+              style={{
+                backgroundColor: isUploading ? "#ccc" : "#00ff33",
+                color: "#000000",
+                border: "none",
+                borderRadius: "5px",
+                padding: "0.5rem",
+                cursor: isUploading ? "not-allowed":"pointer",
+                width: "100%",
+                fontSize: "0.9rem",
+              }}
+            >
+              {isUploading ? "Uploading..." : "Upload"}
+            </button>
+          {uploadSuccess && (
+            <div style={{ color: "green", marginTop: "5px" }}>
+              Image uploaded successfully
+            </div>
+          )}
+          {lead.imageUrl &&(
+            <div style={{marginTop: '1rem'}}>
+              <img 
+                src={lead.imageUrl} 
+                alt="Selected" 
+                style={{maxWidth:'100%',borderRadius: '5px',maxHeight: '150px' }} 
+              />
+            </div>
+          )}
+        </div>
           {/* {lead.imageUrl && ( */}
           {/* <div style={{ marginTop: '1rem' }}>
               <img src={lead.imageUrl} alt="Selected" style={{ maxWidth: '100%', borderRadius: '5px' }} />
             </div>
           // )} */}
-        </div>
+        
         <button
           type="submit"
           style={{
