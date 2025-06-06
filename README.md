@@ -61,6 +61,41 @@ infisical run -- npm run dev
 #### Tip: To simplify this process, you can create aliases for commonly used commands. 
 ---
 
+## **Alternative Setup: Using Dev Containers**
+
+If you have Docker installed and use VS Code, you can use Dev Containers for a more streamlined setup:
+
+### **Prerequisites**
+1. [Docker](https://www.docker.com/products/docker-desktop/) installed on your machine
+2. [VS Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed
+
+### **Steps**
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/pbdsce/pbwebsite.git
+   cd pbwebsite
+   ```
+
+2. Open the project in VS Code:
+   ```bash
+   code .
+   ```
+
+3. When prompted "Reopen in Container", click on it. Alternatively, press `F1`, type "Reopen in Container" and select it.
+
+4. VS Code will build the dev container (this may take a few minutes the first time) and open the project inside it.
+
+5. Once inside the container, all necessary dependencies will be automatically installed and you can start development right away:
+   ```bash
+   npm run dev
+   ```
+
+The application will be accessible at [http://localhost:3000](http://localhost:3000).
+
+**Note**: When using devcontainers, you'll still need to set up Infisical for environment variables. Follow steps 4 and 5 from the standard setup instructions above.
+
+---
+
 ## **Contributing**  
 
 1. Fork this repository.  
