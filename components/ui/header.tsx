@@ -13,7 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
 const navItems = [
-  { href: "https://github.com/pbdsce", label: "GitHub", isExternal: true, hasIcon: true },
+  { href: "https://github.com/pbdsce", label: "GitHub", isExternal: true, icon: faGithub},
   { href: "/events", label: "Events" },
   { href: "/leads", label: "Leads" },
   { href: "/lore", label: "Lore" },
@@ -84,7 +84,7 @@ export default function Header() {
                         : "text-gray-300"
                     } hover:text-white ${item.specialPadding ? "px-5" : "px-2 lg:px-5"} py-3 flex items-center transition duration-150 ease-in-out`}
                   >
-                    {item.hasIcon && <FontAwesomeIcon icon={faGithub} className="mr-2" size="lg" />}
+                    {item.icon && <FontAwesomeIcon icon={item.icon} className="mr-2" size="lg" />}
                     {item.label}
                   </p>
                 </Link>
