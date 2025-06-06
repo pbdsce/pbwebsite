@@ -11,7 +11,7 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
 
 const mobileNavItems = [
-  { href: "https://github.com/pbdsce", label: "GitHub", isExternal: true, hasIcon: true },
+  { href: "https://github.com/pbdsce", label: "GitHub", isExternal: true, icon: faGithub },
   { href: "/events", label: "Events" },
   { href: "/leads", label: "Leads" },
   { href: "/lore", label: "Lore" },
@@ -129,7 +129,7 @@ export default function MobileMenu() {
                   onClick={() => setMobileNavOpen(false)}
                   {...(item.isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 >
-                  {item.hasIcon && <FontAwesomeIcon icon={faGithub} className="mr-2" size="lg" />}
+                  {item.icon && <FontAwesomeIcon icon={item.icon} className="mr-2" size="lg" />}
                   {item.label}
                 </Link>
               </li>
