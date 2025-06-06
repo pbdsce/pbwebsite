@@ -12,6 +12,16 @@ import { auth } from "@/Firebase";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
+const navItems = [
+  { href: "https://github.com/pbdsce", label: "GitHub", isExternal: true, hasIcon: true },
+  { href: "/events", label: "Events" },
+  { href: "/leads", label: "Leads" },
+  { href: "/lore", label: "Lore" },
+  { href: "/members", label: "Members", specialPadding: true },
+  { href: "/achievements", label: "Achievements" },
+  { href: "/hustle", label: "Hustle Results" }
+];
+
 export default function Header() {
   const [top, setTop] = useState(true);
   const pathname = usePathname();
@@ -64,92 +74,22 @@ export default function Header() {
           </div>
           <nav className="hidden md:flex md:grow">
             <ul className="flex grow justify-end flex-wrap items-center">
-            <li>
-                <Link href="https://github.com/pbdsce" target="_blank" rel="noopener noreferrer">
-                  <p className="font-medium text-gray-300 hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out">
-                  <FontAwesomeIcon icon={faGithub} className="mr-2" size="lg" />
-                    GitHub
-                  </p>
-                </Link>
-              </li>
-              <li>
-                <Link href="/events">
+             {navItems.map((item, index) => (
+              <li key={index}>
+                <Link href={item.href} {...(item.isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
                   <p
                     className={`font-medium ${
-                      pathname === "/events"
+                      pathname === item.href
                         ? "font-extrabold text-white"
                         : "text-gray-300"
-                    } hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}
+                    } hover:text-white ${item.specialPadding ? "px-5" : "px-2 lg:px-5"} py-3 flex items-center transition duration-150 ease-in-out`}
                   >
-                    Events
+                    {item.hasIcon && <FontAwesomeIcon icon={faGithub} className="mr-2" size="lg" />}
+                    {item.label}
                   </p>
                 </Link>
               </li>
-              <li>
-                <Link href="/leads">
-                  <p
-                    className={`font-medium ${
-                      pathname === "/leads"
-                        ? "font-extrabold text-white"
-                        : "text-gray-300"
-                    } hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}
-                  >
-                    Leads
-                  </p>
-                </Link>
-              </li>
-              <li>
-                <Link href="/lore">
-                  <p
-                    className={`font-medium ${
-                      pathname === "/lore"
-                        ? "font-extrabold text-white"
-                        : "text-gray-300"
-                    } hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}
-                  >
-                    Lore
-                  </p>
-                </Link>
-              </li>
-              <li>
-                <Link href="/members">
-                  <p
-                    className={`font-medium ${
-                      pathname === "/members"
-                        ? "font-extrabold text-white"
-                        : "text-gray-300"
-                    } hover:text-white px-5 py-3 flex items-center transition duration-150 ease-in-out`}
-                  >
-                    Members
-                  </p>
-                </Link>
-              </li>
-              <li>
-                <Link href="/achievements">
-                  <p
-                    className={`font-medium ${
-                      pathname === "/achievements"
-                        ? "font-extrabold text-white"
-                        : "text-gray-300"
-                    } hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}
-                  >
-                    Achievements
-                  </p>
-                </Link>
-              </li>
-              <li>
-                <Link href="/hustle">
-                  <p
-                    className={`font-medium ${
-                      pathname === "/hustle"
-                        ? "font-extrabold text-white"
-                        : "text-gray-300"
-                    } hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}
-                  >
-                    Hustle Results
-                  </p>
-                </Link>
-              </li>
+            ))}
               {/* <li>
                 <Link href="mailto:admin@pointblank.club">
                 <p className={`font-medium ${pathname === '/contact' ? 'font-extrabold text-white' : 'text-gray-300'} hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}>Contact Us</p>
