@@ -10,6 +10,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGithub } from '@fortawesome/free-brands-svg-icons'; 
 
 
+const mobileNavItems = [
+  { href: "https://github.com/pbdsce", label: "GitHub", isExternal: true, hasIcon: true },
+  { href: "/events", label: "Events" },
+  { href: "/leads", label: "Leads" },
+  { href: "/lore", label: "Lore" },
+  { href: "/members", label: "Members" },
+  { href: "/achievements", label: "Achievements" },
+  { href: "/hustle", label: "Hustle Results" }
+];
 export default function MobileMenu() {
   const [mobileNavOpen, setMobileNavOpen] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
@@ -112,35 +121,19 @@ export default function MobileMenu() {
           leaveTo="opacity-0"
         >
           <ul className="px-5 py-2">
-            <li>
-              <Link 
-                href="https://github.com/pbdsce" 
-                className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center items-center" onClick={() => setMobileNavOpen(false)}
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                <FontAwesomeIcon icon={faGithub} className="mr-2" size="lg" />
-                GitHub
-              </Link>
-            </li>
-            <li>
-              <Link href="/events" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Events</Link>
-            </li>
-            <li>
-              <Link href="/leads" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Leads</Link>
-            </li>
-            <li>
-              <Link href="/lore" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Lore</Link>
-            </li>
-            <li>
-              <Link href="/members" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Members</Link>
-            </li>
-            <li>
-              <Link href="/achievements" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Achievements</Link>
-            </li>
-            <li>
-              <Link href="/hustle" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>Hustle Results</Link>
-            </li>
+            {mobileNavItems.map((item, index) => (
+              <li key={item.href}>
+                <Link 
+                  href={item.href} 
+                  className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center items-center" 
+                  onClick={() => setMobileNavOpen(false)}
+                  {...(item.isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                >
+                  {item.hasIcon && <FontAwesomeIcon icon={faGithub} className="mr-2" size="lg" />}
+                  {item.label}
+                </Link>
+              </li>
+            ))}
             {/* <li>
               <Link href="mailto:admin@pointblank.club" className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" onClick={() => setMobileNavOpen(false)}>
                 Contact Us
