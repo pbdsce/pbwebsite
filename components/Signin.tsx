@@ -58,7 +58,7 @@ const SignIn = () => {
       if(!res.ok){
         const {error} = await res.json();
         toast.error(error || "Email validation failed");
-        setTimeout(() => {setIsButtonLocked(false)}, 2000);
+        setTimeout(() => {setIsButtonLocked(false)}, 120000);
         return;
       }
 
