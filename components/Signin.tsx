@@ -15,7 +15,31 @@ const SignIn = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isButtonLocked, setIsButtonLocked] = useState(false);
+  const [isButtonLocked, setIsButtonLocked] = useState(true);
+
+  useEffect(() => {
+    const checkLock = async () => {
+      setIsButtonLocked(true);
+
+      try {
+        const res = await fetch('/api/check_timer');
+        const { remaining } = await res.json();
+
+        if (remaining > 0) {
+          setTimeout(() => {
+            setIsButtonLocked(false);
+          }, remaining);
+        } else {
+          setIsButtonLocked(false);
+        }
+      } catch (err) {
+        console.error("Failed to fetch timer:", err);
+        setIsButtonLocked(false);
+      }
+    };
+
+    checkLock();
+  }, []);
 
   const handleSignIn = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -24,6 +48,7 @@ const SignIn = () => {
     setIsButtonLocked(true);
 
     try{
+      await fetch('/api/start_timer', { method: 'POST' });
       const res = await fetch('/api/signin_validation',{
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -33,14 +58,14 @@ const SignIn = () => {
       if(!res.ok){
         const {error} = await res.json();
         toast.error(error || "Email validation failed");
-        setTimeout(() => {setIsButtonLocked(false)}, 120000);
         return;
       }
 
       setIsLoading(true);
-
+    
       const actionCodeSettings = {
-        url: "https://www.pointblank.club/admin",
+        // url: "https://www.pointblank.club/admin",
+        url: "http://localhost:3000/admin",
         handleCodeInApp: true,
       };
 
@@ -51,7 +76,6 @@ const SignIn = () => {
       toast.error(signupErr.message || "Failed to sign up");
       console.error("Email link error:", signupErr);
     }finally{
-      setTimeout(() => {setIsButtonLocked(false)}, 120000);
       setIsLoading(false);
     }
   };
