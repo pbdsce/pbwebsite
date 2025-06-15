@@ -58,14 +58,14 @@ const SignIn = () => {
       if(!res.ok){
         const {error} = await res.json();
         toast.error(error || "Email validation failed");
-        setTimeout(() => {setIsButtonLocked(false)}, 120000);
         return;
       }
 
       setIsLoading(true);
     
       const actionCodeSettings = {
-        url: "https://www.pointblank.club/admin",
+        // url: "https://www.pointblank.club/admin",
+        url: "http://localhost:3000/admin",
         handleCodeInApp: true,
       };
 
