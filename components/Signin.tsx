@@ -64,8 +64,7 @@ const SignIn = () => {
       setIsLoading(true);
     
       const actionCodeSettings = {
-        // url: "https://www.pointblank.club/admin",
-        url: "http://localhost:3000/admin",
+        url: "https://www.pointblank.club/admin",
         handleCodeInApp: true,
       };
 
