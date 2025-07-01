@@ -160,8 +160,7 @@ export async function POST(request: Request) {
   await connectMongoDB();
   const formData = await request.json();
   const { recaptcha_token, ...data } = formData;
-
-  // Validate required fields in team_info and leader
+  
   if (
     !data.team_info.team_name ||
     !data.team_info.team_leader.name ||
