@@ -1,14 +1,5 @@
-import { db } from "@/Firebase";
 import connectMongoDB from "@/lib/dbConnect";
-
-import {
-  addDoc,
-  collection,
-  getDocs,
-  limit,
-  query,
-  where,
-} from "firebase/firestore";
+import CtfRegsModel from "@/models/CTFRegs";
 import { NextResponse } from "next/server";
 /**
  * @swagger
@@ -72,34 +63,22 @@ export async function GET(request: Request) {
     if (!usn) {
       return NextResponse.json({ error: "usn is required" }, { status: 400 });
     }
-    const q = query(
-      collection(db, "pbctf_registrations"),
-      where("participant1.usn", "==", usn)
-    );
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-      return NextResponse.json(
-        { message: "usn not registered", isUnique: true },
-        { status: 200 }
-      );
-    }
-    const q2 = query(
-      collection(db, "pbctf_registrations"),
-      where("participant2.usn", "==", usn)
-    );
-    const querySnapshot2 = await getDocs(q2);
 
-    if (!querySnapshot2.empty) {
-      return NextResponse.json(
-        { message: "usn not unique", isUnique: true },
-        { status: 200 }
-      );
-    } else {
+    const existing = await CtfRegsModel.findOne({
+      $or: [{ "participant1.usn": usn }, { "participant2.usn": usn }],
+    });
+
+    if (existing) {
       return NextResponse.json(
         { message: "usn already exists", isUnique: false },
-        { status: 403 }
+        { status: 200 }
       );
     }
+
+    return NextResponse.json(
+      { message: "usn not registered", isUnique: true },
+      { status: 403 }
+    );
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error details:", error.message);
@@ -355,8 +334,8 @@ async function addRegistration(request: Request) {
         { status: 400 }
       );
     }
-    await addDoc(collection(db, "pbctf_registrations"), data);
-
+    const newDoc = new CtfRegsModel(data);
+    await newDoc.save();
     return NextResponse.json({ message: "Registration successful!" });
   } catch (error) {
     console.error("Error adding registration:", error);
