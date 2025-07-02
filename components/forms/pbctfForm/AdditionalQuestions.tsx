@@ -89,7 +89,7 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
         <div className="flex items-center gap-2 mb-4">
           <span className="text-2xl">🔍</span>
           <h3 className="text-green-300 font-mono text-lg">
-            "Prove You're Not a Bot (or a Noob)!"
+            &quot;Prove You&apos;re Not a Bot (or a Noob)!&quot;
           </h3>
         </div>
         
@@ -120,7 +120,7 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
           
           {showSecondHint && (
             <p className="text-green-400/70 font-mono text-xs animate-in fade-in-0 slide-in-from-top-1 duration-500">
-              <strong>Hint 2:</strong> Still stuck? Here's a riddle: I'm in the code but not the screen, find me where devs debug unseen.
+              <strong>Hint 2:</strong> Still stuck? Here&apos;s a riddle: I&apos;m in the code but not the screen, find me where devs debug unseen.
             </p>
           )}
         </div>
@@ -154,7 +154,7 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
           {secretFlag === "pbctf{pls_h4ck_m3_d4ddy}" && (
             <p className="text-green-400 font-mono text-sm flex items-center gap-2">
               <span>✅</span>
-              Excellent! You've found the flag! 🎉
+              Excellent! You&apos;ve found the flag! 🎉
             </p>
           )}
         </div>
