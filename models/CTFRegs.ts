@@ -3,11 +3,37 @@ import mongoose, { Schema, Document } from "mongoose";
 interface Participant {
   name: string;
   email: string;
-  usn: string;
-  year: string;
+  age: number;
+  gender: Gender;
   phone: string;
-  branch: string;   
-  college: string; 
+  background: Background;
+}
+
+interface Background {
+  experRienceLevel: Experience;
+  previousParticipation: boolean;
+  participationDetails?: string;
+  affiliationType: Affiliation;
+  affiliationName: string;
+}
+
+export enum Gender {
+  Male = "male",
+  Female = "female",
+  Other = "other",
+  PreferNotToSay = "prefer_not_to_say",
+}
+
+export enum Experience {
+  Beginner = "beginner",
+  Intermediate = "intermediate",
+  Advanced = "advanced",
+}
+
+export enum Affiliation {
+  Student = "student",
+  Professional = "professional",
+  Hobbyist = "hobbyist",
 }
 
 export interface Registration extends Document {
@@ -16,14 +42,34 @@ export interface Registration extends Document {
   participationType: "solo" | "duo";
 }
 
+const backgroundSchema = new Schema({
+  experRienceLevel: {
+    type: String,
+    enum: Object.values(Experience),
+    required: true,
+  },
+  previousParticipation: { type: Boolean, required: true },
+  participationDetails: {
+    type: String,
+    required: function (this: Background) {
+      return this.previousParticipation === true;
+    },
+  },
+  affiliationType: {
+    type: String,
+    enum: Object.values(Affiliation),
+    required: true,
+  },
+  affiliationName: { type: String, required: true },
+});
+
 const participantSchema = new Schema<Participant>({
   name: { type: String, required: true },
   email: { type: String, required: true },
-  usn: { type: String, required: true },
-  year: { type: String, required: true },
+  age: { type: Number, required: true },
+  gender: { type: String, enum: Object.values(Gender), required: true },
+  background: { type: backgroundSchema, required: true },
   phone: { type: String, required: true },
-  branch: { type: String, required: true },
-  college: { type: String, required: true },
 });
 
 const registrationSchema = new Schema<Registration>({
