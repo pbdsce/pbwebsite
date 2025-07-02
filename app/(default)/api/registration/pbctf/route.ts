@@ -421,7 +421,8 @@ async function checkFlag(request: Request) {
     }
     const { flag } = data;
 
-    const isValidFlag = true;
+    const isValidFlag = flag === process.env.PB_CTF_FLAG;
+  
 
     if (isValidFlag) {
       return NextResponse.json({ message: "Flag is valid!" }, { status: 200 });

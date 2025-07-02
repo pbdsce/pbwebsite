@@ -15,6 +15,7 @@ interface Background {
   participationDetails?: string;
   affiliationType: "Student" | "Professional" | "Hobbyist";
   affiliationName: string;
+  howDidYouHearAboutUs?: string[];
 }
 
 export interface Registration extends Document {
@@ -46,6 +47,7 @@ const backgroundSchema = new Schema({
     required: true,
   },
   affiliationName: { type: String, required: true },
+  howDidYouHearAboutUs: { type: String, required: false },
 });
 
 const participantSchema = new Schema<Participant>({
