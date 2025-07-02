@@ -178,7 +178,7 @@ export async function POST(request: Request) {
     const { success } = await ratelimiter.limit(ip);
     if (!success) {
       return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
-    }
+    } 
 
     const { searchParams } = new URL(request.url); // Extract query parameters
     const action = searchParams.get("action"); // Determine the action from query params
