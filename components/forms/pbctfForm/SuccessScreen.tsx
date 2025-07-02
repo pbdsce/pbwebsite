@@ -12,7 +12,7 @@ const SuccessScreen: React.FC = () => {
         <h2 className="text-2xl font-mono text-green-300 mb-4">Registration Complete</h2>
         <p className="text-gray-400 font-mono mb-6">You&apos;ve been successfully registered for PBCTF 2025</p>
         <a
-          href="https://chat.whatsapp.com/HQejGLcEgM1EZFoPTeCUKb"
+          href="https://chat.whatsapp.com/GQGO7empTIb7ro9TSCwENX?mode=ac_c"
           className="inline-flex items-center gap-2 bg-green-400/10 hover:bg-green-400/20 border border-green-400 text-green-300 font-mono px-6 py-3 rounded-lg transition-all duration-300"
         >
           Join WhatsApp Group

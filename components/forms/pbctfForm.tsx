@@ -25,6 +25,7 @@ const PBCTFForm: React.FC = () => {
   const [isSuccess, setSuccess] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<string | null>(null);
+  
   const [token, setToken] = useState<string>();
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set([0]));
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
@@ -205,7 +206,7 @@ const PBCTFForm: React.FC = () => {
   const checkEmailUniqueness = async (email: string): Promise<boolean> => {
     if (!email) return false;
     try {
-      const resp = await fetch(`/api/registration/pbctf?email=${email}`);
+      const resp = await fetch(`/api/registration/pbctf?identifier=${email}`);
       const data = await resp.json();
       return Boolean(data.isUnique);
     } catch (error) {
@@ -214,12 +215,24 @@ const PBCTFForm: React.FC = () => {
     }
   };
 
+  const checkPhoneUniqueness = async (phone: string): Promise<boolean> => {
+    if (!phone) return false;
+    try {
+      const resp = await fetch(`/api/registration/pbctf?identifier=${phone}`);
+      const data = await resp.json();
+      return Boolean(data.isUnique);
+    } catch (error) {
+      console.log("Error getting document:", error);
+      return false;
+    }
+  };
+
+
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     setEmailError(null);
 
-    console.log("Form data submitted:", data);
     try {
       const recaptcha_token = token;
       if (recaptcha_token) {
@@ -254,6 +267,12 @@ const PBCTFForm: React.FC = () => {
           setIsSubmitting(false);
           return;
         }
+        const isPhoneUnique1 = await checkPhoneUniqueness(data.participant1.phone);
+        if (!isPhoneUnique1) {
+          setEmailError("Phone number for Participant 1 already exists");
+          setIsSubmitting(false);
+          return;
+        }
 
         if (data.participationType === "duo" && data.participant2) {
           const isUnique2 = await checkEmailUniqueness(data.participant2.email);
@@ -262,6 +281,13 @@ const PBCTFForm: React.FC = () => {
             setIsSubmitting(false);
             return;
           }
+          const isPhoneUnique2 = await checkPhoneUniqueness(data.participant2.phone);
+          if (!isPhoneUnique2) {
+            setEmailError("Phone number for Participant 2 already exists");
+            setIsSubmitting(false);
+            return;
+          }
+
         }
 
         const response2 = await fetch(
