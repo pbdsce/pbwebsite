@@ -45,10 +45,10 @@ const StepCard: React.FC<StepCardProps> = ({
           <div className="ml-auto flex items-center gap-2">
             {isCompleted && (
               <>
-                <span className="text-xs font-mono text-green-400 bg-green-400/10 px-2 py-1 rounded border border-green-400/30">
+                <span className="hidden sm:inline-block text-xs font-mono text-green-400 bg-green-400/10 px-2 py-1 rounded border border-green-400/30">
                   COMPLETE
                 </span>
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
+                {/* <div className="w-2 h-2 bg-green-400 rounded-full animate-ping"></div> */}
               </>
             )}
             <div className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
