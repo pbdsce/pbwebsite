@@ -46,12 +46,12 @@ const PBCTFRegisterPage = () => {
               <div className="text-sm text-gray-400">Capture The Flag</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-green-300">48H</div>
-              <div className="text-sm text-gray-400">Competition Duration</div>
+              <div className="text-2xl font-bold text-green-300">10 to 5</div>
+              <div className="text-sm text-gray-400">Competition Hours</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-green-300">∞</div>
-              <div className="text-sm text-gray-400">Learning Opportunities</div>
+              <div className="text-2xl font-bold text-green-300">2nd August</div>
+              <div className="text-sm text-gray-400">Event Date</div>
             </div>
           </div>
         </motion.div>
