@@ -3,9 +3,15 @@ import "../../app/css/additional-styles/utility-patterns.css";
 import "../../app/css/additional-styles/theme.css";
 import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { branches } from "@/lib/constants/dropdownOptions";
 import { Press_Start_2P } from "next/font/google";
 import toast from "react-hot-toast";
+import ParticipantForm from "./pbctfForm/ParticipantForm";
+import ParticipationTypeSelection from "./pbctfForm/ParticipationTypeSelection";
+import RulesAgreements from "./pbctfForm/RulesAgreements";
+import AdditionalQuestions from "./pbctfForm/AdditionalQuestions";
+import StepCard from "./pbctfForm/StepCard";
+import SuccessScreen from "./pbctfForm/SuccessScreen";
+import type { FormData } from "./pbctfForm/types";
 
 // PARAGATI RAJ ARE YOU READING THIS
 // I MISS YOU
@@ -15,55 +21,21 @@ const pressStart2P = Press_Start_2P({
   subsets: ["latin"],
 });
 
-type ParticipantData = {
-  name: string;
-  year: string;
-  branch: string;
-  usn: string;
-  email: string;
-  phone: string;
-};
-
-type FormData = {
-  participationType: "solo" | "duo";
-  participant1: ParticipantData;
-  participant2?: ParticipantData;
-};
-
 const PBCTFForm: React.FC = () => {
   const [isSuccess, setSuccess] = useState<boolean>(false);
-  const [participationType, setParticipationType] = useState<"solo" | "duo">(
-    "solo"
-  );
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [usnError, setUsnError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [token, setToken] = useState<string>();
-
-  const [headingText, setHeadingText] = useState("");
-  const heading = "Be a Part of PBCTF       Register Now!";
-
-  useEffect(() => {
-    let currentIndex = 0;
-    let timeoutId: NodeJS.Timeout;
-
-    const typeEffect = () => {
-      if (currentIndex <= heading.length) {
-        setHeadingText(heading.substring(0, currentIndex));
-        currentIndex++;
-        timeoutId = setTimeout(typeEffect, 200); // Typing speed
-      }
-    };
-
-    typeEffect();
-
-    return () => clearTimeout(timeoutId);
-  }, []);
+  const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set([0]));
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
+    resetField,
   } = useForm<FormData>();
 
   const getRecaptcha = async () => {
@@ -76,32 +48,164 @@ const PBCTFForm: React.FC = () => {
   };
 
   useEffect(() => {
-    // Load the reCAPTCHA script dynamically and ensure it loads fully before calling `grecaptcha`
     const script = document.createElement("script");
     script.src = `https://www.google.com/recaptcha/enterprise.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`;
     script.async = true;
     script.defer = true;
-    script.onload = getRecaptcha; // Call the function once the script is loaded
+    script.onload = getRecaptcha;
     document.head.appendChild(script);
 
     return () => {
-      // Clean up the script if the component unmounts
       document.head.removeChild(script);
     };
   }, []);
 
-  const watchYear1 = watch("participant1.year");
-  const watchYear2 = watch("participant2.year");
-  const watchUsn1 = watch("participant1.usn");
-  const watchUsn2 = watch("participant2.usn");
+  // Watch specific fields instead of entire objects to avoid unnecessary re-renders
+  const participationType = watch("participationType");
+  
+  // Watch individual fields for completion checking
+  const participant1Name = watch("participant1.name");
+  const participant1Email = watch("participant1.email");
+  const participant1Phone = watch("participant1.phone");
+  const participant1Age = watch("participant1.age");
+  const participant1Gender = watch("participant1.gender");
+  const participant1ExperienceLevel = watch("participant1.experienceLevel");
+  const participant1Affiliation = watch("participant1.affiliation");
+  const participant1AffiliationName = watch("participant1.affiliationName");
+  const participant1PreviousCTF = watch("participant1.previousCTF");
+  const participant1CTFNames = watch("participant1.ctfNames");
 
-  const checkUsnUniqueness = async (usn: string): Promise<boolean> => {
-    if (!usn) {
-      console.log("USN is required");
-      return false;
+  const participant2Name = watch("participant2.name");
+  const participant2Email = watch("participant2.email");
+  const participant2Phone = watch("participant2.phone");
+  const participant2Age = watch("participant2.age");
+  const participant2Gender = watch("participant2.gender");
+  const participant2ExperienceLevel = watch("participant2.experienceLevel");
+  const participant2Affiliation = watch("participant2.affiliation");
+  const participant2AffiliationName = watch("participant2.affiliationName");
+  const participant2PreviousCTF = watch("participant2.previousCTF");
+  const participant2CTFNames = watch("participant2.ctfNames");
+
+  const howDidYouHear = watch("howDidYouHear");
+  const secretFlag = watch("secretFlag");
+  const agreeRules = watch("agreeRules");
+  const consentLeaderboard = watch("consentLeaderboard");
+  const allowContact = watch("allowContact");
+
+  // Handle participation type changes
+  useEffect(() => {
+    if (participationType === "solo") {
+      resetField("participant2");
+      setCompletedSteps(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(2);
+        return newSet;
+      });
     }
+  }, [participationType, resetField]);
+
+  // Check step completion with individual field watches
+  useEffect(() => {
+    const newCompletedSteps = new Set<number>();
+
+    // Step 0: Participation type selected
+    if (participationType) {
+      newCompletedSteps.add(0);
+    }
+
+    // Step 1: Participant 1 details complete
+    const participant1Complete = participant1Name && participant1Email && participant1Phone && 
+        participant1Age && participant1Gender && participant1ExperienceLevel && 
+        participant1Affiliation && participant1AffiliationName && participant1PreviousCTF &&
+        (participant1PreviousCTF === "No" || participant1CTFNames);
+    
+    if (participant1Complete) {
+      newCompletedSteps.add(1);
+    }
+
+    // Step 2: Participant 2 details complete (only for duo)
+    if (participationType === "duo") {
+      const participant2Complete = participant2Name && participant2Email && participant2Phone && 
+          participant2Age && participant2Gender && participant2ExperienceLevel && 
+          participant2Affiliation && participant2AffiliationName && participant2PreviousCTF &&
+          (participant2PreviousCTF === "No" || participant2CTFNames);
+      
+      if (participant2Complete) {
+        newCompletedSteps.add(2);
+      }
+    }
+
+    // Step 3: Additional Questions complete
+    const additionalQuestionsComplete = howDidYouHear && howDidYouHear.length > 0 && secretFlag === "pbctf{pls_h4ck_m3_d4ddy}";
+    if (additionalQuestionsComplete) {
+      newCompletedSteps.add(3);
+    }
+
+    // Step 4: Rules & Agreements complete
+    if (agreeRules && consentLeaderboard && allowContact) {
+      newCompletedSteps.add(4);
+    }
+
+    setCompletedSteps(newCompletedSteps);
+
+    // Auto-expand next step when current step is completed
+    setExpandedSteps(prev => {
+      const newExpanded = new Set(prev);
+      
+      // Expand step 1 when step 0 is completed
+      if (newCompletedSteps.has(0) && !newExpanded.has(1)) {
+        newExpanded.add(1);
+      }
+      
+      // Expand next step when step 1 is completed
+      if (newCompletedSteps.has(1) && !newExpanded.has(2) && !newExpanded.has(3)) {
+        if (participationType === "solo") {
+          newExpanded.add(3); // Skip to step 3 (additional questions) for solo participants
+        } else {
+          newExpanded.add(2); // Go to step 2 for duo participants
+        }
+      }
+      
+      // Expand step 3 when step 2 is completed (duo only)
+      if (participationType === "duo" && newCompletedSteps.has(2) && !newExpanded.has(3)) {
+        newExpanded.add(3);
+      }
+      
+      // Expand step 4 (rules) when step 3 (additional questions) is completed
+      if (newCompletedSteps.has(3) && !newExpanded.has(4)) {
+        newExpanded.add(4);
+      }
+      
+      return newExpanded;
+    });
+  }, [
+    participationType,
+    participant1Name, participant1Email, participant1Phone, participant1Age, participant1Gender,
+    participant1ExperienceLevel, participant1Affiliation, participant1AffiliationName, 
+    participant1PreviousCTF, participant1CTFNames,
+    participant2Name, participant2Email, participant2Phone, participant2Age, participant2Gender,
+    participant2ExperienceLevel, participant2Affiliation, participant2AffiliationName, 
+    participant2PreviousCTF, participant2CTFNames,
+    howDidYouHear, secretFlag,
+    agreeRules, consentLeaderboard, allowContact
+  ]);
+
+  const handleStepClick = (stepNumber: number) => {
+    setExpandedSteps(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(stepNumber)) {
+        newExpanded.delete(stepNumber);
+      } else {
+        newExpanded.add(stepNumber);
+      }
+      return newExpanded;
+    });
+  };
+
+  const checkEmailUniqueness = async (email: string): Promise<boolean> => {
+    if (!email) return false;
     try {
-      const resp = await fetch(`/api/registration/pbctf?usn=${usn}`);
+      const resp = await fetch(`/api/registration/pbctf?email=${email}`);
       const data = await resp.json();
       return Boolean(data.isUnique);
     } catch (error) {
@@ -113,7 +217,7 @@ const PBCTFForm: React.FC = () => {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-    setUsnError(null);
+    setEmailError(null);
 
     try {
       const recaptcha_token = token;
@@ -133,38 +237,32 @@ const PBCTFForm: React.FC = () => {
           return;
         }
 
-        console.log(data);
-        // Check if USNs are the same for duo participation
         if (
           data.participationType === "duo" &&
           data.participant2 &&
-          data.participant1.usn === data.participant2.usn
+          data.participant1.email === data.participant2.email
         ) {
-          setUsnError(
-            "USNs for Participant 1 and Participant 2 cannot be the same"
-          );
+          setEmailError("Email addresses for Participant 1 and Participant 2 cannot be the same");
           setIsSubmitting(false);
           return;
         }
 
-        // Check USN uniqueness for participant1
-        const isUnique1 = await checkUsnUniqueness(data.participant1.usn);
+        const isUnique1 = await checkEmailUniqueness(data.participant1.email);
         if (!isUnique1) {
-          setUsnError("USN for Participant 1 already exists");
+          setEmailError("Email for Participant 1 already exists");
           setIsSubmitting(false);
           return;
         }
 
-        // Check USN uniqueness for participant2 if it exists
         if (data.participationType === "duo" && data.participant2) {
-          const isUnique2 = await checkUsnUniqueness(data.participant2.usn);
+          const isUnique2 = await checkEmailUniqueness(data.participant2.email);
           if (!isUnique2) {
-            setUsnError("USN for Participant 2 already exists");
+            setEmailError("Email for Participant 2 already exists");
             setIsSubmitting(false);
             return;
           }
         }
-        // If all checks pass, submit the form
+
         const response2 = await fetch(
           "/api/registration/pbctf?action=addRegistration",
           {
@@ -188,255 +286,126 @@ const PBCTFForm: React.FC = () => {
   };
 
   if (isSuccess) {
-    return (
-      <div className="w-full max-w-md mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col p-6 sm:p-8 rounded-lg shadow-lg bg-black bg-opacity-30 backdrop-blur-lg border border-green-500">
-          <div className="flex flex-col items-center text-center">
-            <div className="inline-block p-4 bg-green-500 rounded-full animate-bounce">
-              <svg
-                className="w-8 h-8 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
-            <h2 className="mt-4 text-2xl sm:text-3xl font-bold text-green-500">
-              Registration Successful!
-            </h2>
-            <p className="mt-4 text-lg text-gray-300 leading-relaxed">
-              You have successfully registered for the PBCTF!
-            </p>
-            <p className="mt-2 text-md text-gray-400 leading-relaxed">
-              Join the WhatsApp Group for further updates immediately.
-            </p>
-          </div>
-          <div className="flex mx-auto items-center mt-6">
-            <a
-              href="https://chat.whatsapp.com/HQejGLcEgM1EZFoPTeCUKb"
-              className="w-full"
-            >
-              <button className="w-full px-6 py-3 bg-green-500 hover:bg-green-600 text-white text-lg font-semibold rounded-full transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50">
-                Join WhatsApp Group!
-              </button>
-            </a>
-          </div>
-        </div>
-      </div>
-    );
+    return <SuccessScreen />;
   }
 
-  const renderParticipantFields = (participantNumber: 1 | 2) => (
-    <div className="mb-4">
-      <h3 className="h3 mb-2">Participant {participantNumber}</h3>
-      <div className="space-y-3">
-        <div>
-          <input
-            {...register(`participant${participantNumber}.name` as const, {
-              required: "Name required",
-            })}
-            placeholder="Name"
-            className="w-full px-4 py-2 border rounded-md bg-transparent form-input focus:border-0 focus:outline-offset-0 focus:outline-green-500"
-          />
-          {errors[`participant${participantNumber}`]?.name && (
-            <p className="mt-1 text-xs text-red-500">
-              {errors[`participant${participantNumber}`]?.name?.message}
-            </p>
-          )}
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <select
-              {...register(`participant${participantNumber}.year` as const, {
-                required: "Year required",
-              })}
-              className="w-full px-4 py-2 border rounded-md bg-transparent form-input focus:border-0 focus:outline-offset-0 focus:outline-green-500"
-            >
-              <option value="" className="bg-black">
-                Select Year
-              </option>
-              <option value="1" className="bg-black">
-                1st Year
-              </option>
-              <option value="2" className="bg-black">
-                2nd Year
-              </option>
-              <option value="3" className="bg-black">
-                3rd Year
-              </option>
-              <option value="4" className="bg-black">
-                4th Year
-              </option>
-            </select>
-            {errors[`participant${participantNumber}`]?.year && (
-              <p className="mt-1 text-xs text-red-500">
-                {errors[`participant${participantNumber}`]?.year?.message}
-              </p>
-            )}
-          </div>
-          <div>
-            <select
-              {...register(`participant${participantNumber}.branch` as const, {
-                required: "Branch required",
-              })}
-              className="w-full px-4 py-2 border rounded-md bg-transparent form-input focus:border-0 focus:outline-offset-0 focus:outline-green-500"
-            >
-              <option value="" className="bg-black">
-                Select Branch
-              </option>
-              {branches.map((branch, index) => (
-                <option key={index} value={branch} className="bg-black">
-                  {branch}
-                </option>
-              ))}
-            </select>
-            {errors[`participant${participantNumber}`]?.branch && (
-              <p className="mt-1 text-xs text-red-500">
-                {errors[`participant${participantNumber}`]?.branch?.message}
-              </p>
-            )}
-          </div>
-        </div>
-        <div>
-          <input
-            {...register(`participant${participantNumber}.usn` as const, {
-              required:
-                (participantNumber === 1 && watchYear1 === "1") ||
-                (participantNumber === 2 && watchYear2 === "1")
-                  ? "Admission Number required"
-                  : "USN required",
-              pattern: {
-                value:
-                  (participantNumber === 1 && watchYear1 === "1") ||
-                  (participantNumber === 2 && watchYear2 === "1")
-                    ? /^[1-9][0-9][A-Z]{4}[0-9]{4}$/
-                    : /^1DS[1-3][0-9][A-Z]{2}[0-9]{3}$/,
-                message:
-                  (participantNumber === 1 && watchYear1 === "1") ||
-                  (participantNumber === 2 && watchYear2 === "1")
-                    ? "Invalid Admission Number"
-                    : "Invalid USN",
-              },
-            })}
-            placeholder={
-              (participantNumber === 1 && watchYear1 === "1") ||
-              (participantNumber === 2 && watchYear2 === "1")
-                ? "Admission Number"
-                : "USN"
-            }
-            className="w-full px-4 py-2 border rounded-md bg-transparent form-input focus:border-0 focus:outline-offset-0 focus:outline-green-500"
-          />
-          {errors[`participant${participantNumber}`]?.usn && (
-            <p className="mt-1 text-xs text-red-500">
-              {errors[`participant${participantNumber}`]?.usn?.message}
-            </p>
-          )}
-        </div>
-        <div>
-          <input
-            {...register(`participant${participantNumber}.email` as const, {
-              required: "Email required",
-              pattern: {
-                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                message: "Invalid email address",
-              },
-            })}
-            placeholder="Email"
-            className="w-full px-4 py-2 border rounded-md bg-transparent form-input focus:border-0 focus:outline-offset-0 focus:outline-green-500"
-          />
-          {errors[`participant${participantNumber}`]?.email && (
-            <p className="mt-1 text-xs text-red-500">
-              {errors[`participant${participantNumber}`]?.email?.message}
-            </p>
-          )}
-        </div>
-        <div>
-          <input
-            {...register(`participant${participantNumber}.phone` as const, {
-              required: "Phone required",
-              pattern: {
-                value: /^[6-9]\d{9}$/,
-                message: "Invalid phone number (10 digits starting with 6-9)",
-              },
-            })}
-            placeholder="Phone Number"
-            maxLength={10}
-            type="tel"
-            className="w-full px-4 py-2 border rounded-md bg-transparent form-input focus:border-0 focus:outline-offset-0 focus:outline-green-500"
-          />
-          {errors[`participant${participantNumber}`]?.phone && (
-            <p className="mt-1 text-xs text-red-500">
-              {errors[`participant${participantNumber}`]?.phone?.message}
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+
 
   return (
-    <>
-      <div className="max-w-3xl mx-auto p-4 sm:p-6 rounded-lg mt-10">
-        <h1
-          className={`${pressStart2P.className} md:text-2xl sm:text-sm font-bold mb-6 text-center text-green-500`}
-          style={{
-            textShadow: "2px 2px 0px #000",
-            letterSpacing: "2px",
-            minHeight: "3rem",
-          }}
+    <div className="max-w-4xl mx-auto">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Participation Type */}
+        <StepCard
+          stepNumber={0}
+          title="Choose Participation Mode"
+          isCompleted={completedSteps.has(0)}
+          isExpanded={expandedSteps.has(0)}
+          onStepClick={handleStepClick}
         >
-          {headingText}
-        </h1>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="space-y-6 sm:mx-auto md:mx-20"
+          <ParticipationTypeSelection 
+            register={register}
+            participationType={participationType}
+          />
+        </StepCard>
+
+        {/* Participant 1 */}
+        <StepCard
+          stepNumber={1}
+          title={participationType === 'solo' ? "Your Details" : "Team Leader Details"}
+          isCompleted={completedSteps.has(1)}
+          isExpanded={expandedSteps.has(1)}
+          onStepClick={handleStepClick}
         >
-          <div>
-            <label className="block mb-2">
-              Participation Type<span className="text-red-600"> * </span>
-            </label>
-            <select
-              {...register("participationType", { required: true })}
-              onChange={(e) =>
-                setParticipationType(e.target.value as "solo" | "duo")
-              }
-              className="w-full px-4 py-2 border rounded-md bg-transparent form-input focus:border-0 focus:outline-offset-0 focus:outline-green-500"
-            >
-              <option value="solo" className="bg-black">
-                Solo
-              </option>
-              <option value="duo" className="bg-black">
-                Duo
-              </option>
-            </select>
+          <ParticipantForm 
+            participantNumber={1} 
+            register={register} 
+            errors={errors} 
+            watch={watch}
+          />
+        </StepCard>
+
+        {/* Participant 2 (only for duo) */}
+        {participationType === 'duo' && (
+          <StepCard
+            stepNumber={2}
+            title="Team Member Details"
+            isCompleted={completedSteps.has(2)}
+            isExpanded={expandedSteps.has(2)}
+            onStepClick={handleStepClick}
+          >
+            <ParticipantForm 
+              participantNumber={2} 
+              register={register} 
+              errors={errors} 
+              watch={watch}
+            />
+          </StepCard>
+        )}
+
+        {/* Additional Questions */}
+        <StepCard
+          stepNumber={3}
+          title="Additional Questions"
+          isCompleted={completedSteps.has(3)}
+          isExpanded={expandedSteps.has(3)}
+          onStepClick={handleStepClick}
+        >
+          <AdditionalQuestions 
+            register={register}
+            errors={errors}
+            watch={watch}
+          />
+        </StepCard>
+
+        {/* Rules & Agreements */}
+        <StepCard
+          stepNumber={4}
+          title="Rules & Agreements"
+          isCompleted={completedSteps.has(4)}
+          isExpanded={expandedSteps.has(4)}
+          onStepClick={handleStepClick}
+        >
+          <RulesAgreements 
+            register={register}
+            errors={errors}
+          />
+        </StepCard>
+
+        {emailError && (
+          <div className="bg-red-900/20 border border-red-400/30 rounded-lg p-4">
+            <p className="text-red-400 font-mono text-sm text-center">{emailError}</p>
           </div>
+        )}
 
-          {renderParticipantFields(1)}
-          {participationType === "duo" && renderParticipantFields(2)}
-
-          {usnError && (
-            <p className="text-red-500 text-center font-bold">{usnError}</p>
-          )}
-
-          <div className="flex justify-center w-full">
+        {/* Submit Button */}
+        {completedSteps.has(4) && (
+          <div className="bg-gray-900/50 border border-green-400/30 rounded-lg p-6">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-1/2 bg-green-500 text-white rounded-full py-2 px-4 text-base font-semibold hover:bg-green-600 transition duration-300 transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 mx-auto"
+              className="w-full bg-green-400/10 hover:bg-green-400/20 border border-green-400 text-green-300 font-mono py-4 px-6 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group"
             >
-              {isSubmitting ? "Submitting..." : "Submit"}
+              <span className="flex items-center justify-center gap-2">
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-green-400/20 border-t-green-400 rounded-full animate-spin"></div>
+                    Processing Registration...
+                  </>
+                ) : (
+                  <>
+                    <span>Complete Registration</span>
+                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </>
+                )}
+              </span>
             </button>
+            <p className="text-xs text-gray-500 mt-3 text-center font-mono">
+              By registering, you agree to the PBCTF terms and conditions
+            </p>
           </div>
-        </form>
-      </div>
-    </>
+        )}
+      </form>
+    </div>
   );
 };
 
