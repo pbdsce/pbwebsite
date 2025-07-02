@@ -59,8 +59,6 @@ const participantSchema = new Schema<Participant>({
   },
   background: { type: backgroundSchema, required: true },
   phone: { type: String, required: true },
-  branch: { type: String, required: true },
-  college: { type: String, required: true },
 });
 
 const registrationSchema = new Schema<Registration>({
