@@ -1,4 +1,5 @@
 import connectMongoDB from "@/lib/dbConnect";
+import { rateLimiter } from "@/lib/ratelimiter";
 import CtfRegsModel from "@/models/CTFRegs";
 import { NextResponse } from "next/server";
 /**
@@ -59,24 +60,23 @@ export async function GET(request: Request) {
   await connectMongoDB();
   try {
     const { searchParams } = new URL(request.url);
-    const usn = searchParams.get("usn");
-    if (!usn) {
+    const email = searchParams.get("email");
+    if (!email) {
       return NextResponse.json({ error: "usn is required" }, { status: 400 });
     }
 
     const existing = await CtfRegsModel.findOne({
-      $or: [{ "participant1.usn": usn }, { "participant2.usn": usn }],
+      $or: [{ "participant1.email": email }, { "participant2.email": email }],
     });
 
     if (existing) {
       return NextResponse.json(
-        { message: "usn already exists", isUnique: false },
+        { message: "email already exists", isUnique: false },
         { status: 200 }
       );
     }
-
     return NextResponse.json(
-      { message: "usn not registered", isUnique: true },
+      { message: "email not registered", isUnique: true },
       { status: 403 }
     );
   } catch (error) {
@@ -154,6 +154,17 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+
+    const allowed = rateLimiter(ip, 10); // 10 requests per minute
+    if (!allowed) {
+      return new Response(
+        JSON.stringify({ error: "Too many requests. Try again in a minute." }),
+        { status: 429 }
+      );
+    }
+
     const { searchParams } = new URL(request.url); // Extract query parameters
     const action = searchParams.get("action"); // Determine the action from query params
 
@@ -334,11 +345,39 @@ async function addRegistration(request: Request) {
         { status: 400 }
       );
     }
-    const isValidFlag = await checkFlag(request);
-    if (!isValidFlag.ok) {
-      return NextResponse.json({ error: "Invalid flag." }, { status: 400 });
-    }
-    const newDoc = new CtfRegsModel(data);
+    // const isValidFlag = await checkFlag(request);
+    // if (!isValidFlag.ok) {
+    //   return NextResponse.json({ error: "Invalid flag." }, { status: 400 });
+    // }
+        const transformParticipant = (p: any) => {
+      if (!p) return undefined;
+
+      return {
+        name: p.name,
+        email: p.email,
+        age: parseInt(p.age),
+        phone: p.phone,
+        gender: p.gender,
+        background: {
+          experienceLevel: p.experienceLevel,
+          previousParticipation: p.previousCTF === "Yes",
+          participationDetails: p.previousCTF === "Yes" ? p.ctfNames : undefined,
+          affiliationType: p.affiliation,
+          affiliationName: p.affiliationName,
+          howDidYouHearAboutUs: p.howDidYouHear,
+        },
+      };
+    };
+
+    const registrationData = {
+      participant1: transformParticipant(data.participant1),
+      participant2: data.participationType === "duo" ? transformParticipant(data.participant2) : undefined,
+      participationType: data.participationType,
+    };
+
+   
+
+    const newDoc = new CtfRegsModel(registrationData);
     await newDoc.save();
     return NextResponse.json({ message: "Registration successful!" });
   } catch (error) {
@@ -358,7 +397,8 @@ async function checkFlag(request: Request) {
     }
     const { flag } = data;
 
-    const isValidFlag = true;
+    const isValidFlag = flag === process.env.PB_CTF_FLAG;
+  
 
     if (isValidFlag) {
       return NextResponse.json({ message: "Flag is valid!" }, { status: 200 });
