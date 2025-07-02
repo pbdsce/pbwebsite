@@ -4,37 +4,22 @@ interface Participant {
   name: string;
   email: string;
   age: number;
-  gender: Gender;
+  gender: "Male" | "Female" | "Other" | "Prefer not to say";
   phone: string;
   background: Background;
 }
 
 interface Background {
-  experRienceLevel: Experience;
+  experienceLevel: "Beginner" | "Intermediate" | "Advanced";
   previousParticipation: boolean;
   participationDetails?: string;
-  affiliationType: Affiliation;
+  affiliationType: "Student" | "Professional" | "Hobbyist";
   affiliationName: string;
+  howDidYouHearAboutUs?: string[];
 }
 
-export enum Gender {
-  Male = "male",
-  Female = "female",
-  Other = "other",
-  PreferNotToSay = "prefer_not_to_say",
-}
 
-export enum Experience {
-  Beginner = "beginner",
-  Intermediate = "intermediate",
-  Advanced = "advanced",
-}
 
-export enum Affiliation {
-  Student = "student",
-  Professional = "professional",
-  Hobbyist = "hobbyist",
-}
 
 export interface Registration extends Document {
   participant1: Participant;
@@ -43,9 +28,9 @@ export interface Registration extends Document {
 }
 
 const backgroundSchema = new Schema({
-  experRienceLevel: {
+  experienceLevel: {
     type: String,
-    enum: Object.values(Experience),
+    enum: ["Beginner", "Intermediate", "Advanced"],
     required: true,
   },
   previousParticipation: { type: Boolean, required: true },
@@ -57,17 +42,18 @@ const backgroundSchema = new Schema({
   },
   affiliationType: {
     type: String,
-    enum: Object.values(Affiliation),
+    enum: ["Student", "Professional", "Hobbyist"],
     required: true,
   },
   affiliationName: { type: String, required: true },
+  howDidYouHearAboutUs: { type: String, required: false },
 });
 
 const participantSchema = new Schema<Participant>({
   name: { type: String, required: true },
   email: { type: String, required: true },
   age: { type: Number, required: true },
-  gender: { type: String, enum: Object.values(Gender), required: true },
+  gender: { type: String, enum: ["Male", "Female", "Other", "Prefer not to say"], required: true },
   background: { type: backgroundSchema, required: true },
   phone: { type: String, required: true },
 });
