@@ -1,5 +1,5 @@
 import connectMongoDB from "@/lib/dbConnect";
-import { rateLimiter } from "@/lib/ratelimiter";
+import { ratelimiter } from "@/lib/ratelimiter";
 import CtfRegsModel from "@/models/CTFRegs";
 import { NextResponse } from "next/server";
 /**
@@ -60,25 +60,44 @@ export async function GET(request: Request) {
   await connectMongoDB();
   try {
     const { searchParams } = new URL(request.url);
-    const email = searchParams.get("email");
-    if (!email) {
-      return NextResponse.json({ error: "usn is required" }, { status: 400 });
-    }
+    const identifier = searchParams.get("identifier");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    const existing = await CtfRegsModel.findOne({
-      $or: [{ "participant1.email": email }, { "participant2.email": email }],
-    });
-
-    if (existing) {
+    if (identifier && emailRegex.test(identifier)) {
+      const existing = await CtfRegsModel.findOne({
+        $or: [
+          { "participant1.email": identifier },
+          { "participant2.email": identifier },
+        ],
+      });
+      if (existing) {
+        return NextResponse.json(
+          { message: "email already exists", isUnique: false },
+          { status: 200 }
+        );
+      }
       return NextResponse.json(
-        { message: "email already exists", isUnique: false },
-        { status: 200 }
+        { message: "email not registered", isUnique: true },
+        { status: 403 }
+      );
+    } else {
+      const existing = await CtfRegsModel.findOne({
+        $or: [
+          { "participant1.phone": identifier },
+          { "participant2.phone": identifier },
+        ],
+      });
+      if (existing) {
+        return NextResponse.json(
+          { message: "phone already exists", isUnique: false },
+          { status: 200 }
+        );
+      }
+      return NextResponse.json(
+        { message: "phone not registered", isUnique: true },
+        { status: 403 }
       );
     }
-    return NextResponse.json(
-      { message: "email not registered", isUnique: true },
-      { status: 403 }
-    );
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error details:", error.message);
@@ -154,15 +173,11 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
-    const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
-
-    const allowed = rateLimiter(ip, 10); // 10 requests per minute
-    if (!allowed) {
-      return new Response(
-        JSON.stringify({ error: "Too many requests. Try again in a minute." }),
-        { status: 429 }
-      );
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+ 
+    const { success } = await ratelimiter.limit(ip);
+    if (!success) {
+      return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
     }
 
     const { searchParams } = new URL(request.url); // Extract query parameters
@@ -345,11 +360,8 @@ async function addRegistration(request: Request) {
         { status: 400 }
       );
     }
-    // const isValidFlag = await checkFlag(request);
-    // if (!isValidFlag.ok) {
-    //   return NextResponse.json({ error: "Invalid flag." }, { status: 400 });
-    // }
-        const transformParticipant = (p: any) => {
+
+    const transformParticipant = (p: any) => {
       if (!p) return undefined;
 
       return {
@@ -361,7 +373,8 @@ async function addRegistration(request: Request) {
         background: {
           experienceLevel: p.experienceLevel,
           previousParticipation: p.previousCTF === "Yes",
-          participationDetails: p.previousCTF === "Yes" ? p.ctfNames : undefined,
+          participationDetails:
+            p.previousCTF === "Yes" ? p.ctfNames : undefined,
           affiliationType: p.affiliation,
           affiliationName: p.affiliationName,
           howDidYouHearAboutUs: p.howDidYouHear,
@@ -371,11 +384,12 @@ async function addRegistration(request: Request) {
 
     const registrationData = {
       participant1: transformParticipant(data.participant1),
-      participant2: data.participationType === "duo" ? transformParticipant(data.participant2) : undefined,
+      participant2:
+        data.participationType === "duo"
+          ? transformParticipant(data.participant2)
+          : undefined,
       participationType: data.participationType,
     };
-
-   
 
     const newDoc = new CtfRegsModel(registrationData);
     await newDoc.save();
@@ -384,31 +398,6 @@ async function addRegistration(request: Request) {
     console.error("Error adding registration:", error);
     return NextResponse.json(
       { error: "Failed to add registration.", details: error },
-      { status: 500 }
-    );
-  }
-}
-
-async function checkFlag(request: Request) {
-  try {
-    const data = await request.json();
-    if (!data || !data.flag) {
-      return NextResponse.json({ error: "Flag is required." }, { status: 400 });
-    }
-    const { flag } = data;
-
-    const isValidFlag = flag === process.env.PB_CTF_FLAG;
-  
-
-    if (isValidFlag) {
-      return NextResponse.json({ message: "Flag is valid!" }, { status: 200 });
-    } else {
-      return NextResponse.json({ error: "Invalid flag." }, { status: 400 });
-    }
-  } catch (error) {
-    console.error("Error checking flag:", error);
-    return NextResponse.json(
-      { error: "Failed to check flag.", details: error },
       { status: 500 }
     );
   }
