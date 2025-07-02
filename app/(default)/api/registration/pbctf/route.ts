@@ -334,6 +334,10 @@ async function addRegistration(request: Request) {
         { status: 400 }
       );
     }
+    const isValidFlag = await checkFlag(request);
+    if (!isValidFlag.ok) {
+      return NextResponse.json({ error: "Invalid flag." }, { status: 400 });
+    }
     const newDoc = new CtfRegsModel(data);
     await newDoc.save();
     return NextResponse.json({ message: "Registration successful!" });
@@ -341,6 +345,30 @@ async function addRegistration(request: Request) {
     console.error("Error adding registration:", error);
     return NextResponse.json(
       { error: "Failed to add registration.", details: error },
+      { status: 500 }
+    );
+  }
+}
+
+async function checkFlag(request: Request) {
+  try {
+    const data = await request.json();
+    if (!data || !data.flag) {
+      return NextResponse.json({ error: "Flag is required." }, { status: 400 });
+    }
+    const { flag } = data;
+
+    const isValidFlag = true;
+
+    if (isValidFlag) {
+      return NextResponse.json({ message: "Flag is valid!" }, { status: 200 });
+    } else {
+      return NextResponse.json({ error: "Invalid flag." }, { status: 400 });
+    }
+  } catch (error) {
+    console.error("Error checking flag:", error);
+    return NextResponse.json(
+      { error: "Failed to check flag.", details: error },
       { status: 500 }
     );
   }
