@@ -412,28 +412,3 @@ async function addRegistration(request: Request) {
     );
   }
 }
-
-async function checkFlag(request: Request) {
-  try {
-    const data = await request.json();
-    if (!data || !data.flag) {
-      return NextResponse.json({ error: "Flag is required." }, { status: 400 });
-    }
-    const { flag } = data;
-
-    const isValidFlag = flag === process.env.PB_CTF_FLAG;
-  
-
-    if (isValidFlag) {
-      return NextResponse.json({ message: "Flag is valid!" }, { status: 200 });
-    } else {
-      return NextResponse.json({ error: "Invalid flag." }, { status: 400 });
-    }
-  } catch (error) {
-    console.error("Error checking flag:", error);
-    return NextResponse.json(
-      { error: "Failed to check flag.", details: error },
-      { status: 500 }
-    );
-  }
-}
