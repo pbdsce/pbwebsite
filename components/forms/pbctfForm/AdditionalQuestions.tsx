@@ -20,15 +20,6 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
   const [timeElapsed, setTimeElapsed] = useState(0);
 
   useEffect(() => {
-    // Hide the flag in the console for CTF challenge
-    const flagData = "cGJjdGZ7cGxzX2g0Y2tfbTNfZDRkZHl9"; // base64 encoded flag
-    const decodedFlag = atob(flagData);
-    console.log(`
-🕵️‍♂️ SECRET AGENT FLAG FOUND! 🕵️‍♂️
-Congratulations! You found the hidden flag: ${decodedFlag}
-Copy this flag and paste it in the registration form!
-`);
-    (window as any).ctfFlag = decodedFlag;
 
     const timer = setInterval(() => {
       setTimeElapsed(prev => {
