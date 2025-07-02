@@ -55,7 +55,7 @@ import { NextResponse } from "next/server";
  *                   type: string
  *                   example: "Detailed error message"
  */
-//Check if USN exists
+//Check if email and phone exists
 export async function GET(request: Request) {
   await connectMongoDB();
   try {
@@ -63,7 +63,14 @@ export async function GET(request: Request) {
     const identifier = searchParams.get("identifier");
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (identifier && emailRegex.test(identifier)) {
+    if (!identifier) {
+      return NextResponse.json(
+        { error: "Missing identifier" },
+        { status: 400 }
+      );
+    }
+
+    if (emailRegex.test(identifier)) {
       const existing = await CtfRegsModel.findOne({
         $or: [
           { "participant1.email": identifier },
@@ -173,12 +180,12 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
-    const ip = request.headers.get('x-forwarded-for') || 'unknown';
- 
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+
     const { success } = await ratelimiter.limit(ip);
     if (!success) {
-      return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
-    } 
+      return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });
+    }
 
     const { searchParams } = new URL(request.url); // Extract query parameters
     const action = searchParams.get("action"); // Determine the action from query params
