@@ -74,7 +74,7 @@ const PBCTFRegisterPage = () => {
           className="bg-gray-900/30 border border-green-400/20 rounded-lg"
         >
           <div className="border-b border-green-400/20 px-6 py-3">
-            <h2 className="text-green-300 font-semibold">// Registration Terminal</h2>
+            <h2 className="text-green-300 font-semibold">Registration Terminal</h2>
           </div>
           <div className="p-6">
             <PBCTFForm />
