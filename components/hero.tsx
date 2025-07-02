@@ -85,7 +85,7 @@ export default function Hero() {
                                 <div className="mt-4 pt-3 border-t border-green-400/30">
                                   <div className="text-cyan-300">
                                     <span className="text-white">$ </span>
-                                    <span>echo "Join the CTF challenge!"</span>
+                                    <span>echo &quot;Join the CTF challenge!&quot;</span>
                                   </div>
                                   <div className="text-green-200 ml-2 mt-1">
                                     Join the CTF challenge!
