@@ -384,7 +384,6 @@ async function addRegistration(request: Request) {
             p.previousCTF === "Yes" ? p.ctfNames : undefined,
           affiliationType: p.affiliation,
           affiliationName: p.affiliationName,
-          howDidYouHearAboutUs: p.howDidYouHear,
         },
       };
     };
@@ -396,6 +395,10 @@ async function addRegistration(request: Request) {
           ? transformParticipant(data.participant2)
           : undefined,
       participationType: data.participationType,
+      howDidYouHearAboutUs: data.howDidYouHear,
+      agreeRules: data.agreeRules,
+      consentLeaderboard: data.consentLeaderboard,
+      allowContact: data.allowContact,
     };
 
     const newDoc = new CtfRegsModel(registrationData);

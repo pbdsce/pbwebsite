@@ -18,13 +18,14 @@ interface Background {
   howDidYouHearAboutUs?: string[];
 }
 
-
-
-
 export interface Registration extends Document {
   participant1: Participant;
   participant2?: Participant;
   participationType: "solo" | "duo";
+  howDidYouHearAboutUs?: string[];
+  agreeRules: boolean;
+  consentLeaderboard: boolean;
+  allowContact: boolean;
 }
 
 const backgroundSchema = new Schema({
@@ -46,14 +47,18 @@ const backgroundSchema = new Schema({
     required: true,
   },
   affiliationName: { type: String, required: true },
-  howDidYouHearAboutUs: { type: String, required: false },
+  howDidYouHearAboutUs: { type: [String], required: false },
 });
 
 const participantSchema = new Schema<Participant>({
   name: { type: String, required: true },
   email: { type: String, required: true },
   age: { type: Number, required: true },
-  gender: { type: String, enum: ["Male", "Female", "Other", "Prefer not to say"], required: true },
+  gender: {
+    type: String,
+    enum: ["Male", "Female", "Other", "Prefer not to say"],
+    required: true,
+  },
   background: { type: backgroundSchema, required: true },
   phone: { type: String, required: true },
 });
@@ -66,12 +71,15 @@ const registrationSchema = new Schema<Registration>({
       return this.participationType === "duo";
     },
   },
-
   participationType: {
     type: String,
     enum: ["solo", "duo"],
     required: true,
   },
+  howDidYouHearAboutUs: { type: [String], required: false },
+  agreeRules: { type: Boolean, required: true },
+  consentLeaderboard: { type: Boolean, required: true },
+  allowContact: { type: Boolean, required: true },
 });
 
 const CtfRegsModel =

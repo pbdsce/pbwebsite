@@ -232,7 +232,6 @@ const PBCTFForm: React.FC = () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     setEmailError(null);
-
     try {
       const recaptcha_token = token;
       if (recaptcha_token) {
