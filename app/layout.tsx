@@ -40,7 +40,7 @@ export default function RootLayout({
       >
         <NextThemesProvider>
           <Link href="/pbctf" className="flex w-full bg-yellow-500 text-black p-2 justify-center items-center text-center z-50 fixed top-0 left-0">
-            PBCTF Registration is LIVE!
+            🚨 PBCTF Registration is LIVE! 🚨
           </Link>
           <div className="flex flex-col min-h-screen overflow-hidden supports-[overflow:clip]:overflow-clip pt-10">
             <Header />
