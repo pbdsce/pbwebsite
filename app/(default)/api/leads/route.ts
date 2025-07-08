@@ -94,35 +94,35 @@ export async function GET(request: Request) {
  *         description: Error creating lead
  */
 // POST method: Add a new lead
-export async function POST(request: Request) {
-  try {
-    const leadData = await request.json();
+// export async function POST(request: Request) {
+//   try {
+//     const leadData = await request.json();
 
-    const validationError = validateLeadData(leadData);
-    if (validationError) {
-      return NextResponse.json({ error: validationError }, { status: 400 });
-    }
+//     const validationError = validateLeadData(leadData);
+//     if (validationError) {
+//       return NextResponse.json({ error: validationError }, { status: 400 });
+//     }
 
-    const leadID: string = uuidv4();
+//     const leadID: string = uuidv4();
 
-    const newLead = new Leadsmodel({
-      id: leadID,
-      ...leadData,
-    });
+//     const newLead = new Leadsmodel({
+//       id: leadID,
+//       ...leadData,
+//     });
 
-    const savedLead = await newLead.save();
-    return NextResponse.json(savedLead, { status: 201 });
-  } catch (error) {
-    console.error("Error creating lead:", error);
-    return NextResponse.json(
-      {
-        error: "An error occurred while creating the lead",
-        details: (error as Error).message,
-      },
-      { status: 500 }
-    );
-  }
-}
+//     const savedLead = await newLead.save();
+//     return NextResponse.json(savedLead, { status: 201 });
+//   } catch (error) {
+//     console.error("Error creating lead:", error);
+//     return NextResponse.json(
+//       {
+//         error: "An error occurred while creating the lead",
+//         details: (error as Error).message,
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
 /**
  * @swagger
  * /api/leads:
@@ -142,49 +142,49 @@ export async function POST(request: Request) {
  *         description: Error updating lead
  */
 // PUT method: Update an existing lead
-export async function PUT(request: Request) {
-  try {
-    const leadData = await request.json();
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-    const user = await Leadsmodel.findOne({ id });
-    const _id = user._id;
+// export async function PUT(request: Request) {
+//   try {
+//     const leadData = await request.json();
+//     const { searchParams } = new URL(request.url);
+//     const id = searchParams.get("id");
+//     const user = await Leadsmodel.findOne({ id });
+//     const _id = user._id;
     
-    if (!id) {
-      return NextResponse.json(
-        { error: "Lead ID is required" },
-        { status: 400 }
-      );
-    }
+//     if (!id) {
+//       return NextResponse.json(
+//         { error: "Lead ID is required" },
+//         { status: 400 }
+//       );
+//     }
 
-    // Validate the incoming lead data
-    const validationError = validateLeadData(leadData);
-    if (validationError) {
-      return NextResponse.json({ error: validationError }, { status: 400 });
-    }
+//     // Validate the incoming lead data
+//     const validationError = validateLeadData(leadData);
+//     if (validationError) {
+//       return NextResponse.json({ error: validationError }, { status: 400 });
+//     }
 
-    const updatedLead = await Leadsmodel.findOneAndUpdate(
-      { _id },
-      { ...leadData },
-      { new: true }
-    );
+//     const updatedLead = await Leadsmodel.findOneAndUpdate(
+//       { _id },
+//       { ...leadData },
+//       { new: true }
+//     );
     
-    if (!updatedLead) {
-      return NextResponse.json({ error: "Lead not found" }, { status: 404 });
-    }
+//     if (!updatedLead) {
+//       return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+//     }
 
-    return NextResponse.json(updatedLead, { status: 200 });
-  } catch (error) {
-    console.error("Error updating lead:", error);
-    return NextResponse.json(
-      {
-        error: "An error occurred while updating the lead",
-        details: (error as Error).message,
-      },
-      { status: 500 }
-    );
-  }
-}
+//     return NextResponse.json(updatedLead, { status: 200 });
+//   } catch (error) {
+//     console.error("Error updating lead:", error);
+//     return NextResponse.json(
+//       {
+//         error: "An error occurred while updating the lead",
+//         details: (error as Error).message,
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
 
 // DELETE method: Remove an existing lead
 /**
@@ -205,61 +205,61 @@ export async function PUT(request: Request) {
  *       500:
  *         description: Error deleting lead
  */
-export async function DELETE(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
+// export async function DELETE(request: Request) {
+//   try {
+//     const { searchParams } = new URL(request.url);
+//     const id = searchParams.get("id");
 
-    if (!id) {
-      return NextResponse.json(
-        { error: "Lead ID is required" },
-        { status: 400 }
-      );
-    }
+//     if (!id) {
+//       return NextResponse.json(
+//         { error: "Lead ID is required" },
+//         { status: 400 }
+//       );
+//     }
 
-    const deletedLead = await Leadsmodel.findOne({ id });
+//     const deletedLead = await Leadsmodel.findOne({ id });
     
-    if (!deletedLead) {
-      return NextResponse.json({ error: "Lead not found" }, { status: 404 });
-    }
+//     if (!deletedLead) {
+//       return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+//     }
 
-    // If there's an image URL, delete it from Cloudinary
-    if (deletedLead.imageUrl) {
-      try {
-        // Extract the filename from URL
-        const urlParts = deletedLead.imageUrl.split('/');
-        const filename = urlParts[urlParts.length - 1].split('.')[0];
+//     // If there's an image URL, delete it from Cloudinary
+//     if (deletedLead.imageUrl) {
+//       try {
+//         // Extract the filename from URL
+//         const urlParts = deletedLead.imageUrl.split('/');
+//         const filename = urlParts[urlParts.length - 1].split('.')[0];
         
-        // Format the public ID as shown in your console
-        const publicId = `leads/${deletedLead.name}-${filename.split('-').pop()}`;
+//         // Format the public ID as shown in your console
+//         const publicId = `leads/${deletedLead.name}-${filename.split('-').pop()}`;
         
-        // Delete the image
-        const result = await cloudinary.uploader.destroy(publicId);
-        console.log("Cloudinary delete result:", result);
-      } catch (cloudinaryError) {
-        console.error("Error deleting image from Cloudinary:", cloudinaryError);
-        // Continue with lead deletion even if image deletion fails
-      }
-    }
+//         // Delete the image
+//         const result = await cloudinary.uploader.destroy(publicId);
+//         console.log("Cloudinary delete result:", result);
+//       } catch (cloudinaryError) {
+//         console.error("Error deleting image from Cloudinary:", cloudinaryError);
+//         // Continue with lead deletion even if image deletion fails
+//       }
+//     }
 
-    await Leadsmodel.deleteOne({ id });
-    return NextResponse.json(
-      { message: "Lead deleted successfully" },
-      { status: 200 }
-    );
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("Error deleting lead:", error.message);
-      return NextResponse.json(
-        { error: "An error occurred while deleting the lead", details: error.message },
-        { status: 500 }
-      );
-    } else {
-      console.error("Unknown error:", error);
-      return NextResponse.json(
-        { error: "An unknown error occurred" },
-        { status: 500 }
-      );
-    }
-  }
-}
+//     await Leadsmodel.deleteOne({ id });
+//     return NextResponse.json(
+//       { message: "Lead deleted successfully" },
+//       { status: 200 }
+//     );
+//   } catch (error) {
+//     if (error instanceof Error) {
+//       console.error("Error deleting lead:", error.message);
+//       return NextResponse.json(
+//         { error: "An error occurred while deleting the lead", details: error.message },
+//         { status: 500 }
+//       );
+//     } else {
+//       console.error("Unknown error:", error);
+//       return NextResponse.json(
+//         { error: "An unknown error occurred" },
+//         { status: 500 }
+//       );
+//     }
+//   }
+// }

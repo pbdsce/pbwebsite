@@ -231,145 +231,145 @@ import connectMongoDB from "@/lib/dbConnect";
  */
 
 // POST method: Create or add a new achievement
-export async function POST(request: Request) {
-  try {
-    // Validate request method
-    if (request.method !== 'POST') {
-      return NextResponse.json(
-        { error: 'Method Not Allowed', details: 'Only POST requests are supported' },
-        { status: 405 }
-      );
-    }
+// export async function POST(request: Request) {
+//   try {
+//     // Validate request method
+//     if (request.method !== 'POST') {
+//       return NextResponse.json(
+//         { error: 'Method Not Allowed', details: 'Only POST requests are supported' },
+//         { status: 405 }
+//       );
+//     }
 
-    // Validate form data
-    await connectMongoDB();
-    const formData = await request.formData();
+//     // Validate form data
+//     await connectMongoDB();
+//     const formData = await request.formData();
 
-    // Comprehensive input validation
-    const requiredFields = ['email', 'name', 'batch', 'achievements', 'image'];
-    for (const field of requiredFields) {
-      if (!formData.get(field)) {
-        return NextResponse.json(
-          { error: 'Validation Failed', details: `Missing required field: ${field}` },
-          { status: 400 }
-        );
-      }
-    }
+//     // Comprehensive input validation
+//     const requiredFields = ['email', 'name', 'batch', 'achievements', 'image'];
+//     for (const field of requiredFields) {
+//       if (!formData.get(field)) {
+//         return NextResponse.json(
+//           { error: 'Validation Failed', details: `Missing required field: ${field}` },
+//           { status: 400 }
+//         );
+//       }
+//     }
 
-    // Extract data from the form
-    const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
-    const batch = formData.get("batch") as string;
-    const portfolio = formData.get("portfolio") as string;
-    const internship = formData.get("internship") as string;
-    const companyPosition = formData.get("companyPosition") as string;
-    const achievements = JSON.parse(
-      formData.get("achievements") as string
-    ) as string[];
-    const image: File | null = formData.get("image") as File;
+//     // Extract data from the form
+//     const name = formData.get("name") as string;
+//     const email = formData.get("email") as string;
+//     const batch = formData.get("batch") as string;
+//     const portfolio = formData.get("portfolio") as string;
+//     const internship = formData.get("internship") as string;
+//     const companyPosition = formData.get("companyPosition") as string;
+//     const achievements = JSON.parse(
+//       formData.get("achievements") as string
+//     ) as string[];
+//     const image: File | null = formData.get("image") as File;
 
-    // Check if a person with the same email already exists in MongoDB
-    const existingMember = await Achievementmodel.findOne({ email });
-    if (existingMember) {
-      return NextResponse.json(
-        { 
-          error: 'Duplicate Entry', 
-          details: `A member with the email ${email} already exists.` 
-        },
-        { status: 409 }
-      );
-    }
+//     // Check if a person with the same email already exists in MongoDB
+//     const existingMember = await Achievementmodel.findOne({ email });
+//     if (existingMember) {
+//       return NextResponse.json(
+//         { 
+//           error: 'Duplicate Entry', 
+//           details: `A member with the email ${email} already exists.` 
+//         },
+//         { status: 409 }
+//       );
+//     }
 
-    // Handle image upload to Cloudinary Storage
-    if (!image) {
-      return NextResponse.json(
-        { 
-          error: 'Upload Failed', 
-          details: 'Image file is required' 
-        },
-        { status: 400 }
-      );
-    }
+//     // Handle image upload to Cloudinary Storage
+//     if (!image) {
+//       return NextResponse.json(
+//         { 
+//           error: 'Upload Failed', 
+//           details: 'Image file is required' 
+//         },
+//         { status: 400 }
+//       );
+//     }
 
-    let imageUrl;
-    try {
-      // Convert the uploaded file (File object) to a Buffer
-      const arrayBuffer = await image.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+//     let imageUrl;
+//     try {
+//       // Convert the uploaded file (File object) to a Buffer
+//       const arrayBuffer = await image.arrayBuffer();
+//       const buffer = Buffer.from(arrayBuffer);
 
-      // Create a readable stream from the Buffer
-      const stream = Readable.from(buffer);
+//       // Create a readable stream from the Buffer
+//       const stream = Readable.from(buffer);
 
-      // Upload the image to Cloudinary
-      const uploadResult: UploadApiResponse = await new Promise(
-        (resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: "achievements", public_id: email },
-            (error, result) => {
-              if (error || !result) {
-                reject(error || new Error('Upload to Cloudinary failed'));
-              } else {
-                resolve(result);
-              }
-            }
-          );
+//       // Upload the image to Cloudinary
+//       const uploadResult: UploadApiResponse = await new Promise(
+//         (resolve, reject) => {
+//           const uploadStream = cloudinary.uploader.upload_stream(
+//             { folder: "achievements", public_id: email },
+//             (error, result) => {
+//               if (error || !result) {
+//                 reject(error || new Error('Upload to Cloudinary failed'));
+//               } else {
+//                 resolve(result);
+//               }
+//             }
+//           );
 
-          // Pipe the readable stream into the Cloudinary upload stream
-          stream.pipe(uploadStream);
-        }
-      );
-      imageUrl = uploadResult.secure_url;
-    } catch (uploadError) {
-      return NextResponse.json(
-        { 
-          error: 'Image Upload Failed', 
-          details: (uploadError as Error).message 
-        },
-        { status: 500 }
-      );
-    }
+//           // Pipe the readable stream into the Cloudinary upload stream
+//           stream.pipe(uploadStream);
+//         }
+//       );
+//       imageUrl = uploadResult.secure_url;
+//     } catch (uploadError) {
+//       return NextResponse.json(
+//         { 
+//           error: 'Image Upload Failed', 
+//           details: (uploadError as Error).message 
+//         },
+//         { status: 500 }
+//       );
+//     }
 
-    // Create new achievement with comprehensive error handling
-    try {
-      const newAchievement = new Achievementmodel({
-        name,
-        email,
-        batch,
-        portfolio,
-        internship,
-        companyPosition,
-        achievements,
-        imageUrl,
-      });
+//     // Create new achievement with comprehensive error handling
+//     try {
+//       const newAchievement = new Achievementmodel({
+//         name,
+//         email,
+//         batch,
+//         portfolio,
+//         internship,
+//         companyPosition,
+//         achievements,
+//         imageUrl,
+//       });
 
-      const result = await newAchievement.save();
-      return NextResponse.json(
-        { 
-          message: 'Achievement Created Successfully', 
-          data: result 
-        },
-        { status: 201 }
-      );
-    } catch (saveError) {
-      return NextResponse.json(
-        { 
-          error: 'Database Save Failed', 
-          details: (saveError as Error).message 
-        },
-        { status: 500 }
-      );
-    }
-  } catch (error) {
-    console.error("Unexpected error in POST method:", error);
-    return NextResponse.json(
-      { 
-        error: 'Internal Server Error', 
-        details: (error as Error).message 
-      },
-      { status: 500 }
-    );
-  }
-}
+//       const result = await newAchievement.save();
+//       return NextResponse.json(
+//         { 
+//           message: 'Achievement Created Successfully', 
+//           data: result 
+//         },
+//         { status: 201 }
+//       );
+//     } catch (saveError) {
+//       return NextResponse.json(
+//         { 
+//           error: 'Database Save Failed', 
+//           details: (saveError as Error).message 
+//         },
+//         { status: 500 }
+//       );
+//     }
+//   } catch (error) {
+//     console.error("Unexpected error in POST method:", error);
+//     return NextResponse.json(
+//       { 
+//         error: 'Internal Server Error', 
+//         details: (error as Error).message 
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
 
 // GET method: Fetch achievements based on email or fetch all if no email is provided
 export async function GET(request: NextRequest) {
@@ -448,236 +448,236 @@ export async function GET(request: NextRequest) {
 }
 
 // PUT method: Update an existing achievement based on email
-export async function PUT(request: Request) {
-  try {
-    // Validate request method
-    if (request.method !== 'PUT') {
-      return NextResponse.json(
-        { error: 'Method Not Allowed', details: 'Only PUT requests are supported' },
-        { status: 405 }
-      );
-    }
+// export async function PUT(request: Request) {
+//   try {
+//     // Validate request method
+//     if (request.method !== 'PUT') {
+//       return NextResponse.json(
+//         { error: 'Method Not Allowed', details: 'Only PUT requests are supported' },
+//         { status: 405 }
+//       );
+//     }
 
-    await connectMongoDB();
-    const formData = await request.formData();
-    const email = formData.get("email") as string;
+//     await connectMongoDB();
+//     const formData = await request.formData();
+//     const email = formData.get("email") as string;
 
-    console.log("Received email in PUT method:", email);
+//     console.log("Received email in PUT method:", email);
     
-    // Validate email is provided
-    if (!email) {
-      return NextResponse.json(
-        { 
-          error: 'Validation Failed', 
-          details: 'Email is required for updating a member' 
-        },
-        { status: 400 }
-      );
-    }
+//     // Validate email is provided
+//     if (!email) {
+//       return NextResponse.json(
+//         { 
+//           error: 'Validation Failed', 
+//           details: 'Email is required for updating a member' 
+//         },
+//         { status: 400 }
+//       );
+//     }
 
-    // Fetch the existing document by email
-    const existingMember = await Achievementmodel.findOne({ email });
-    if (!existingMember) {
-      return NextResponse.json(
-        { 
-          error: 'Not Found', 
-          details: `No member found with the email ${email}` 
-        },
-        { status: 404 }
-      );
-    }
+//     // Fetch the existing document by email
+//     const existingMember = await Achievementmodel.findOne({ email });
+//     if (!existingMember) {
+//       return NextResponse.json(
+//         { 
+//           error: 'Not Found', 
+//           details: `No member found with the email ${email}` 
+//         },
+//         { status: 404 }
+//       );
+//     }
     
-    // Use findOneAndUpdate instead of modifying the existing document
-    const achievementsJson = formData.get("achievements") as string;
-    const updatedAchievements = JSON.parse(achievementsJson);
+//     // Use findOneAndUpdate instead of modifying the existing document
+//     const achievementsJson = formData.get("achievements") as string;
+//     const updatedAchievements = JSON.parse(achievementsJson);
     
-    // Prepare update data
-    const updateData: any = {
-      achievements: updatedAchievements,
-    };
+//     // Prepare update data
+//     const updateData: any = {
+//       achievements: updatedAchievements,
+//     };
     
-    // Only add fields that are provided in the form data
-    if (formData.get("name")) updateData.name = formData.get("name") as string;
-    if (formData.get("batch")) updateData.batch = formData.get("batch") as string;
-    if (formData.get("portfolio")) updateData.portfolio = formData.get("portfolio") as string;
-    if (formData.get("internship")) updateData.internship = formData.get("internship") as string;
-    if (formData.get("companyPosition")) updateData.companyPosition = formData.get("companyPosition") as string;
+//     // Only add fields that are provided in the form data
+//     if (formData.get("name")) updateData.name = formData.get("name") as string;
+//     if (formData.get("batch")) updateData.batch = formData.get("batch") as string;
+//     if (formData.get("portfolio")) updateData.portfolio = formData.get("portfolio") as string;
+//     if (formData.get("internship")) updateData.internship = formData.get("internship") as string;
+//     if (formData.get("companyPosition")) updateData.companyPosition = formData.get("companyPosition") as string;
     
-    // Handle image upload if a new image is provided
-    const image = formData.get("image") as File;
+//     // Handle image upload if a new image is provided
+//     const image = formData.get("image") as File;
     
-    if (image && image.size > 0) {
-      try {
-        // Convert the uploaded file (File object) to a Buffer
-        const arrayBuffer = await image.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
+//     if (image && image.size > 0) {
+//       try {
+//         // Convert the uploaded file (File object) to a Buffer
+//         const arrayBuffer = await image.arrayBuffer();
+//         const buffer = Buffer.from(arrayBuffer);
         
-        // Create a readable stream from the Buffer
-        const stream = Readable.from(buffer);
+//         // Create a readable stream from the Buffer
+//         const stream = Readable.from(buffer);
         
-        // Upload the image to Cloudinary
-        const uploadResult: UploadApiResponse = await new Promise(
-          (resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-              { folder: "achievements", public_id: email },
-              (error, result) => {
-                if (error || !result) {
-                  reject(error || new Error('Cloudinary upload failed'));
-                } else {
-                  resolve(result);
-                }
-              }
-            );
+//         // Upload the image to Cloudinary
+//         const uploadResult: UploadApiResponse = await new Promise(
+//           (resolve, reject) => {
+//             const uploadStream = cloudinary.uploader.upload_stream(
+//               { folder: "achievements", public_id: email },
+//               (error, result) => {
+//                 if (error || !result) {
+//                   reject(error || new Error('Cloudinary upload failed'));
+//                 } else {
+//                   resolve(result);
+//                 }
+//               }
+//             );
             
-            // Pipe the readable stream into the Cloudinary upload stream
-            stream.pipe(uploadStream);
-          }
-        );
-        updateData.imageUrl = uploadResult.secure_url;
-      } catch (uploadError) {
-        return NextResponse.json(
-          { 
-            error: 'Image Upload Failed', 
-            details: (uploadError as Error).message 
-          },
-          { status: 500 }
-        );
-      }
-    }
+//             // Pipe the readable stream into the Cloudinary upload stream
+//             stream.pipe(uploadStream);
+//           }
+//         );
+//         updateData.imageUrl = uploadResult.secure_url;
+//       } catch (uploadError) {
+//         return NextResponse.json(
+//           { 
+//             error: 'Image Upload Failed', 
+//             details: (uploadError as Error).message 
+//           },
+//           { status: 500 }
+//         );
+//       }
+//     }
     
-    // Use findOneAndUpdate with { new: true, runValidators: false }
-    try {
-      const updatedMember = await Achievementmodel.findOneAndUpdate(
-        { email },
-        { $set: updateData },
-        { new: true, runValidators: false }
-      );
+//     // Use findOneAndUpdate with { new: true, runValidators: false }
+//     try {
+//       const updatedMember = await Achievementmodel.findOneAndUpdate(
+//         { email },
+//         { $set: updateData },
+//         { new: true, runValidators: false }
+//       );
       
-      if (!updatedMember) {
-        return NextResponse.json(
-          { error: 'Update Failed', details: 'Could not update the document' },
-          { status: 500 }
-        );
-      }
+//       if (!updatedMember) {
+//         return NextResponse.json(
+//           { error: 'Update Failed', details: 'Could not update the document' },
+//           { status: 500 }
+//         );
+//       }
       
-      return NextResponse.json(
-        { 
-          message: 'Member Updated Successfully', 
-          data: updatedMember
-        },
-        { status: 200 }
-      );
-    } catch (saveError) {
-      return NextResponse.json(
-        { 
-          error: 'Database Update Failed', 
-          details: (saveError as Error).message 
-        },
-        { status: 500 }
-      );
-    }
-  } catch (error) {
-    console.error("Unexpected error in PUT method:", error);
-    return NextResponse.json(
-      { 
-        error: 'Internal Server Error', 
-        details: (error as Error).message 
-      },
-      { status: 500 }
-    );
-  }
-}
+//       return NextResponse.json(
+//         { 
+//           message: 'Member Updated Successfully', 
+//           data: updatedMember
+//         },
+//         { status: 200 }
+//       );
+//     } catch (saveError) {
+//       return NextResponse.json(
+//         { 
+//           error: 'Database Update Failed', 
+//           details: (saveError as Error).message 
+//         },
+//         { status: 500 }
+//       );
+//     }
+//   } catch (error) {
+//     console.error("Unexpected error in PUT method:", error);
+//     return NextResponse.json(
+//       { 
+//         error: 'Internal Server Error', 
+//         details: (error as Error).message 
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
 
 // DELETE method: Delete an achievement based on email
-export async function DELETE(request: NextRequest) {
-  try {
-    // Validate request method
-    if (request.method !== 'DELETE') {
-      return NextResponse.json(
-        { error: 'Method Not Allowed', details: 'Only DELETE requests are supported' },
-        { status: 405 }
-      );
-    }
+// export async function DELETE(request: NextRequest) {
+//   try {
+//     // Validate request method
+//     if (request.method !== 'DELETE') {
+//       return NextResponse.json(
+//         { error: 'Method Not Allowed', details: 'Only DELETE requests are supported' },
+//         { status: 405 }
+//       );
+//     }
 
-    await connectMongoDB();
+//     await connectMongoDB();
     
-    // Get email from query parameters
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get("email");
+//     // Get email from query parameters
+//     const { searchParams } = new URL(request.url);
+//     const email = searchParams.get("email");
 
-    // Validate email is provided
-    if (!email) {
-      return NextResponse.json(
-        { 
-          error: 'Validation Failed', 
-          details: 'Email is required for deleting a member' 
-        },
-        { status: 400 }
-      );
-    }
+//     // Validate email is provided
+//     if (!email) {
+//       return NextResponse.json(
+//         { 
+//           error: 'Validation Failed', 
+//           details: 'Email is required for deleting a member' 
+//         },
+//         { status: 400 }
+//       );
+//     }
 
-    // Find the member to be deleted
-    const existingMember = await Achievementmodel.findOne({ email });
-    if (!existingMember) {
-      return NextResponse.json(
-        { 
-          error: 'Not Found', 
-          details: `No member found with the email ${email}` 
-        },
-        { status: 404 }
-      );
-    }
+//     // Find the member to be deleted
+//     const existingMember = await Achievementmodel.findOne({ email });
+//     if (!existingMember) {
+//       return NextResponse.json(
+//         { 
+//           error: 'Not Found', 
+//           details: `No member found with the email ${email}` 
+//         },
+//         { status: 404 }
+//       );
+//     }
 
-    // Get the image URL before deleting
-    const imageUrl = existingMember.imageUrl;
-    const publicId = imageUrl ? imageUrl.split('/').pop()?.split('.')[0] : null;
+//     // Get the image URL before deleting
+//     const imageUrl = existingMember.imageUrl;
+//     const publicId = imageUrl ? imageUrl.split('/').pop()?.split('.')[0] : null;
 
-    // Delete the document from MongoDB
-    try {
-      const deleteResult = await Achievementmodel.deleteOne({ email });
+//     // Delete the document from MongoDB
+//     try {
+//       const deleteResult = await Achievementmodel.deleteOne({ email });
       
-      if (deleteResult.deletedCount === 0) {
-        return NextResponse.json(
-          { 
-            error: 'Deletion Failed', 
-            details: 'Could not delete the document' 
-          },
-          { status: 500 }
-        );
-      }
+//       if (deleteResult.deletedCount === 0) {
+//         return NextResponse.json(
+//           { 
+//             error: 'Deletion Failed', 
+//             details: 'Could not delete the document' 
+//           },
+//           { status: 500 }
+//         );
+//       }
 
-      // Delete image from Cloudinary if exists
-      if (publicId) {
-        try {
-          await cloudinary.uploader.destroy(`achievements/${email}`);
-        } catch (cloudinaryError) {
-          // Continue even if Cloudinary delete fails
-        }
-      }
+//       // Delete image from Cloudinary if exists
+//       if (publicId) {
+//         try {
+//           await cloudinary.uploader.destroy(`achievements/${email}`);
+//         } catch (cloudinaryError) {
+//           // Continue even if Cloudinary delete fails
+//         }
+//       }
       
-      return NextResponse.json(
-        { 
-          message: 'Member Deleted Successfully', 
-          email: email 
-        },
-        { status: 200 }
-      );
-    } catch (deleteError) {
-      return NextResponse.json(
-        { 
-          error: 'Database Delete Failed', 
-          details: (deleteError as Error).message 
-        },
-        { status: 500 }
-      );
-    }
-  } catch (error) {
-    return NextResponse.json(
-      { 
-        error: 'Internal Server Error', 
-        details: (error as Error).message 
-      },
-      { status: 500 }
-    );
-  }
-}
+//       return NextResponse.json(
+//         { 
+//           message: 'Member Deleted Successfully', 
+//           email: email 
+//         },
+//         { status: 200 }
+//       );
+//     } catch (deleteError) {
+//       return NextResponse.json(
+//         { 
+//           error: 'Database Delete Failed', 
+//           details: (deleteError as Error).message 
+//         },
+//         { status: 500 }
+//       );
+//     }
+//   } catch (error) {
+//     return NextResponse.json(
+//       { 
+//         error: 'Internal Server Error', 
+//         details: (error as Error).message 
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
