@@ -28,7 +28,7 @@ const StepCard: React.FC<StepCardProps> = ({
     >
       <div className="p-6">
         <div 
-          className="flex items-center gap-3 mb-4 cursor-pointer"
+          className={`flex items-center gap-3 cursor-pointer ${isExpanded ? 'mb-4' : 'mb-0'}`}
           onClick={() => onStepClick(stepNumber)}
         >
           <div className={`

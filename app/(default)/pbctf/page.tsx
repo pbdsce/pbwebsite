@@ -42,11 +42,11 @@ const PBCTFRegisterPage = () => {
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
             <div>
-              <div className="text-2xl font-bold text-green-300">PBCTF 2025</div>
+              <div className="text-2xl font-bold text-green-300">PBCTF 4.0</div>
               <div className="text-sm text-gray-400">Capture The Flag</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-green-300">10 to 5</div>
+              <div className="text-2xl font-bold text-green-300">10AM to 5PM</div>
               <div className="text-sm text-gray-400">Competition Hours</div>
             </div>
             <div>
