@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { UseFormRegister, FieldErrors, UseFormWatch } from "react-hook-form";
 import type { FormData } from "./types";
 
@@ -15,27 +15,7 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
 }) => {
   const howDidYouHear = watch("howDidYouHear") || [];
   const secretFlag = watch("secretFlag");
-  const [showFirstHint, setShowFirstHint] = useState(false);
-  const [showSecondHint, setShowSecondHint] = useState(false);
-  const [timeElapsed, setTimeElapsed] = useState(0);
-
-  useEffect(() => {
-
-    const timer = setInterval(() => {
-      setTimeElapsed(prev => {
-        const newTime = prev + 1;
-        if (newTime >= 30 && !showFirstHint) {
-          setShowFirstHint(true);
-        }
-        if (newTime >= 60 && !showSecondHint) {
-          setShowSecondHint(true);
-        }
-        return newTime;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [showFirstHint, showSecondHint]);
+  const [showHintMessage, setShowHintMessage] = useState(false);
 
   const hearAboutOptions = [
     "Twitter/X",
@@ -98,29 +78,24 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
         </p>
         
         <div className="bg-gray-800/50 border border-green-400/10 rounded-lg p-4 space-y-2">
-          {!showFirstHint && !showSecondHint && (
-            <p className="text-green-400/50 font-mono text-xs flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-400/50 rounded-full animate-pulse"></span>
-              Hints will appear after some time... ⏱️ ({Math.max(0, 30 - timeElapsed)}s until first hint)
-            </p>
+          {!showHintMessage && (
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowHintMessage(true)}
+                className="px-4 py-2 bg-green-400/20 hover:bg-green-400/30 border border-green-400/50 rounded-lg text-green-300 font-mono text-sm transition-colors"
+              >
+                Show Hint 💡
+              </button>
+              <p className="text-green-400/50 font-mono text-xs">
+                Need help? Click for a hint...
+              </p>
+            </div>
           )}
           
-          {showFirstHint && (
-            <p className="text-green-400/70 font-mono text-xs animate-in fade-in-0 slide-in-from-top-1 duration-500">
-              <strong>Hint 1:</strong> The flag is watching you from the dark corners of this page... come inspect me
-            </p>
-          )}
-          
-          {showFirstHint && !showSecondHint && (
-            <p className="text-green-400/50 font-mono text-xs flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-400/50 rounded-full animate-pulse"></span>
-              Second hint coming in {Math.max(0, 60 - timeElapsed)}s...
-            </p>
-          )}
-          
-          {showSecondHint && (
-            <p className="text-green-400/70 font-mono text-xs animate-in fade-in-0 slide-in-from-top-1 duration-500">
-              <strong>Hint 2:</strong> Still stuck? Here&apos;s a riddle: I&apos;m in the code but not the screen, find me where devs debug unseen.
+          {showHintMessage && (
+            <p className="text-red-400 font-mono text-sm animate-in fade-in-0 slide-in-from-top-1 duration-500">
+              <strong>😂 lol loser, this ain&apos;t for you son</strong>
             </p>
           )}
         </div>
