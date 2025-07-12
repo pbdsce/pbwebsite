@@ -65,54 +65,95 @@ function uploadToCloudinary(fileBuffer: Buffer): Promise<{ secure_url: string; p
   }
   
 export async function POST(request: NextRequest) {
-    try{
-        await connectMongoDB();
+  try {
+    await connectMongoDB();
 
-        const repoUrl = "https://api.github.com/repos/pbdsce/PB_Website/contributors";
+    const repoOwner = "pbdsce";
+    const repoName = "PB_Website";
+    const branches = ["prod", "staging"];
 
-        const contributorsResponse  = await fetch(repoUrl);
-        if(!contributorsResponse.ok) {
-            return NextResponse.json({error: 'Failed to fetch contributors'}, {status: contributorsResponse.status})
+    const contributorsSet = new Set<string>();
+    const contributors: { id: number; login: string; name?: string; avatar_url: string; html_url: string }[] = [];
+
+    for (const branch of branches) {
+      let page = 1;
+      let hasMoreCommits = true;
+
+      while (hasMoreCommits) {
+        const commitsUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/commits?sha=${branch}&per_page=100&page=${page}`;
+        const commitsResponse = await fetch(commitsUrl);
+        if (!commitsResponse.ok) {
+          if (commitsResponse.status === 429) {
+            return NextResponse.json({ error: "GitHub API rate limit exceeded. Try again later or use a GitHub token." }, { status: 429 });
+          }
+          console.error(`Failed to fetch commits for ${branch}: ${commitsResponse.statusText}`);
+          continue;
         }
 
-        const contributors = await contributorsResponse.json();
+        const commits = await commitsResponse.json();
+        if (commits.length === 0) {
+          hasMoreCommits = false;
+          break;
+        }
 
-        const newCredits = [];
-
-        for(const contributor of contributors) {
-            const { id , name , login , avatar_url , html_url } = contributor;
-            const contributorName = name || login;
-
-            const existingCredit = await Credit.findOne({name: login});
-            if(existingCredit) {
-              continue;
-            }
-
-            const avatarResponse = await fetch(avatar_url);
-            if(!avatarResponse.ok) {
-              throw new Error(`Failed to fetch avatar for ${contributorName}`);
-            }
-
-            const avatarBuffer = Buffer.from(await avatarResponse.arrayBuffer());
-
-            const { secure_url , public_id } = await uploadToCloudinary(avatarBuffer);
-
-            const newCredit = new Credit({
-              userId: id,
-              name: contributorName,
-              githubUrl: html_url,
-              imageUrl: secure_url,
-              publicId: public_id,
+        for (const commit of commits) {
+          const author = commit.author;
+          if (author && !contributorsSet.has(author.login) && author.login !== "dependabot[bot]") {
+            contributorsSet.add(author.login);
+            contributors.push({
+              id: author.id,
+              login: author.login,
+              name: commit.commit.author?.name,
+              avatar_url: author.avatar_url,
+              html_url: author.html_url,
             });
-
-            await newCredit.save();
-
-            newCredits.push(newCredit);
           }
+        }
 
-        return NextResponse.json({success: true, newCredits}, {status: 201});
-    } catch (error) {
-        console.log("Error creating credits:", error);
-        return NextResponse.json({error: 'Failed to create credits'}, {status: 500});
+        page++;
+      }
     }
+
+    if (contributors.length === 0) {
+      return NextResponse.json({ error: "No contributors found" }, { status: 400 });
+    }
+
+    const newCredits = [];
+
+    for (const contributor of contributors) {
+      const { id, name, login, avatar_url, html_url } = contributor;
+      const contributorName = name || login;
+
+
+      const existingCredit = await Credit.findOne({ userId: id });
+      if (existingCredit) {
+        continue;
+      }
+
+      const avatarResponse = await fetch(avatar_url);
+      if (!avatarResponse.ok) {
+        console.error(`Failed to fetch avatar for ${contributorName}`);
+        continue;
+      }
+
+      const avatarBuffer = Buffer.from(await avatarResponse.arrayBuffer());
+      const { secure_url, public_id } = await uploadToCloudinary(avatarBuffer);
+
+      const newCredit = new Credit({
+        userId: id,
+        name: contributorName,
+        githubUrl: html_url,
+        imageUrl: secure_url,
+        publicId: public_id,
+      });
+
+      await newCredit.save();
+      newCredits.push(newCredit);
+    }
+
+    return NextResponse.json({ success: true, newCredits }, { status: 201 });
+  } catch (error) {
+    console.error("Error creating credits:", error);
+    return NextResponse.json({ error: "Failed to create credits" }, { status: 500 });
+  }
 }

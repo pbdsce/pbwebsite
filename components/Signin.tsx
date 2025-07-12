@@ -14,11 +14,41 @@ import toast from "react-hot-toast";
 const SignIn = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isButtonLocked, setIsButtonLocked] = useState(true);
+
+  useEffect(() => {
+    const checkLock = async () => {
+      setIsButtonLocked(true);
+
+      try {
+        const res = await fetch('/api/check_timer');
+        const { remaining } = await res.json();
+
+        if (remaining > 0) {
+          setTimeout(() => {
+            setIsButtonLocked(false);
+          }, remaining);
+        } else {
+          setIsButtonLocked(false);
+        }
+      } catch (err) {
+        console.error("Failed to fetch timer:", err);
+        setIsButtonLocked(false);
+      }
+    };
+
+    checkLock();
+  }, []);
 
   const handleSignIn = async (event: React.FormEvent) => {
     event.preventDefault();
 
+    if(isButtonLocked) return;
+    setIsButtonLocked(true);
+
     try{
+      await fetch('/api/start_timer', { method: 'POST' });
       const res = await fetch('/api/signin_validation',{
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -31,6 +61,8 @@ const SignIn = () => {
         return;
       }
 
+      setIsLoading(true);
+    
       const actionCodeSettings = {
         url: "https://www.pointblank.club/admin",
         handleCodeInApp: true,
@@ -42,6 +74,8 @@ const SignIn = () => {
     } catch (signupErr: any) {
       toast.error(signupErr.message || "Failed to sign up");
       console.error("Email link error:", signupErr);
+    }finally{
+      setIsLoading(false);
     }
   };
 
@@ -94,12 +128,17 @@ const SignIn = () => {
           </label>
         </div>
         <div className="mb-4">
-          <button
-            type="submit"
-            className="w-full p-3 bg-green-600 text-white rounded-md hover:bg-green-500"
-          >
-            Sign In
-          </button>
+      <button
+          type="submit"
+          disabled={isLoading || isButtonLocked}
+          className={`w-full p-3 rounded-md text-white transition ${
+            isLoading || isButtonLocked
+              ? "bg-green-900 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-500"
+          }`}>
+        {isLoading ? "Sending..." : isButtonLocked ? "Please wait..." : "Sign In"}
+      </button>
+
         </div>
       </form>
     </div>

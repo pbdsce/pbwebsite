@@ -1,14 +1,6 @@
-import { db } from "@/Firebase";
 import connectMongoDB from "@/lib/dbConnect";
-
-import {
-  addDoc,
-  collection,
-  getDocs,
-  limit,
-  query,
-  where,
-} from "firebase/firestore";
+import { ratelimiter } from "@/lib/ratelimiter";
+import CtfRegsModel from "@/models/CTFRegs";
 import { NextResponse } from "next/server";
 /**
  * @swagger
@@ -68,35 +60,41 @@ export async function GET(request: Request) {
   await connectMongoDB();
   try {
     const { searchParams } = new URL(request.url);
-    const usn = searchParams.get("usn");
-    if (!usn) {
-      return NextResponse.json({ error: "usn is required" }, { status: 400 });
-    }
-    const q = query(
-      collection(db, "pbctf_registrations"),
-      where("participant1.usn", "==", usn)
-    );
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-      return NextResponse.json(
-        { message: "usn not registered", isUnique: true },
-        { status: 200 }
-      );
-    }
-    const q2 = query(
-      collection(db, "pbctf_registrations"),
-      where("participant2.usn", "==", usn)
-    );
-    const querySnapshot2 = await getDocs(q2);
+    const identifier = searchParams.get("identifier");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!querySnapshot2.empty) {
+    if (identifier && emailRegex.test(identifier)) {
+      const existing = await CtfRegsModel.findOne({
+        $or: [
+          { "participant1.email": identifier },
+          { "participant2.email": identifier },
+        ],
+      });
+      if (existing) {
+        return NextResponse.json(
+          { message: "email already exists", isUnique: false },
+          { status: 200 }
+        );
+      }
       return NextResponse.json(
-        { message: "usn not unique", isUnique: true },
-        { status: 200 }
+        { message: "email not registered", isUnique: true },
+        { status: 403 }
       );
     } else {
+      const existing = await CtfRegsModel.findOne({
+        $or: [
+          { "participant1.phone": identifier },
+          { "participant2.phone": identifier },
+        ],
+      });
+      if (existing) {
+        return NextResponse.json(
+          { message: "phone already exists", isUnique: false },
+          { status: 200 }
+        );
+      }
       return NextResponse.json(
-        { message: "usn already exists", isUnique: false },
+        { message: "phone not registered", isUnique: true },
         { status: 403 }
       );
     }
@@ -175,6 +173,13 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+ 
+    const { success } = await ratelimiter.limit(ip);
+    if (!success) {
+      return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+    } 
+
     const { searchParams } = new URL(request.url); // Extract query parameters
     const action = searchParams.get("action"); // Determine the action from query params
 
@@ -355,8 +360,39 @@ async function addRegistration(request: Request) {
         { status: 400 }
       );
     }
-    await addDoc(collection(db, "pbctf_registrations"), data);
 
+    const transformParticipant = (p: any) => {
+      if (!p) return undefined;
+
+      return {
+        name: p.name,
+        email: p.email,
+        age: parseInt(p.age),
+        phone: p.phone,
+        gender: p.gender,
+        background: {
+          experienceLevel: p.experienceLevel,
+          previousParticipation: p.previousCTF === "Yes",
+          participationDetails:
+            p.previousCTF === "Yes" ? p.ctfNames : undefined,
+          affiliationType: p.affiliation,
+          affiliationName: p.affiliationName,
+          howDidYouHearAboutUs: p.howDidYouHear,
+        },
+      };
+    };
+
+    const registrationData = {
+      participant1: transformParticipant(data.participant1),
+      participant2:
+        data.participationType === "duo"
+          ? transformParticipant(data.participant2)
+          : undefined,
+      participationType: data.participationType,
+    };
+
+    const newDoc = new CtfRegsModel(registrationData);
+    await newDoc.save();
     return NextResponse.json({ message: "Registration successful!" });
   } catch (error) {
     console.error("Error adding registration:", error);
