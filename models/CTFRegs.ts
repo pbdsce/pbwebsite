@@ -28,6 +28,8 @@ export interface Registration extends Document {
   allowContact: boolean;
 }
 
+export interface TempCTFUserDoc extends Document, TempCTFUser {}
+
 const backgroundSchema = new Schema({
   experienceLevel: {
     type: String,
@@ -86,4 +88,9 @@ const CtfRegsModel =
   mongoose.models.ctfregs ||
   mongoose.model<Registration>("ctfregs", registrationSchema);
 
+const TempCTFUserModel =
+  mongoose.models.tempctfusers ||
+  mongoose.model<TempCTFUserDoc>("tempctfusers", tempCTFUserSchema);
+
 export default CtfRegsModel;
+export { TempCTFUserModel };

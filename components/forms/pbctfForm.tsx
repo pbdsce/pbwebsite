@@ -5,11 +5,11 @@ import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Press_Start_2P } from "next/font/google";
 import toast from "react-hot-toast";
+import StepCard from "./pbctfForm/StepCard";
+import AdditionalQuestions from "./pbctfForm/AdditionalQuestions";
 import ParticipantForm from "./pbctfForm/ParticipantForm";
 import ParticipationTypeSelection from "./pbctfForm/ParticipationTypeSelection";
 import RulesAgreements from "./pbctfForm/RulesAgreements";
-import AdditionalQuestions from "./pbctfForm/AdditionalQuestions";
-import StepCard from "./pbctfForm/StepCard";
 import SuccessScreen from "./pbctfForm/SuccessScreen";
 import type { FormData } from "./pbctfForm/types";
 
@@ -29,6 +29,8 @@ const PBCTFForm: React.FC = () => {
   const [token, setToken] = useState<string>();
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set([0]));
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [participant1EmailVerified, setParticipant1EmailVerified] = useState<boolean>(false);
+  const [participant2EmailVerified, setParticipant2EmailVerified] = useState<boolean>(false);
 
   const {
     register,
@@ -98,12 +100,22 @@ const PBCTFForm: React.FC = () => {
     if (participationType === "solo") {
       resetField("participant2");
       setCompletedSteps((prev) => {
+      setParticipant2EmailVerified(false);
+      setCompletedSteps(prev => {
         const newSet = new Set(prev);
         newSet.delete(2);
         return newSet;
       });
     }
   }, [participationType, resetField]);
+
+  useEffect(() => {
+    setParticipant1EmailVerified(false);
+  }, [participant1Email]);
+
+  useEffect(() => {
+    setParticipant2EmailVerified(false);
+  }, [participant2Email]);
 
   // Check step completion with individual field watches
   useEffect(() => {
@@ -127,6 +139,11 @@ const PBCTFForm: React.FC = () => {
       participant1PreviousCTF &&
       (participant1PreviousCTF === "No" || participant1CTFNames);
 
+    const participant1Complete = participant1Name && participant1Email && participant1Phone && 
+        participant1Age && participant1Gender && participant1ExperienceLevel && 
+        participant1Affiliation && participant1AffiliationName && participant1PreviousCTF &&
+        (participant1PreviousCTF === "No" || participant1CTFNames) && participant1EmailVerified;
+    
     if (participant1Complete) {
       newCompletedSteps.add(1);
     }
@@ -145,6 +162,11 @@ const PBCTFForm: React.FC = () => {
         participant2PreviousCTF &&
         (participant2PreviousCTF === "No" || participant2CTFNames);
 
+      const participant2Complete = participant2Name && participant2Email && participant2Phone && 
+          participant2Age && participant2Gender && participant2ExperienceLevel && 
+          participant2Affiliation && participant2AffiliationName && participant2PreviousCTF &&
+          (participant2PreviousCTF === "No" || participant2CTFNames) && participant2EmailVerified;
+      
       if (participant2Complete) {
         newCompletedSteps.add(2);
       }
@@ -231,6 +253,14 @@ const PBCTFForm: React.FC = () => {
     agreeRules,
     consentLeaderboard,
     allowContact,
+    participant1Name, participant1Email, participant1Phone, participant1Age, participant1Gender,
+    participant1ExperienceLevel, participant1Affiliation, participant1AffiliationName, 
+    participant1PreviousCTF, participant1CTFNames, participant1EmailVerified,
+    participant2Name, participant2Email, participant2Phone, participant2Age, participant2Gender,
+    participant2ExperienceLevel, participant2Affiliation, participant2AffiliationName, 
+    participant2PreviousCTF, participant2CTFNames, participant2EmailVerified,
+    howDidYouHear, secretFlag,
+    agreeRules, consentLeaderboard, allowContact
   ]);
 
   const handleStepClick = (stepNumber: number) => {
@@ -274,6 +304,18 @@ const PBCTFForm: React.FC = () => {
     setIsSubmitting(true);
     setEmailError(null);
     try {
+      if (!participant1EmailVerified) {
+        setEmailError("Please verify Team Leader's email address before submitting");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (data.participationType === "duo" && !participant2EmailVerified) {
+        setEmailError("Please verify Team Member's email address before submitting");
+        setIsSubmitting(false);
+        return;
+      }
+
       const recaptcha_token = token;
       if (recaptcha_token) {
         const response1 = await fetch(
@@ -393,6 +435,7 @@ const PBCTFForm: React.FC = () => {
             register={register}
             errors={errors}
             watch={watch}
+            onEmailVerificationChange={setParticipant1EmailVerified}
           />
         </StepCard>
 
@@ -409,6 +452,7 @@ const PBCTFForm: React.FC = () => {
               register={register}
               errors={errors}
               watch={watch}
+              onEmailVerificationChange={setParticipant2EmailVerified}
             />
           </StepCard>
         )}
