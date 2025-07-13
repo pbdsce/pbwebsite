@@ -1,7 +1,9 @@
 import connectMongoDB from "@/lib/dbConnect";
 import { ratelimiter } from "@/lib/ratelimiter";
-import CtfRegsModel from "@/models/CTFRegs";
+import CtfRegsModel, { TempCTFUserModel } from "@/models/CTFRegs";
 import { NextResponse } from "next/server";
+import nodemailer from "nodemailer";
+
 /**
  * @swagger
  * /api/registrations:
@@ -119,7 +121,7 @@ export async function GET(request: Request) {
  * /api/registrations:
  *   post:
  *     summary: Handle registration actions
- *     description: This endpoint handles different registration actions like reCAPTCHA validation or adding a registration.
+ *     description: This endpoint handles different registration actions like reCAPTCHA validation, OTP sending, OTP verification, or adding a registration.
  *     tags:
  *      - Registration
  *     parameters:
@@ -128,7 +130,7 @@ export async function GET(request: Request) {
  *         required: true
  *         schema:
  *           type: string
- *           description: Action to perform (validateRecaptcha, addRegistration)
+ *           description: Action to perform (validateRecaptcha, sendOTP, verifyOTP, addRegistration)
  *     requestBody:
  *       required: true
  *       content:
@@ -139,6 +141,12 @@ export async function GET(request: Request) {
  *               recaptcha_token:
  *                 type: string
  *                 description: The reCAPTCHA token for validation.
+ *               email:
+ *                 type: string
+ *                 description: Email for OTP operations.
+ *               otp:
+ *                 type: string
+ *                 description: OTP for verification.
  *     responses:
  *       200:
  *         description: Successful operation based on action.
@@ -149,7 +157,7 @@ export async function GET(request: Request) {
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Recaptcha validated!"
+ *                   example: "Operation successful!"
  *       400:
  *         description: Invalid action specified or missing data.
  *         content:
@@ -180,11 +188,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
     } 
 
-    const { searchParams } = new URL(request.url); // Extract query parameters
-    const action = searchParams.get("action"); // Determine the action from query params
+    const { searchParams } = new URL(request.url);
+    const action = searchParams.get("action");
 
     if (action === "validateRecaptcha") {
       return validateRecaptcha(request);
+    } else if (action === "sendOTP") {
+      return sendOTP(request);
+    } else if (action === "verifyOTP") {
+      return verifyOTP(request);
     } else if (action === "addRegistration") {
       return addRegistration(request);
     } else {
@@ -255,7 +267,6 @@ export async function POST(request: Request) {
  *                   type: string
  *                   example: "reCAPTCHA token not found! Try again"
  */
-// Add a new registration
 async function validateRecaptcha(request: Request) {
   const formData = await request.json();
   const { recaptcha_token } = formData;
@@ -281,8 +292,6 @@ async function validateRecaptcha(request: Request) {
     );
   }
 
-  // Verify the reCATPTCHA token
-
   const recaptchaResponse = await fetch(
     `https://recaptchaenterprise.googleapis.com/v1/projects/${process.env.RECAPTCHA_PROJECT}/assessments?key=${process.env.RECAPTCHA_API_KEY}`,
     {
@@ -299,9 +308,241 @@ async function validateRecaptcha(request: Request) {
     });
   }
 
-  // Return a response
   return NextResponse.json({ message: "Recaptcha validated!" });
 }
+
+/**
+ * @swagger
+ * /api/registrations/sendOTP:
+ *   post:
+ *     summary: Send OTP for registration
+ *     description: This endpoint sends an OTP to the provided email and stores registration data temporarily.
+ *     tags:
+ *      - Registration
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Email to send OTP to.
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "OTP sent successfully"
+ *       400:
+ *         description: Missing email or registration data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Email and registration data required"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal Server Error"
+ */
+async function sendOTP(request: Request) {
+  try {
+    const { email } = await request.json();
+    if (!email) {
+      return NextResponse.json(
+        { error: "Email is required" },
+        { status: 400 }
+      );
+    }
+    // Check for existing CTF registration
+    const existingReg = await CtfRegsModel.findOne({
+      $or: [
+        { "participant1.email": email },
+        { "participant2.email": email },
+      ],
+    });
+
+    if (existingReg) {
+      return NextResponse.json(
+        { error: "Email already registered" },
+        { status: 400 }
+      );
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    await TempCTFUserModel.findOneAndUpdate(
+      { email },
+      { otp, otpExpiresAt },
+      { upsert: true }
+    );
+    const transporter = nodemailer.createTransport({
+      host: 'server.hosting3.acm.org',
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS,
+      }
+    });
+
+    await transporter.sendMail({
+      from: `"CTF Registration" <${process.env.MAIL_USER}>`,
+      to: email,
+      subject: `[PBCTF 4.0] Email Verification OTP: ${otp}`,
+      text: `
+      Your OTP for PBCTF 4.0 is:
+
+      >>> ${otp} <<<
+
+      It is valid for 10 minutes before it self-destructs.
+
+      - PointBlank`,
+    });
+
+    return NextResponse.json(
+      { message: "OTP sent successfully" },
+      { status: 200 }
+    );
+
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+/**
+ * @swagger
+ * /api/registrations?action=verifyOTP:
+ *   post:
+ *     summary: Verify OTP for CTF registration
+ *     description: This endpoint verifies the OTP sent to the user's email. It only validates the OTP and does not complete the registration process.
+ *     tags:
+ *      - Registration
+ *     parameters:
+ *       - in: query
+ *         name: action
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [verifyOTP]
+ *           description: Must be set to "verifyOTP"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email address where OTP was sent
+ *                 example: "user@domain.com"
+ *               otp:
+ *                 type: string
+ *                 pattern: '^[0-9]{6}$'
+ *                 description: The 6-digit OTP received via email
+ *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: OTP verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "OTP verified successfully!"
+ *       400:
+ *         description: Bad request - Missing fields or invalid/expired OTP
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   enum: 
+ *                     - "Email and OTP required"
+ *                     - "Invalid or expired OTP"
+ *                   examples:
+ *                     missing_fields:
+ *                       value: "Email and OTP required"
+ *                     invalid_otp:
+ *                       value: "Invalid or expired OTP"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal Server Error"
+ */
+async function verifyOTP(request: Request) {
+  try {
+    const { email, otp } = await request.json();
+
+    if (!email || !otp) {
+      return NextResponse.json(
+        { error: "Email and OTP required" },
+        { status: 400 }
+      );
+    }
+
+    const tempUser = await TempCTFUserModel.findOne({ email });
+    if (!tempUser) {
+      return NextResponse.json(
+        { error: "Invalid or expired OTP" },
+        { status: 400 }
+      );
+    }
+
+    if (tempUser.otp !== otp || tempUser.otpExpiresAt < new Date()) {
+      return NextResponse.json(
+        { error: "Invalid or expired OTP" },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: "OTP verified successfully!" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
 /**
  * @swagger
  * /api/registrations/addRegistration:
