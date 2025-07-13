@@ -18,14 +18,19 @@ interface Background {
   howDidYouHearAboutUs?: string[];
 }
 
-
-
+interface TempCTFUser {
+  email: string;
+  otp: string;
+  otpExpiresAt: Date;
+}
 
 export interface Registration extends Document {
   participant1: Participant;
   participant2?: Participant;
   participationType: "solo" | "duo";
 }
+
+export interface TempCTFUserDoc extends Document, TempCTFUser {}
 
 const backgroundSchema = new Schema({
   experienceLevel: {
@@ -66,7 +71,6 @@ const registrationSchema = new Schema<Registration>({
       return this.participationType === "duo";
     },
   },
-
   participationType: {
     type: String,
     enum: ["solo", "duo"],
@@ -74,8 +78,21 @@ const registrationSchema = new Schema<Registration>({
   },
 });
 
+const tempCTFUserSchema = new Schema<TempCTFUserDoc>({
+  email: { type: String, required: true, unique: true },
+  otp: { type: String, required: true },
+  otpExpiresAt: { type: Date, required: true },
+});
+
+tempCTFUserSchema.index({ otpExpiresAt: 1 }, { expireAfterSeconds: 0 });
+
 const CtfRegsModel =
   mongoose.models.ctfregs ||
   mongoose.model<Registration>("ctfregs", registrationSchema);
 
+const TempCTFUserModel =
+  mongoose.models.tempctfusers ||
+  mongoose.model<TempCTFUserDoc>("tempctfusers", tempCTFUserSchema);
+
 export default CtfRegsModel;
+export { TempCTFUserModel };
