@@ -1,6 +1,7 @@
 import connectMongoDB from "@/lib/dbConnect";
 import { ratelimiter } from "@/lib/ratelimiter";
 import CtfRegsModel, { TempCTFUserModel } from "@/models/CTFRegs";
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
@@ -363,6 +364,10 @@ async function validateRecaptcha(request: Request) {
  */
 async function sendOTP(request: Request) {
   try {
+    await connectMongoDB();
+    while (mongoose.connection.readyState !== 1) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
     const { email } = await request.json();
     if (!email) {
       return NextResponse.json(
@@ -370,13 +375,17 @@ async function sendOTP(request: Request) {
         { status: 400 }
       );
     }
-    // Check for existing CTF registration
-    const existingReg = await CtfRegsModel.findOne({
-      $or: [
-        { "participant1.email": email },
-        { "participant2.email": email },
-      ],
-    });
+    const existingReg = await Promise.race([
+      CtfRegsModel.findOne({
+        $or: [
+          { "participant1.email": email },
+          { "participant2.email": email },
+        ],
+      }).lean(), 
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database query timeout')), 8000)
+      )
+    ]);
 
     if (existingReg) {
       return NextResponse.json(
@@ -386,13 +395,17 @@ async function sendOTP(request: Request) {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-    await TempCTFUserModel.findOneAndUpdate(
-      { email },
-      { otp, otpExpiresAt },
-      { upsert: true }
-    );
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    await Promise.race([
+      TempCTFUserModel.findOneAndUpdate(
+        { email },
+        { otp, otpExpiresAt },
+        { upsert: true }
+      ),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('OTP save timeout')), 8000)
+      )
+    ]);
     const transporter = nodemailer.createTransport({
       host: 'server.hosting3.acm.org',
       port: 465,
@@ -410,7 +423,7 @@ async function sendOTP(request: Request) {
       text: `
       Your OTP for PBCTF 4.0 is:
 
-      >>> ${otp} <<<
+      >>> ${otp} <
 
       It is valid for 10 minutes before it self-destructs.
 
@@ -514,28 +527,27 @@ async function verifyOTP(request: Request) {
         { status: 400 }
       );
     }
-
     const tempUser = await TempCTFUserModel.findOne({ email });
+
     if (!tempUser) {
       return NextResponse.json(
         { error: "Invalid or expired OTP" },
         { status: 400 }
       );
     }
-
-    if (tempUser.otp !== otp || tempUser.otpExpiresAt < new Date()) {
+    const isOTPValid = tempUser.otp === otp;
+    const isOTPExpired = tempUser.otpExpiresAt < new Date();
+    if (!isOTPValid || isOTPExpired) {
       return NextResponse.json(
         { error: "Invalid or expired OTP" },
         { status: 400 }
       );
     }
-
     return NextResponse.json(
       { message: "OTP verified successfully!" },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error verifying OTP:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
