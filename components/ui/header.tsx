@@ -20,7 +20,7 @@ const navItems = [
   { href: "/lore", label: "Lore" },
   { href: "/members", label: "Members", specialPadding: true },
   { href: "/achievements", label: "Achievements" },
-  { href: "/hustle", label: "Hustle Results" }
+  { href: "/hustle", label: "Hustle Results" },
 ];
 
 export default function Header() {
@@ -91,6 +91,21 @@ export default function Header() {
                 </Link>
               </li>
             ))}
+            {loggedIn && (
+              <li>
+                <Link href="/docs">
+                  <p
+                    className={`font-medium ${
+                      pathname === "/docs"
+                        ? "font-extrabold text-white"
+                        : "text-gray-300"
+                    } hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}
+                  >
+                    Docs
+                  </p>
+                </Link>
+              </li>
+            )}
               {/* <li>
                 <Link href="mailto:admin@pointblank.club">
                 <p className={`font-medium ${pathname === '/contact' ? 'font-extrabold text-white' : 'text-gray-300'} hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}>Contact Us</p>
