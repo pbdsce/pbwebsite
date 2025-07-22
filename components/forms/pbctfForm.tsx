@@ -90,7 +90,7 @@ const PBCTFForm: React.FC = () => {
   const participant2CTFNames = watch("participant2.ctfNames");
 
   const howDidYouHear = watch("howDidYouHear");
-  const secretFlag = watch("secretFlag");
+  // const secretFlag = watch("secretFlag");
   const agreeRules = watch("agreeRules");
   const consentLeaderboard = watch("consentLeaderboard");
   const allowContact = watch("allowContact");
@@ -173,10 +173,14 @@ const PBCTFForm: React.FC = () => {
     }
 
     // Step 3: Additional Questions complete
+<<<<<<< HEAD
     const additionalQuestionsComplete =
       howDidYouHear &&
       howDidYouHear.length > 0 &&
       secretFlag === "pbctf{pls_h4ck_m3_d4ddy}";
+=======
+    const additionalQuestionsComplete = howDidYouHear && howDidYouHear.length > 0;
+>>>>>>> f210968 (Refactor: Remove secret flag logic from PBCTF form and Additional Questions component)
     if (additionalQuestionsComplete) {
       newCompletedSteps.add(3);
     }
@@ -259,7 +263,7 @@ const PBCTFForm: React.FC = () => {
     participant2Name, participant2Email, participant2Phone, participant2Age, participant2Gender,
     participant2ExperienceLevel, participant2Affiliation, participant2AffiliationName, 
     participant2PreviousCTF, participant2CTFNames, participant2EmailVerified,
-    howDidYouHear, secretFlag,
+    howDidYouHear,
     agreeRules, consentLeaderboard, allowContact
   ]);
 
