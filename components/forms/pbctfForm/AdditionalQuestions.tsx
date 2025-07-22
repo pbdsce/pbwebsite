@@ -65,7 +65,7 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
       </div>
 
       {/* Secret Flag Challenge */}
-      <div className="bg-gray-900/30 border border-green-400/20 rounded-lg p-6 space-y-4">
+      {/* <div className="bg-gray-900/30 border border-green-400/20 rounded-lg p-6 space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <span className="text-2xl">🔍</span>
           <h3 className="text-green-300 font-mono text-lg">
@@ -133,7 +133,7 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
             </p>
           )}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
