@@ -32,6 +32,15 @@ const nextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: '/troll',
+        destination: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        permanent: true,
+      },
+    ]
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
