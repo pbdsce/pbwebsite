@@ -6,9 +6,7 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type { Viewport } from "next";
 import Link from "next/link";
-import { recordPageView } from "@/telemetry/setup";
-import { useEffect } from "react";
-import { usePathname } from "next/navigation";
+import MetricsTracker from "@/components/MetricsTracker";
 
 config.autoAddCss = false;
 
@@ -29,17 +27,6 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1.0,
 };
-
-function MetricsTracker() {
-  const pathname = usePathname();
-  
-  useEffect(() => {
-    // Record page view with current path
-    recordPageView(pathname);
-  }, [pathname]);
-
-  return null;
-}
 
 export default function RootLayout({
   children,
