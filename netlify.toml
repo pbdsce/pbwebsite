@@ -1,0 +1,11 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# Scheduled metrics collection (every 5 minutes)
+[[functions]]
+  function = "scheduled-metrics"
+  schedule = "*/5 * * * *"

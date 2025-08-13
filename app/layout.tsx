@@ -6,6 +6,9 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type { Viewport } from "next";
 import Link from "next/link";
+import { recordPageView } from "@/telemetry/setup";
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 config.autoAddCss = false;
 
@@ -27,6 +30,17 @@ export const viewport: Viewport = {
   initialScale: 1.0,
 };
 
+function MetricsTracker() {
+  const pathname = usePathname();
+  
+  useEffect(() => {
+    // Record page view with current path
+    recordPageView(pathname);
+  }, [pathname]);
+
+  return null;
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -41,6 +55,7 @@ export default function RootLayout({
         <NextThemesProvider>
           <div className="flex flex-col min-h-screen overflow-hidden supports-[overflow:clip]:overflow-clip">
             <Header />
+            <MetricsTracker />
             {children}
           </div>
         </NextThemesProvider>

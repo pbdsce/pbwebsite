@@ -1,68 +1,61 @@
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { Registry, collectDefaultMetrics, Counter, Histogram } from 'prom-client';
 
-let sdk: NodeSDK | null = null;
-let prometheusExporter: PrometheusExporter | null = null;
+const register = new Registry();
+collectDefaultMetrics({ register });
 
-const telemetryDisabled = false;
-const metricsPort = 9464;
-const metricsHost = '0.0.0.0';
+// Website-specific metrics
+const pageViewCounter = new Counter({
+  name: 'website_page_views_total',
+  help: 'Total number of page views',
+  labelNames: ['page', 'user_agent'],
+  registers: [register]
+});
 
-if (!telemetryDisabled) {
-  try {
-    prometheusExporter = new PrometheusExporter({
-      port: metricsPort,
-      host: metricsHost,
-      endpoint: '/metrics',
-    });
+const pageLoadTime = new Histogram({
+  name: 'website_page_load_duration_seconds',
+  help: 'Page load time in seconds',
+  labelNames: ['page'],
+  buckets: [0.1, 0.5, 1, 2, 5, 10],
+  registers: [register]
+});
 
-    sdk = new NodeSDK({
-      instrumentations: [
-        getNodeAutoInstrumentations({
-          '@opentelemetry/instrumentation-fs': { enabled: false },
-          '@opentelemetry/instrumentation-dns': { enabled: false },
-          '@opentelemetry/instrumentation-net': { enabled: false },
-        }),
-      ],
-      metricReader: prometheusExporter,
-    });
-  } catch (error) {
-    process.exit(1);
+const PUSHGATEWAY_URL = process.env.PUSHGATEWAY_URL;
+
+export async function pushMetrics() {
+  if (!PUSHGATEWAY_URL) {
+    console.error('PUSHGATEWAY_URL is not configured');
+    return;
   }
-}
-
-export function initializeTelemetry() {
-  if (telemetryDisabled) return true;
   
   try {
-    if (!sdk) return false;
-    sdk.start();
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
-export async function shutdownTelemetry() {
-  if (telemetryDisabled) return;
-  
-  try {
-    if (sdk) {
-      await sdk.shutdown();
+    const metrics = await register.metrics();
+    const res = await fetch(PUSHGATEWAY_URL, {
+      method: 'POST',
+      body: metrics,
+      headers: { 'Content-Type': 'text/plain' },
+    });
+    if (!res.ok) {
+      throw new Error(`Pushgateway returned ${res.status}`);
     }
+    console.log('Metrics pushed successfully');
+  } catch (error) {
+    console.error('Error pushing metrics:', error);
+  }
+}
+
+// Function to record page view (called from layout)
+export function recordPageView(page: string = '/') {
+  if (typeof window !== 'undefined') {
+    const userAgent = navigator.userAgent;
+    pageViewCounter.inc({ page, user_agent: userAgent });
     
-    if (prometheusExporter) {
-      const server = (prometheusExporter as any).server;
-      if (server) {
-        await new Promise<void>((resolve) => {
-          server.close(() => resolve());
-        });
-      }
-    }
-  } catch (error) {
-    // Silent fail
+    // Record page load time
+    const loadTime = performance.now() / 1000; // Convert to seconds
+    pageLoadTime.observe({ page }, loadTime);
   }
 }
 
-export { sdk }; 
+// CommonJS export for Netlify functions
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { pushMetrics, recordPageView };
+}
