@@ -5,9 +5,9 @@ import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentation
 let sdk: NodeSDK | null = null;
 let prometheusExporter: PrometheusExporter | null = null;
 
-const telemetryDisabled = process.env.DISABLE_TELEMETRY === 'true';
-const metricsPort = parseInt(process.env.METRICS_PORT || '9464', 10);
-const metricsHost = process.env.METRICS_HOST || '0.0.0.0';
+const telemetryDisabled = false;
+const metricsPort = 9464;
+const metricsHost = '0.0.0.0';
 
 if (!telemetryDisabled) {
   try {
