@@ -6,6 +6,7 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type { Viewport } from "next";
 import Link from "next/link";
+import MetricsTracker from "@/components/MetricsTracker";
 
 config.autoAddCss = false;
 
@@ -41,6 +42,7 @@ export default function RootLayout({
         <NextThemesProvider>
           <div className="flex flex-col min-h-screen overflow-hidden supports-[overflow:clip]:overflow-clip">
             <Header />
+            <MetricsTracker />
             {children}
           </div>
         </NextThemesProvider>
