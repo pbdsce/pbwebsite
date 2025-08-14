@@ -9,3 +9,8 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[[redirects]]
+  from = "/metrics"
+  to = "/.netlify/functions/metrics"
+  status = 200
