@@ -13,6 +13,7 @@
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@headlessui/react": "^1.7.17",
+    "@netlify/plugin-nextjs": "^5.12.0",
     "@types/node": "^20.10.4",
     "@types/react": "^18.2.42",
     "@types/swagger-ui-react": "^5.18.0",
