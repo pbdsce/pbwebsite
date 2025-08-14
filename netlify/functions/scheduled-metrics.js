@@ -1,4 +1,4 @@
-const { pushMetrics } = require('../../telemetry/setup');
+const { pushMetrics } = require('./telemetry-setup');
 
 exports.handler = async () => {
   try {
