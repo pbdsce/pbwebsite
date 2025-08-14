@@ -22,13 +22,11 @@ export default function MetricsTracker() {
     const recordPageView = async () => {
       try {
         const userAgent = navigator.userAgent;
-        const loadTime = performance.now() / 1000;
-
+        
         await sendMetrics({
           type: 'page_view',
           page: pathname,
           userAgent,
-          loadTime,
           timestamp: Date.now(),
           referrer: document.referrer || 'direct',
           screen_resolution: `${screen.width}x${screen.height}`,
@@ -62,7 +60,7 @@ export default function MetricsTracker() {
             type: 'api_request',
             endpoint: resource,
             method: config?.method || 'GET',
-            status_code: response.status.toString(),
+            status_code: response.status,
             duration,
             timestamp: Date.now()
           });
@@ -82,7 +80,7 @@ export default function MetricsTracker() {
             type: 'api_request',
             endpoint: resource,
             method: config?.method || 'GET',
-            status_code: '0',
+            status_code: 0,
             duration,
             timestamp: Date.now()
           });
@@ -148,19 +146,49 @@ export default function MetricsTracker() {
         if (navigationEntries.length > 0) {
           const nav = navigationEntries[0];
 
-          sendMetrics({
+          // Send individual performance metrics
+          const performanceData = {
             type: 'performance',
             page: pathname,
             dns_lookup_time: (nav.domainLookupEnd - nav.domainLookupStart) / 1000,
             tcp_connect_time: (nav.connectEnd - nav.connectStart) / 1000,
             request_response_time: (nav.responseEnd - nav.requestStart) / 1000,
-            dom_processing_time: (nav.domComplete - nav.responseEnd) / 1000, // Updated
-            total_load_time: (nav.loadEventEnd - nav.startTime) / 1000,       // Updated
+            dom_processing_time: (nav.domComplete - nav.responseEnd) / 1000,
+            total_load_time: (nav.loadEventEnd - nav.startTime) / 1000,
             timestamp: Date.now()
-          });
+          };
+
+          sendMetrics(performanceData);
+
+          // Also send the total load time as a separate page load time metric
+          if (performanceData.total_load_time > 0) {
+            sendMetrics({
+              type: 'page_load_time',
+              page: pathname,
+              load_time: performanceData.total_load_time,
+              timestamp: Date.now()
+            });
+          }
         }
       }
     };
+
+    // Track user session activity
+    const trackUserActivity = () => {
+      sendMetrics({
+        type: 'user_activity',
+        action: 'session_active',
+        page: pathname,
+        timestamp: Date.now()
+      });
+    };
+
+    // Send heartbeat every 30 seconds when page is visible
+    const heartbeatInterval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        trackUserActivity();
+      }
+    }, 30000);
 
     window.addEventListener('error', handleError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
@@ -176,6 +204,7 @@ export default function MetricsTracker() {
     }
 
     return () => {
+      clearInterval(heartbeatInterval);
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
       document.removeEventListener('visibilitychange', handleVisibilityChange);

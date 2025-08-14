@@ -16,7 +16,7 @@ const pageLoadTime = new Histogram({
   name: 'pointblank_page_load_time_seconds',
   help: 'Page load time in seconds',
   labelNames: ['page'],
-  buckets: [0.1, 0.5, 1, 2, 5, 10],
+  buckets: [0.1, 0.5, 1, 2, 5, 10, 30],
   registers: [register]
 });
 
@@ -46,6 +46,25 @@ const errorRate = new Counter({
   labelNames: ['error_type', 'page'],
   registers: [register]
 });
+
+// New metrics for better monitoring
+const performanceMetrics = new Histogram({
+  name: 'pointblank_performance_seconds',
+  help: 'Various performance timings',
+  labelNames: ['page', 'metric_type'],
+  buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10],
+  registers: [register]
+});
+
+const userSessions = new Gauge({
+  name: 'pointblank_active_sessions',
+  help: 'Number of active user sessions',
+  registers: [register]
+});
+
+// Track active sessions in memory (in production, use Redis or similar)
+const activeSessions = new Map();
+const SESSION_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
 const PUSHGATEWAY_URL = process.env.PUSHGATEWAY_URL;
 
@@ -88,14 +107,35 @@ async function pushToGateway(metrics) {
   }
 }
 
-function getUserAgent(userAgent) {
-  if (!userAgent) return 'unknown';
-  if (userAgent.includes('Chrome')) return 'chrome';
-  if (userAgent.includes('Firefox')) return 'firefox';
-  if (userAgent.includes('Safari')) return 'safari';
-  if (userAgent.includes('Edge')) return 'edge';
-  return 'other';
+function getStatusCodeGroup(statusCode) {
+  const code = parseInt(statusCode);
+  if (code >= 200 && code < 300) return '2';
+  if (code >= 300 && code < 400) return '3';
+  if (code >= 400 && code < 500) return '4';
+  if (code >= 500 && code < 600) return '5';
+  return 'unknown';
 }
+
+function cleanupSessions() {
+  const now = Date.now();
+  let removedCount = 0;
+  
+  for (const [sessionId, lastSeen] of activeSessions.entries()) {
+    if (now - lastSeen > SESSION_TIMEOUT) {
+      activeSessions.delete(sessionId);
+      removedCount++;
+    }
+  }
+  
+  userSessions.set(activeSessions.size);
+  
+  if (removedCount > 0) {
+    console.log(`Cleaned up ${removedCount} inactive sessions. Active sessions: ${activeSessions.size}`);
+  }
+}
+
+// Clean up sessions every minute
+setInterval(cleanupSessions, 60000);
 
 exports.handler = async (event, context) => {
   const headers = {
@@ -121,29 +161,53 @@ exports.handler = async (event, context) => {
     if (event.httpMethod === 'POST' && event.headers['content-type']?.includes('application/json')) {
       const body = JSON.parse(event.body || '{}');
       
+      // Generate session ID from IP + User Agent
+      const sessionId = Buffer.from(
+        `${event.headers['x-forwarded-for'] || event.headers['client-ip'] || 'unknown'}_${event.headers['user-agent'] || 'unknown'}`
+      ).toString('base64');
+      
       if (body.type === 'page_view') {
         const page = body.page || '/unknown';
         pageViews.inc({ page });
         
-        if (body.loadTime && typeof body.loadTime === 'number') {
-          pageLoadTime.observe({ page }, body.loadTime);
-        }
+        // Track active session
+        activeSessions.set(sessionId, Date.now());
+        userSessions.set(activeSessions.size);
         
-        console.log(`Page view recorded: ${page} (${body.loadTime}s)`);
+        console.log(`Page view recorded: ${page}`);
+      }
+      
+      else if (body.type === 'page_load_time') {
+        const page = body.page || '/unknown';
+        const loadTime = body.load_time;
+        
+        if (loadTime && typeof loadTime === 'number' && loadTime > 0) {
+          pageLoadTime.observe({ page }, loadTime);
+          console.log(`Page load time recorded: ${page} - ${loadTime}s`);
+        }
       }
       
       else if (body.type === 'api_request') {
         const endpoint = body.endpoint || '/unknown';
-        const method = body.method || 'GET';
-        const statusCode = body.status_code || '200';
+        const method = (body.method || 'GET').toLowerCase();
+        const statusCode = body.status_code || 200;
+        const statusGroup = getStatusCodeGroup(statusCode);
         
+        // Record with individual status code
         apiRequests.inc({ 
           endpoint, 
-          method: method.toLowerCase(), 
+          method, 
           status_code: statusCode.toString()
         });
         
-        console.log(`API request recorded: ${method} ${endpoint} - ${statusCode}`);
+        // Record with grouped status code for dashboard
+        apiRequests.inc({ 
+          endpoint, 
+          method, 
+          status_code: `${statusGroup}xx`
+        });
+        
+        console.log(`API request recorded: ${method.toUpperCase()} ${endpoint} - ${statusCode}`);
       }
       
       else if (body.type === 'error') {
@@ -156,10 +220,44 @@ exports.handler = async (event, context) => {
       }
       
       else if (body.type === 'user_activity') {
-        if (body.active_users && typeof body.active_users === 'number') {
-          activeUsers.set(body.active_users);
+        // Update session activity
+        activeSessions.set(sessionId, Date.now());
+        userSessions.set(activeSessions.size);
+        
+        if (body.action === 'session_active') {
+          // Just update the session timestamp
+          console.log(`User activity: ${body.action} on ${body.page}`);
         }
       }
+      
+      else if (body.type === 'performance') {
+        const page = body.page || '/unknown';
+        
+        // Record various performance metrics
+        const perfMetrics = [
+          'dns_lookup_time',
+          'tcp_connect_time', 
+          'request_response_time',
+          'dom_processing_time',
+          'total_load_time'
+        ];
+        
+        perfMetrics.forEach(metric => {
+          if (body[metric] && typeof body[metric] === 'number' && body[metric] > 0) {
+            performanceMetrics.observe(
+              { page, metric_type: metric }, 
+              body[metric]
+            );
+          }
+        });
+        
+        console.log(`Performance metrics recorded for: ${page}`);
+      }
+    }
+    
+    // Clean up old sessions periodically
+    if (Math.random() < 0.1) { // 10% chance on each request
+      cleanupSessions();
     }
     
     const metrics = await register.metrics();
@@ -183,7 +281,8 @@ exports.handler = async (event, context) => {
         success: true,
         message: pushSuccess ? 'Metrics recorded and pushed successfully' : 'Metrics recorded (push failed)',
         timestamp: new Date().toISOString(),
-        metrics_pushed: pushSuccess
+        metrics_pushed: pushSuccess,
+        active_sessions: activeSessions.size
       })
     };
     
