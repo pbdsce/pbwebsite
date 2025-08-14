@@ -12,7 +12,7 @@ export default function MetricsTracker() {
         const userAgent = navigator.userAgent;
         const loadTime = performance.now() / 1000;
         
-        await fetch('/api/metrics', {
+        await fetch('/metrics', { 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
