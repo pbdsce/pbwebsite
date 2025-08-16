@@ -105,15 +105,6 @@ async function pushToGateway(metrics) {
   }
 }
 
-function getStatusCodeGroup(statusCode) {
-  const code = parseInt(statusCode);
-  if (code >= 200 && code < 300) return '2';
-  if (code >= 300 && code < 400) return '3';
-  if (code >= 400 && code < 500) return '4';
-  if (code >= 500 && code < 600) return '5';
-  return 'unknown';
-}
-
 function cleanupSessions() {
   const now = Date.now();
   let removedCount = 0;
@@ -132,8 +123,6 @@ function cleanupSessions() {
   }
 }
 
-// Clean up sessions every minute
-setInterval(cleanupSessions, 60000);
 
 exports.handler = async (event, context) => {
   const headers = {
@@ -189,20 +178,13 @@ exports.handler = async (event, context) => {
         const endpoint = body.endpoint || '/unknown';
         const method = (body.method || 'GET').toLowerCase();
         const statusCode = body.status_code || 200;
-        const statusGroup = getStatusCodeGroup(statusCode);
+        
         
         // Record with individual status code
         apiRequests.inc({ 
           endpoint, 
           method, 
           status_code: statusCode.toString()
-        });
-        
-        // Record with grouped status code for dashboard
-        apiRequests.inc({ 
-          endpoint, 
-          method, 
-          status_code: `${statusGroup}xx`
         });
         
         console.log(`API request recorded: ${method.toUpperCase()} ${endpoint} - ${statusCode}`);
