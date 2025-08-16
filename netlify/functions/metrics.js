@@ -75,24 +75,24 @@ async function pushToGateway(metrics) {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
-    
+
     const response = await fetch(PUSHGATEWAY_URL, {
       method: 'POST',
       body: metrics,
-      headers: { 
+      headers: {
         'Content-Type': 'text/plain',
         'User-Agent': 'pointblank-netlify-function/1.0'
       },
       signal: controller.signal
     });
-    
+
     clearTimeout(timeoutId);
-    
+
     if (!response.ok) {
       console.error(`Pushgateway error: ${response.status} ${response.statusText}`);
       return false;
     }
-    
+
     console.log('Metrics pushed to Pushgateway successfully');
     return true;
   } catch (error) {
@@ -108,16 +108,16 @@ async function pushToGateway(metrics) {
 function cleanupSessions() {
   const now = Date.now();
   let removedCount = 0;
-  
+
   for (const [sessionId, lastSeen] of activeSessions.entries()) {
     if (now - lastSeen > SESSION_TIMEOUT) {
       activeSessions.delete(sessionId);
       removedCount++;
     }
   }
-  
+
   userSessions.set(activeSessions.size);
-  
+
   if (removedCount > 0) {
     console.log(`Cleaned up ${removedCount} inactive sessions. Active sessions: ${activeSessions.size}`);
   }
@@ -147,50 +147,57 @@ exports.handler = async (event, context) => {
 
     if (event.httpMethod === 'POST' && event.headers['content-type']?.includes('application/json')) {
       const body = JSON.parse(event.body || '{}');
-      
+
       // Generate session ID from IP + User Agent
       const sessionId = Buffer.from(
         `${event.headers['x-forwarded-for'] || event.headers['client-ip'] || 'unknown'}_${event.headers['user-agent'] || 'unknown'}`
       ).toString('base64');
-      
+
       if (body.type === 'page_view') {
         const page = body.page || '/unknown';
         pageViews.inc({ page });
-        
+
         // Track active session
         activeSessions.set(sessionId, Date.now());
         userSessions.set(activeSessions.size);
-        
+
         console.log(`Page view recorded: ${page}`);
       }
       
       else if (body.type === 'page_load_time') {
         const page = body.page || '/unknown';
         const loadTime = body.load_time;
-        
+
         if (loadTime && typeof loadTime === 'number' && loadTime > 0) {
           pageLoadTime.observe({ page }, loadTime);
           console.log(`Page load time recorded: ${page} - ${loadTime}s`);
         }
-      }
-      
-      else if (body.type === 'api_request') {
-        const endpoint = body.endpoint || '/unknown';
-        const method = (body.method || 'GET').toLowerCase();
-        const statusCode = body.status_code || 200;
+      } else if (body.type === 'api_request') {
+        const endpoint = body.endpoint;
+        const method = body.method;
+        const statusCode = body.status_code;
         
+        // Validate and normalize data
+        const validEndpoint = endpoint || 'unknown';
+        const validMethod = method ? method.toLowerCase() : 'unknown';
+        const validStatus = typeof statusCode === 'number' ? statusCode.toString() : 'unknown';
+
+        if (endpoint && method && typeof statusCode === 'number') {
+          console.log(`API request recorded: ${method.toUpperCase()} ${endpoint} - ${statusCode}`);
+        } else {
+          console.warn('API request data incomplete:', {
+            endpoint: endpoint || 'unknown',
+            method: method || 'unknown',
+            status_code: typeof statusCode === 'number' ? statusCode : 'unknown'
+          });
+        }
         
-        // Record with individual status code
-        apiRequests.inc({ 
-          endpoint, 
-          method, 
-          status_code: statusCode.toString()
+        apiRequests.inc({
+          endpoint: validEndpoint,
+          method: validMethod,
+          status_code: validStatus
         });
-        
-        console.log(`API request recorded: ${method.toUpperCase()} ${endpoint} - ${statusCode}`);
-      }
-      
-      else if (body.type === 'error') {
+      } else if (body.type === 'error') {
         const errorType = body.error_type || 'unknown';
         const page = body.page || '/unknown';
         
@@ -203,7 +210,7 @@ exports.handler = async (event, context) => {
         // Update session activity
         activeSessions.set(sessionId, Date.now());
         userSessions.set(activeSessions.size);
-        
+
         if (body.action === 'session_active') {
           // Just update the session timestamp
           console.log(`User activity: ${body.action} on ${body.page}`);
@@ -212,37 +219,37 @@ exports.handler = async (event, context) => {
       
       else if (body.type === 'performance') {
         const page = body.page || '/unknown';
-        
+
         // Record various performance metrics
         const perfMetrics = [
           'dns_lookup_time',
-          'tcp_connect_time', 
+          'tcp_connect_time',
           'request_response_time',
           'dom_processing_time',
           'total_load_time'
         ];
-        
+
         perfMetrics.forEach(metric => {
           if (body[metric] && typeof body[metric] === 'number' && body[metric] > 0) {
             performanceMetrics.observe(
-              { page, metric_type: metric }, 
+              { page, metric_type: metric },
               body[metric]
             );
           }
         });
-        
+
         console.log(`Performance metrics recorded for: ${page}`);
       }
     }
-    
+
     // Clean up old sessions periodically
     if (Math.random() < 0.1) { // 10% chance on each request
       cleanupSessions();
     }
-    
+
     const metrics = await register.metrics();
     const pushSuccess = await pushToGateway(metrics);
-    
+
     if (event.httpMethod === 'GET') {
       return {
         statusCode: 200,
@@ -253,7 +260,7 @@ exports.handler = async (event, context) => {
         body: metrics
       };
     }
-    
+
     return {
       statusCode: 200,
       headers,
@@ -268,14 +275,14 @@ exports.handler = async (event, context) => {
     
   } catch (error) {
     console.error('Metrics function error:', error);
-    
+
     try {
       const metrics = await register.metrics();
       await pushToGateway(metrics);
     } catch (fallbackError) {
       console.error('Fallback metrics push failed:', fallbackError);
     }
-    
+
     return {
       statusCode: 500,
       headers,

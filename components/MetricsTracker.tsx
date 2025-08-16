@@ -1,223 +1,294 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+
+interface BaseMetric {
+  type: string;
+  page: string;
+  timestamp: number;
+}
+
+interface PageViewMetric extends BaseMetric {
+  type: 'page_view';
+  page: string;
+  referrer: 'direct' | 'internal' | 'external';
+}
+
+interface ApiRequestMetric extends BaseMetric {
+  type: 'api_request';
+  endpoint: string;
+  method: string;
+  status_code: number;
+  duration_ms: number;
+}
+
+interface PerformanceMetric extends BaseMetric {
+  type: 'performance';
+  page: string;
+  load_time: number;
+  dom_content_loaded: number;
+  first_contentful_paint: number | null;
+}
+
+interface ErrorMetric extends BaseMetric {
+  type: 'error';
+  error_type: 'critical_error' | 'unhandled_rejection';
+  page: string;
+  message: string;
+}
+
+interface SessionMetric extends BaseMetric {
+  type: 'session_duration' | 'session_end';
+  page: string;
+  duration_seconds: number;
+}
+
+type Metric = PageViewMetric | ApiRequestMetric | PerformanceMetric | ErrorMetric | SessionMetric;
+
+let fetchOverrideCount = 0;
+let globalOriginalFetch: typeof fetch | null = null;
 
 export default function MetricsTracker() {
   const pathname = usePathname();
+  const sessionStartRef = useRef<number>(Date.now());
+  const instanceIdRef = useRef<number>(0);
 
   useEffect(() => {
-    const sendMetrics = async (data: any) => {
+    instanceIdRef.current = ++fetchOverrideCount;
+
+    const sendMetrics = async (data: Metric) => {
       try {
-        await fetch('/metrics', {
+        const fetchToUse = globalOriginalFetch || window.fetch;
+        await fetchToUse('/metrics', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
       } catch (error) {
-        console.error('Failed to send metrics:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to send metrics:', error);
+        }
       }
     };
 
-    let lastActivityTimestamp = Date.now();
-
-    const updateActivity = () => {
-      lastActivityTimestamp = Date.now();
-    };
-
-    const trackUserActivity = () => {
-      if (Date.now() - lastActivityTimestamp < 60000) {
-        sendMetrics({
-          type: 'user_activity',
-          action: 'session_active',
-          page: pathname,
-          timestamp: Date.now()
-        });
+    const getReferrerType = (): 'direct' | 'internal' | 'external' => {
+      if (!document.referrer) {
+        return 'direct';
       }
-    };
-
-    const activityEvents = ['mousemove', 'click', 'keydown', 'touchstart', 'touchmove'];
-    activityEvents.forEach(event => window.addEventListener(event, updateActivity));
-
-    const heartbeatInterval = setInterval(trackUserActivity, 30000);
-
-
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-      const [resource, config] = args;
-      const startTime = performance.now();
-
+      
       try {
-        const response = await originalFetch(...args);
-        const endTime = performance.now();
-        const duration = (endTime - startTime) / 1000;
-
-        if (
-          typeof resource === 'string' &&
-          (resource.startsWith('/api/') || resource.includes('api.')) &&
-          !resource.includes('/metrics')
-        ) {
-          await sendMetrics({
-            type: 'api_request',
-            endpoint: resource,
-            method: config?.method || 'GET',
-            status_code: response.status,
-            duration,
-            timestamp: Date.now()
-          });
+        const referrerUrl = new URL(document.referrer);
+        const currentUrl = new URL(window.location.href);
+        
+        return referrerUrl.hostname === currentUrl.hostname ? 'internal' : 'external';
+      } catch {
+        try {
+          const currentHostname = window.location.hostname;
+          const referrerLower = document.referrer.toLowerCase();
+          const hostnamePattern = new RegExp(`https?://${currentHostname.replace('.', '\\.')}`, 'i');
+          return hostnamePattern.test(referrerLower) ? 'internal' : 'external';
+        } catch {
+          return 'external';
         }
-
-        return response;
-      } catch (error) {
-        const endTime = performance.now();
-        const duration = (endTime - startTime) / 1000;
-
-        if (
-          typeof resource === 'string' &&
-          (resource.startsWith('/api/') || resource.includes('api.')) &&
-          !resource.includes('/metrics')
-        ) {
-          await sendMetrics({
-            type: 'api_request',
-            endpoint: resource,
-            method: config?.method || 'GET',
-            status_code: 0,
-            duration,
-            timestamp: Date.now()
-          });
-        }
-
-        throw error;
       }
     };
 
-    const handleError = (event: ErrorEvent) => {
-      sendMetrics({
+    if (fetchOverrideCount === 1) {
+      globalOriginalFetch = window.fetch;
+      
+      window.fetch = async (...args) => {
+        const [resource, config] = args;
+        const startTime = performance.now();
+
+        try {
+          const response = await globalOriginalFetch!(...args);
+          const endTime = performance.now();
+          const duration = Math.round(endTime - startTime);
+
+          if (typeof resource === 'string' && 
+              (resource.startsWith('/api/') || resource.includes('/api/')) &&
+              !resource.includes('/metrics')) {
+            const cleanEndpoint = resource.split('?')[0].replace(/\/\d+/g, '/:id');
+            const apiMetric: ApiRequestMetric = {
+              type: 'api_request',
+              page: pathname,
+              endpoint: cleanEndpoint,
+              method: config?.method || 'GET',
+              status_code: response.status,
+              duration_ms: duration,
+              timestamp: Date.now()
+            };
+            sendMetrics(apiMetric);
+          }
+
+          return response;
+        } catch (error) {
+          const endTime = performance.now();
+          const duration = Math.round(endTime - startTime);
+
+          if (typeof resource === 'string' && 
+              (resource.startsWith('/api/') || resource.includes('/api/')) &&
+              !resource.includes('/metrics')) {
+            
+            const cleanEndpoint = resource.split('?')[0].replace(/\/\d+/g, '/:id');
+            
+            const apiMetric: ApiRequestMetric = {
+              type: 'api_request',
+              page: pathname,
+              endpoint: cleanEndpoint,
+              method: config?.method || 'GET',
+              status_code: 0,
+              duration_ms: duration,
+              timestamp: Date.now()
+            };
+            
+            sendMetrics(apiMetric);
+          }
+
+          throw error;
+        }
+      };
+    }
+
+    const handleCriticalError = (event: ErrorEvent) => {
+      if (!event.error || !event.message || event.message.length < 5) {
+        return;
+      }
+
+      const errorMetric: ErrorMetric = {
         type: 'error',
-        error_type: 'javascript_error',
+        error_type: 'critical_error',
         page: pathname,
-        message: event.message,
-        filename: event.filename,
-        line: event.lineno,
-        column: event.colno,
+        message: event.message.substring(0, 100),
         timestamp: Date.now()
-      });
+      };
+      sendMetrics(errorMetric);
     };
 
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      sendMetrics({
+      let message = 'Unknown rejection';
+      if (event.reason instanceof Error) {
+        message = event.reason.message;
+      } else if (typeof event.reason === 'string') {
+        message = event.reason;
+      } else if (event.reason && typeof event.reason === 'object') {
+        message = event.reason.toString();
+      }
+      
+      if (message.length < 5) {
+        return;
+      }
+
+      const errorMetric: ErrorMetric = {
         type: 'error',
-        error_type: 'unhandled_promise_rejection',
+        error_type: 'unhandled_rejection',
         page: pathname,
-        message: event.reason?.message || event.reason,
+        message: message.substring(0, 100),
         timestamp: Date.now()
-      });
+      };
+      
+      sendMetrics(errorMetric);
     };
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        sendMetrics({
-          type: 'user_activity',
-          action: 'page_visible',
-          page: pathname,
-          timestamp: Date.now()
-        });
-      }
-    };
-
-    const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      const tagName = target.tagName.toLowerCase();
-
-      if (['button', 'a', 'input'].includes(tagName)) {
-        sendMetrics({
-          type: 'user_activity',
-          action: 'click',
-          element: tagName,
-          page: pathname,
-          element_text: target.textContent?.substring(0, 50) || '',
-          timestamp: Date.now()
-        });
-      }
-    };
-
-    const trackPerformanceMetrics = () => {
+    const trackPagePerformance = () => {
       if ('getEntriesByType' in performance) {
         const navigationEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
         if (navigationEntries.length > 0) {
           const nav = navigationEntries[0];
-
-          const performanceData = {
+          const firstContentfulPaint = performance.getEntriesByName('first-contentful-paint')[0];
+          
+          const performanceMetric: PerformanceMetric = {
             type: 'performance',
             page: pathname,
-            dns_lookup_time: (nav.domainLookupEnd - nav.domainLookupStart) / 1000,
-            tcp_connect_time: (nav.connectEnd - nav.connectStart) / 1000,
-            request_response_time: (nav.responseEnd - nav.requestStart) / 1000,
-            dom_processing_time: (nav.domComplete - nav.responseEnd) / 1000,
-            total_load_time: (nav.loadEventEnd - nav.startTime) / 1000,
+            load_time: Math.round(nav.loadEventEnd - nav.startTime),
+            dom_content_loaded: Math.round(nav.domContentLoadedEventEnd - nav.startTime),
+            first_contentful_paint: firstContentfulPaint 
+              ? Math.round(firstContentfulPaint.startTime) 
+              : null,
             timestamp: Date.now()
           };
-
-          sendMetrics(performanceData);
-
-          if (performanceData.total_load_time > 0) {
-            sendMetrics({
-              type: 'page_load_time',
-              page: pathname,
-              load_time: performanceData.total_load_time,
-              timestamp: Date.now()
-            });
-          }
+          
+          sendMetrics(performanceMetric);
         }
       }
     };
+    const pageViewMetric: PageViewMetric = {
+      type: 'page_view',
+      page: pathname,
+      referrer: getReferrerType(),
+      timestamp: Date.now()
+    };
+    
+    sendMetrics(pageViewMetric);
+    const SESSION_THRESHOLD_SECONDS = 30;
 
+    const trackSessionDuration = () => {
+      const sessionDuration = Math.round((Date.now() - sessionStartRef.current) / 1000); 
+      
+      if (sessionDuration > SESSION_THRESHOLD_SECONDS) { 
+        const sessionMetric: SessionMetric = {
+          type: 'session_duration',
+          page: pathname,
+          duration_seconds: sessionDuration,
+          timestamp: Date.now()
+        };
+        
+        sendMetrics(sessionMetric);
+      }
+    };
+
+    window.addEventListener('error', handleCriticalError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    
     if (document.readyState === 'complete') {
-      setTimeout(trackPerformanceMetrics, 1000);
+      setTimeout(trackPagePerformance, 1000);
     } else {
       window.addEventListener('load', () => {
-        setTimeout(trackPerformanceMetrics, 1000);
+        setTimeout(trackPagePerformance, 1000);
       });
     }
 
-    sendMetrics({
-      type: 'page_view',
-      page: pathname,
-      userAgent: navigator.userAgent,
-      timestamp: Date.now(),
-      referrer: document.referrer || 'direct',
-      screen_resolution: `${screen.width}x${screen.height}`,
-      viewport: `${window.innerWidth}x${window.innerHeight}`
-    });
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        trackSessionDuration();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      clearInterval(heartbeatInterval);
-      activityEvents.forEach(event => window.removeEventListener(event, updateActivity));
-      window.removeEventListener('error', handleError);
+      fetchOverrideCount--;
+            if (fetchOverrideCount === 0 && globalOriginalFetch) {
+        window.fetch = globalOriginalFetch;
+        globalOriginalFetch = null;
+      }
+      
+      window.removeEventListener('error', handleCriticalError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      document.removeEventListener('click', handleClick);
-      window.fetch = originalFetch;
     };
   }, [pathname]);
 
   useEffect(() => {
+    const SESSION_THRESHOLD_SECONDS = 30;
+    
     const handleBeforeUnload = () => {
-      if ('sendBeacon' in navigator) {
-        navigator.sendBeacon('/metrics', JSON.stringify({
-          type: 'user_activity',
-          action: 'page_unload',
+      const sessionDuration = Math.round((Date.now() - sessionStartRef.current) / 1000);
+      
+      if ('sendBeacon' in navigator && sessionDuration > SESSION_THRESHOLD_SECONDS) {
+        const sessionEndMetric: SessionMetric = {
+          type: 'session_end',
           page: pathname,
+          duration_seconds: sessionDuration,
           timestamp: Date.now()
-        }));
+        };
+        
+        navigator.sendBeacon('/metrics', JSON.stringify(sessionEndMetric));
       }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [pathname]);
 
   return null;
