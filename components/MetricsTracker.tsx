@@ -19,27 +19,28 @@ export default function MetricsTracker() {
       }
     };
 
-    const recordPageView = async () => {
-      try {
-        const userAgent = navigator.userAgent;
-        
-        await sendMetrics({
-          type: 'page_view',
-          page: pathname,
-          userAgent,
-          timestamp: Date.now(),
-          referrer: document.referrer || 'direct',
-          screen_resolution: `${screen.width}x${screen.height}`,
-          viewport: `${window.innerWidth}x${window.innerHeight}`
-        });
+    let lastActivityTimestamp = Date.now();
 
-        console.log(`Page view tracked: ${pathname}`);
-      } catch (error) {
-        console.error('Failed to record page view:', error);
+    const updateActivity = () => {
+      lastActivityTimestamp = Date.now();
+    };
+
+    const trackUserActivity = () => {
+      if (Date.now() - lastActivityTimestamp < 60000) {
+        sendMetrics({
+          type: 'user_activity',
+          action: 'session_active',
+          page: pathname,
+          timestamp: Date.now()
+        });
       }
     };
 
-    recordPageView();
+    const activityEvents = ['mousemove', 'click', 'keydown', 'touchstart', 'touchmove'];
+    activityEvents.forEach(event => window.addEventListener(event, updateActivity));
+
+    const heartbeatInterval = setInterval(trackUserActivity, 30000);
+
 
     const originalFetch = window.fetch;
     window.fetch = async (...args) => {
@@ -146,7 +147,6 @@ export default function MetricsTracker() {
         if (navigationEntries.length > 0) {
           const nav = navigationEntries[0];
 
-          // Send individual performance metrics
           const performanceData = {
             type: 'performance',
             page: pathname,
@@ -160,7 +160,6 @@ export default function MetricsTracker() {
 
           sendMetrics(performanceData);
 
-          // Also send the total load time as a separate page load time metric
           if (performanceData.total_load_time > 0) {
             sendMetrics({
               type: 'page_load_time',
@@ -173,28 +172,6 @@ export default function MetricsTracker() {
       }
     };
 
-    // Track user session activity
-    const trackUserActivity = () => {
-      sendMetrics({
-        type: 'user_activity',
-        action: 'session_active',
-        page: pathname,
-        timestamp: Date.now()
-      });
-    };
-
-    // Send heartbeat every 30 seconds when page is visible
-    const heartbeatInterval = setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        trackUserActivity();
-      }
-    }, 30000);
-
-    window.addEventListener('error', handleError);
-    window.addEventListener('unhandledrejection', handleUnhandledRejection);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    document.addEventListener('click', handleClick);
-
     if (document.readyState === 'complete') {
       setTimeout(trackPerformanceMetrics, 1000);
     } else {
@@ -203,8 +180,19 @@ export default function MetricsTracker() {
       });
     }
 
+    sendMetrics({
+      type: 'page_view',
+      page: pathname,
+      userAgent: navigator.userAgent,
+      timestamp: Date.now(),
+      referrer: document.referrer || 'direct',
+      screen_resolution: `${screen.width}x${screen.height}`,
+      viewport: `${window.innerWidth}x${window.innerHeight}`
+    });
+
     return () => {
       clearInterval(heartbeatInterval);
+      activityEvents.forEach(event => window.removeEventListener(event, updateActivity));
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
