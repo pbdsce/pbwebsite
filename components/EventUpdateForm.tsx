@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useStore } from "@/lib/zustand/store";
+import { apiFetch } from "@/lib/apiFetch";
 
 interface EventUpdateFormProps {
   eventId: string;
@@ -45,7 +46,7 @@ const EventUpdateForm = ({
       formData.append("existingUrl", imageURL);
     }
   
-    const response = await fetch("/api/events/upload", {
+    const response = await apiFetch("/api/events/upload", {
       method: "POST",
       body: formData,
     });
@@ -85,7 +86,7 @@ const EventUpdateForm = ({
     }
 
     try {
-      const response = await fetch(`/api/events/?eventid=${eventId}`, {
+      const response = await apiFetch(`/api/events/?eventid=${eventId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

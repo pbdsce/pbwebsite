@@ -5,6 +5,7 @@ import { auth } from "@/Firebase";
 import { useStore } from "@/lib/zustand/store";
 import LoadingBrackets from "@/components/ui/loading-brackets";
 import { convertToWebP } from "@/utils/webpImages";
+import { apiFetch } from "@/lib/apiFetch";
 
 interface Lead {
   id?:string;
@@ -82,7 +83,7 @@ const Leads: React.FC = () => {
           formData.append("name", selectedLead.name);
         }
 
-        const response = await fetch("/api/leads/upload", {
+        const response = await apiFetch("/api/leads/upload", {
           method: "POST",
           body: formData, // FormData automatically sets the correct headers
         });
@@ -110,7 +111,7 @@ const Leads: React.FC = () => {
       if (selectedLead.id) {
         // Update lead in Firestore
         try {
-          await fetch(`/api/leads/?id=${selectedLead.id}`, {
+          await apiFetch(`/api/leads/?id=${selectedLead.id}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -127,7 +128,7 @@ const Leads: React.FC = () => {
       } else {
         // Add new lead to Firestore
         try {
-          await fetch("/api/leads", {
+          await apiFetch("/api/leads", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -161,7 +162,7 @@ const Leads: React.FC = () => {
 
   const handleDeleteLead = async (id: string) => {
     try {
-      await fetch(`/api/leads/?id=${id}`, {
+      await apiFetch(`/api/leads/?id=${id}`, {
         method: "DELETE",
       });
       alert("Lead deleted successfully");

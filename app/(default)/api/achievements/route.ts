@@ -4,6 +4,7 @@ import { cloudinary } from "@/Cloudinary";
 import { Readable } from "stream";
 import { UploadApiResponse } from "cloudinary";
 import connectMongoDB from "@/lib/dbConnect";
+import { requireAuth } from "@/lib/requireAuth";
 /**
  * @swagger
  * /api/achievements:
@@ -234,6 +235,10 @@ import connectMongoDB from "@/lib/dbConnect";
 // export async function POST(request: Request) {
 //   try {
 //     // Validate request method
+
+//     const { user, error } = await requireAuth(request);
+//     if (error) return error;
+
 //     if (request.method !== 'POST') {
 //       return NextResponse.json(
 //         { error: 'Method Not Allowed', details: 'Only POST requests are supported' },
@@ -449,6 +454,8 @@ export async function GET(request: NextRequest) {
 
 // PUT method: Update an existing achievement based on email
 // export async function PUT(request: Request) {
+//   const { user, error } = await requireAuth(request);
+//   if (error) return error;
 //   try {
 //     // Validate request method
 //     if (request.method !== 'PUT') {
@@ -590,6 +597,8 @@ export async function GET(request: NextRequest) {
 
 // DELETE method: Delete an achievement based on email
 // export async function DELETE(request: NextRequest) {
+//   const { user, error } = await requireAuth(request);
+//   if (error) return error;
 //   try {
 //     // Validate request method
 //     if (request.method !== 'DELETE') {

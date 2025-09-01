@@ -4,6 +4,7 @@ import RecruitmentModel from "@/models/Recruitment";
 import { TempRecruitmentUserModel } from "@/models/Recruitment";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/requireAuth";
 import nodemailer from "nodemailer";
 
 // Email rotation system - 20 PointBlank email accounts

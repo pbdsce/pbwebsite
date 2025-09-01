@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import connectMongoDB from "@/lib/dbConnect";
 import Leadsmodel from "@/models/Leads";
 import { cloudinary } from '@/Cloudinary';
+import { requireAuth } from "@/lib/requireAuth";
 
 // Interface for Lead
 interface Lead {
@@ -95,6 +96,8 @@ export async function GET(request: Request) {
  */
 // POST method: Add a new lead
 // export async function POST(request: Request) {
+//   const { user, error } = await requireAuth(request);
+//   if (error) return error;
 //   try {
 //     const leadData = await request.json();
 
@@ -143,6 +146,8 @@ export async function GET(request: Request) {
  */
 // PUT method: Update an existing lead
 // export async function PUT(request: Request) {
+//   const { user, error } = await requireAuth(request);
+//   if (error) return error;
 //   try {
 //     const leadData = await request.json();
 //     const { searchParams } = new URL(request.url);

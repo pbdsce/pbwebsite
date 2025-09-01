@@ -3,9 +3,12 @@ import AchievementsCategory from "@/models/AchievementsCategory";
 import connectMongoDB from "@/lib/dbConnect";
 import { Readable } from "stream";
 import { cloudinary } from "@/Cloudinary";
+import { requireAuth } from "@/lib/requireAuth";
 
 // POST method: Create or add a new achievement
 // export async function POST(request: Request) {
+//   const { user, error } = await requireAuth(request);
+//   if (error) return error;
 //   try {
 //     // Validate form data
 //     await connectMongoDB();
@@ -167,6 +170,8 @@ export async function GET(request: NextRequest) {
 
 // PUT method: Update an existing achievement based on name
 // export async function PUT(request: Request) {
+//   const { user, error } = await requireAuth(request);
+//   if (error) return error;
 //   try {
 //     await connectMongoDB();
 //     const formData = await request.formData();
@@ -275,6 +280,8 @@ export async function GET(request: NextRequest) {
 // export async function DELETE(request: NextRequest) {
 //   try {
 //     await connectMongoDB();
+//     const { user, error } = await requireAuth(request);
+//     if (error) return error;
 //     const { searchParams } = new URL(request.url);
 //     const name = searchParams.get("name");
 

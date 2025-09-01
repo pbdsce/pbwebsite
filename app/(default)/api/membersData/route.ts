@@ -4,6 +4,7 @@ import connectMongoDB from "@/lib/dbConnect";
 import Membersmodel from "@/models/Members";
 import { ObjectId } from "mongodb";
 import { convertToWebP } from "@/utils/webpImages";
+import { requireAuth } from "@/lib/requireAuth";
 /**
  * @swagger
  * /api/members:
@@ -154,6 +155,8 @@ export async function GET() {
  *                   example: true
  */
 // export async function POST(request: Request) {
+//   const { user, error } = await requireAuth(request);
+//   if (error) return error;
 //   try {
 //     const data = await request.json();
 
@@ -271,6 +274,8 @@ export async function GET() {
  */
 // PUT handler to update an existing member
 // export async function PUT(request: Request) {
+//   const { user, error } = await requireAuth(request);
+//   if (error) return error;
 //   try {
 //     const data = await request.json();
 //     const { id, name } = data;
@@ -368,6 +373,8 @@ export async function GET() {
  */
 // DELETE handler to delete a member and their image
 // export async function DELETE(request: Request) {
+//   const { user, error } = await requireAuth(request);
+//   if (error) return error;
 //   try {
 //     // Parse the request body to get the member ID
 //     const { id } = await request.json();
