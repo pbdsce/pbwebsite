@@ -2,25 +2,18 @@ import { db } from "@/Firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { getApiDocs } from '@/lib/swagger';
 import { NextResponse } from 'next/server';
+import { requireAuth } from "@/lib/requireAuth";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(request: Request) {
   try {
-    // Get the UID from the query parameters
-    const { searchParams } = new URL(request.url);
-    const uid = searchParams.get('uid');
-
-    if (!uid) {
-      return NextResponse.json(
-        { error: 'No user ID provided' },
-        { status: 401 }
-      );
-    }
+    const { user, error } = await requireAuth(request);
+    if (error) return error;
 
     // Check admin status
-    const adminDocRef = doc(db, "admin", uid);
+    const adminDocRef = doc(db, "admin", user.uid);
     const adminDocSnap = await getDoc(adminDocRef);
 
     if (!adminDocSnap) {
