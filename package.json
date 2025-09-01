@@ -25,6 +25,7 @@
     "embla-carousel": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "firebase": "^11.6.0",
+    "firebase-admin": "^13.4.0",
     "framer-motion": "^11.11.10",
     "iron-session": "^8.0.4",
     "lodash": "^4.17.21",

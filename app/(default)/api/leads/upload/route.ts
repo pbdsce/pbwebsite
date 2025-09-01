@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Readable } from "stream";
 import { cloudinary } from "@/Cloudinary";
 import { UploadApiResponse } from "cloudinary";
+import { requireAuth } from "@/lib/requireAuth";
 
 /**
  * Handles file uploads and uploads the file to Cloudinary.
@@ -70,6 +71,8 @@ import { UploadApiResponse } from "cloudinary";
  *                   example: "Unknown upload error"
  */
 // export async function POST(request: Request): Promise<Response> {
+// const { user, error } = await requireAuth(request);
+//   if (error) return error;
 //   try {
 //     // Parse the form data from the incoming request
 //     const formData = await request.formData();

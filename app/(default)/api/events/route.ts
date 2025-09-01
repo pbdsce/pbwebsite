@@ -3,6 +3,7 @@ import Eventmodel from "@/models/Events";
 import connectMongoDB from "@/lib/dbConnect";
 import { v4 as uuidv4 } from "uuid";
 import { cloudinary } from '@/Cloudinary';
+import { requireAuth } from "@/lib/requireAuth";
 /**
  * @swagger
  * /api/events:
@@ -234,6 +235,9 @@ export async function GET(request: Request) {
  */
 // POST request
 export async function POST(request: Request) {
+  const { user, error } = await requireAuth(request);
+  if (error) return error;
+  
   try {
     const newEvent = await request.json();
     const validationErrors = validateEvent(newEvent);
@@ -289,6 +293,9 @@ export async function POST(request: Request) {
  */
 // PUT request
 export async function PUT(request: Request) {
+  const { user, error } = await requireAuth(request);
+  if (error) return error;
+
   try {
     const { searchParams } = new URL(request.url);
     const eventid = searchParams.get("eventid");
@@ -344,6 +351,9 @@ export async function PUT(request: Request) {
 }
 // DELETE request
 export async function DELETE(request: Request) {
+  const { user, error } = await requireAuth(request)
+  if (error) return error;
+
   try {
     const { searchParams } = new URL(request.url);
     const eventid = searchParams.get("eventid");
