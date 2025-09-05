@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 const PBCTFRegisterPage = () => {
   return (
     <div className="min-h-screen mt-10 bg-black text-green-400 font-mono overflow-hidden">
+      {/*PBCTF content commented out for future use
       <div className="hidden" id="secret-agent-flag" data-flag="pbctf{pls_h4ck_m3_d4ddy}">
         🕵️‍♂️ CTF SECRET AGENT FLAG: pbctf&#123;pls_h4ck_m3_d4ddy&#125; 🕵️‍♂️
       </div>
@@ -93,6 +94,7 @@ const PBCTFRegisterPage = () => {
           backgroundSize: '20px 20px'
         }} />
       </div>
+      */}
     </div>
   );
 };
