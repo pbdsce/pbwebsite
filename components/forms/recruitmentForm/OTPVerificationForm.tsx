@@ -10,7 +10,6 @@ interface OTPVerificationFormProps {
   isVerifyingOTP: boolean;
   isSendingOTP: boolean;
   resendTimer: number;
-  canResend: boolean;
   onOTPChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onVerifyOTP: () => void;
   onResendOTP: () => void;
@@ -25,7 +24,6 @@ const OTPVerificationForm: React.FC<OTPVerificationFormProps> = ({
   isVerifyingOTP,
   isSendingOTP,
   resendTimer,
-  canResend,
   onOTPChange,
   onVerifyOTP,
   onResendOTP,
@@ -45,7 +43,7 @@ const OTPVerificationForm: React.FC<OTPVerificationFormProps> = ({
             Verify Your Email
           </h1>
           <p className="text-gray-400 text-sm">
-            We've sent a 6-digit OTP to<br/>
+            We&apos;ve sent a 6-digit OTP to<br/>
             <span className="text-green-400 font-medium">{formDataForSubmission?.email}</span>
           </p>
         </motion.div>

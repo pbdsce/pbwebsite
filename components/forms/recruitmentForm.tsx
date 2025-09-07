@@ -46,7 +46,6 @@ const RecruitmentForm: React.FC = () => {
   const [isVerifyingOTP, setIsVerifyingOTP] = useState<boolean>(false);
   const [otp, setOtp] = useState<string>("");
   const [otpError, setOtpError] = useState<string>("");
-  const [canResend, setCanResend] = useState<boolean>(false);
   const [resendTimer, setResendTimer] = useState<number>(0);
 
   const {
@@ -71,7 +70,6 @@ const RecruitmentForm: React.FC = () => {
     },
   });
 
-  const router = useRouter();
   const watchedYear = watch("year_of_study");
   const watchedEmail = watch("email");
 
@@ -82,14 +80,12 @@ const RecruitmentForm: React.FC = () => {
       interval = setInterval(() => {
         setResendTimer((prev) => prev - 1);
       }, 1000);
-    } else if (resendTimer === 0 && currentStep === "otp") {
-      setCanResend(true);
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [resendTimer, currentStep]);
+  }, [resendTimer]);
 
   // Scroll to top when step changes
   useEffect(() => {
@@ -144,7 +140,6 @@ const RecruitmentForm: React.FC = () => {
 
       toast.success("OTP sent to your email!");
       setResendTimer(60);
-      setCanResend(false);
       return true;
     } catch (error) {
       console.error("OTP send error:", error);
@@ -363,7 +358,6 @@ const RecruitmentForm: React.FC = () => {
         isVerifyingOTP={isVerifyingOTP}
         isSendingOTP={isSendingOTP}
         resendTimer={resendTimer}
-        canResend={canResend}
         onOTPChange={handleOTPChange}
         onVerifyOTP={handleOTPVerification}
         onResendOTP={handleResendOTP}
