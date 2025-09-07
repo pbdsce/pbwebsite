@@ -1,219 +1,275 @@
-import { db } from "@/Firebase";
 import connectMongoDB from "@/lib/dbConnect";
-import { recruitValidate } from "@/lib/server/utils";
-import {
-  addDoc,
-  collection,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
+import { ratelimiter } from "@/lib/ratelimiter";
+import RecruitmentModel from "@/models/Recruitment";
+import { TempRecruitmentUserModel } from "@/models/Recruitment";
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
-
-// Helper validation functions
-const validateEmail = (email: string): boolean =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-const validatePhone = (phone: string): boolean =>
-  /^[6-9]\d{9}$/.test(phone);
-
-// Validate Admission Number (1st Years)
-const validateAdmissionNumber = (admissionNumber: string): boolean =>
-  /^[1-9][0-9][A-Z]{4}[0-9]{4}$/.test(admissionNumber);
-
-// Validate USN (Other Years)
-const validateUSN = (usn: string): boolean =>
-  /^[1][D][S][1-3][0-9][A-Z]{2}[0-9]{3}$/.test(usn);
-/**
- * @swagger
- * components:
- *   schemas:
- *     RegistrationRequest:
- *       type: object
- *       required:
- *         - email
- *         - whatsapp_number
- *         - college_id
- *         - year_of_study
- *       properties:
- *         email:
- *           type: string
- *           description: The email of the participant.
- *         whatsapp_number:
- *           type: string
- *           description: The WhatsApp number of the participant.
- *         college_id:
- *           type: string
- *           description: The college ID or USN of the participant.
- *         year_of_study:
- *           type: integer
- *           description: The year of study of the participant.
- *         recaptcha_token:
- *           type: string
- *           description: The reCAPTCHA validation token.
- *     RegistrationResponse:
- *       type: object
- *       properties:
- *         message:
- *           type: string
- *           description: The response message indicating success or failure.
- *         error:
- *           type: string
- *           description: A specific error message if any.
- */
+import nodemailer from "nodemailer";
 
 /**
  * @swagger
- * /api/register:
- *   post:
- *     summary: Register a new participant for recruitment.
- *     description: Validates the input and reCAPTCHA, then stores the registration details in Firebase.
+ * /api/registration/recruitment:
+ *   get:
+ *     summary: Check if an email or phone is registered
+ *     description: This endpoint checks if the provided email or phone is already registered for recruitment.
  *     tags:
- *      - Registration
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/RegistrationRequest'
+ *      - Recruitment
+ *     parameters:
+ *       - in: query
+ *         name: identifier
+ *         required: true
+ *         schema:
+ *           type: string
+ *           description: The email or phone number to check.
  *     responses:
  *       200:
- *         description: Registration successful
+ *         description: The identifier is already registered.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/RegistrationResponse'
- *       400:
- *         description: Validation failed or input errors.
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "email already exists"
+ *                 isUnique:
+ *                   type: boolean
+ *                   example: false
+ *       403:
+ *         description: The identifier is not registered.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/RegistrationResponse'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "email not registered"
+ *                 isUnique:
+ *                   type: boolean
+ *                   example: true
  *       500:
  *         description: Internal server error.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/RegistrationResponse'
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred"
  */
-// Add a new registration
-export async function POST(request: Request) {
+export async function GET(request: Request) {
   await connectMongoDB();
+  try {
+    const { searchParams } = new URL(request.url);
+    const identifier = searchParams.get("identifier");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (identifier && emailRegex.test(identifier)) {
+      const existing = await RecruitmentModel.findOne({
+        email: identifier,
+      });
+      if (existing) {
+        return NextResponse.json(
+          { message: "email already exists", isUnique: false },
+          { status: 200 }
+        );
+      }
+      return NextResponse.json(
+        { message: "email not registered", isUnique: true },
+        { status: 403 }
+      );
+    } else {
+      const existing = await RecruitmentModel.findOne({
+        whatsapp_number: identifier,
+      });
+      if (existing) {
+        return NextResponse.json(
+          { message: "phone already exists", isUnique: false },
+          { status: 200 }
+        );
+      }
+      return NextResponse.json(
+        { message: "phone not registered", isUnique: true },
+        { status: 403 }
+      );
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error details:", error.message);
+      return NextResponse.json(
+        { error: "An error occurred", details: error.message },
+        { status: 500 }
+      );
+    } else {
+      console.error("Unknown error:", error);
+      return NextResponse.json(
+        { error: "An unknown error occurred" },
+        { status: 500 }
+      );
+    }
+  }
+}
+
+/**
+ * @swagger
+ * /api/registration/recruitment:
+ *   post:
+ *     summary: Handle recruitment actions
+ *     description: This endpoint handles different recruitment actions like reCAPTCHA validation, OTP sending, OTP verification, or adding a registration.
+ *     tags:
+ *      - Recruitment
+ *     parameters:
+ *       - in: query
+ *         name: action
+ *         required: true
+ *         schema:
+ *           type: string
+ *           description: Action to perform (validateRecaptcha, sendOTP, verifyOTP, addRegistration)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               recaptcha_token:
+ *                 type: string
+ *                 description: The reCAPTCHA token for validation.
+ *               email:
+ *                 type: string
+ *                 description: Email for OTP operations.
+ *               otp:
+ *                 type: string
+ *                 description: OTP for verification.
+ *     responses:
+ *       200:
+ *         description: Successful operation based on action.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Operation successful!"
+ *       400:
+ *         description: Invalid action specified or missing data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid action specified"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred"
+ */
+export async function POST(request: Request) {
+  try {
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+
+    const { success } = await ratelimiter.limit(ip);
+    if (!success) {
+      return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const action = searchParams.get("action");
+
+    if (action === "validateRecaptcha") {
+      return validateRecaptcha(request);
+    } else if (action === "sendOTP") {
+      return sendOTP(request);
+    } else if (action === "verifyOTP") {
+      return verifyOTP(request);
+    } else if (action === "addRegistration") {
+      return addRegistration(request);
+    } else {
+      return NextResponse.json(
+        { error: "Invalid action specified" },
+        { status: 400 }
+      );
+    }
+  } catch (error) {
+    console.error("Error processing request:", error);
+    return NextResponse.json(
+      { error: "An error occurred", details: error },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * @swagger
+ * /api/registration/recruitment/validateRecaptcha:
+ *   post:
+ *     summary: Validate reCAPTCHA token
+ *     description: This endpoint validates the reCAPTCHA token to verify if the user is human.
+ *     tags:
+ *      - Recruitment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               recaptcha_token:
+ *                 type: string
+ *                 description: The reCAPTCHA token for validation.
+ *     responses:
+ *       200:
+ *         description: reCAPTCHA validated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Recaptcha validated!"
+ *       500:
+ *         description: reCAPTCHA validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "reCAPTCHA validation failed"
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *       400:
+ *         description: Bad Request when reCAPTCHA token is missing.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "reCAPTCHA token not found! Try again"
+ */
+async function validateRecaptcha(request: Request) {
   const formData = await request.json();
-  const { recaptcha_token, ...data } = formData;
-  const { email, whatsapp_number, college_id, year_of_study } = formData;
+  const { recaptcha_token } = formData;
 
-  // Check if required fields are present
-  if (!email || !whatsapp_number || !college_id) {
-    return NextResponse.json(
-      {
-        message: "Missing required fields",
-        error: "Missing required fields",
-      },
-      { status: 400 }
-    );
-  }
-
-  // Validate email
-  if (!validateEmail(email)) {
-    return NextResponse.json(
-      {
-        message: "Invalid email format",
-        error: "Invalid email format",
-      },
-      { status: 400 }
-    );
-  }
-
-  // Validate phone number
-  if (!validatePhone(whatsapp_number)) {
-    return NextResponse.json(
-      {
-        message: "Invalid phone number format",
-        error: "Invalid phone number format",
-      },
-      { status: 400 }
-    );
-  }
-
-  // Validate College ID based on year
-  if (year_of_study == 1) {
-    if (!validateAdmissionNumber(college_id)) {
-      return NextResponse.json(
-        {
-          message: "Invalid Admission Number format. Example: 19ABCD1234",
-          error: "Invalid Admission Number format",
-        },
-        { status: 400 }
-      );
-    }
-  } else {
-    if (!validateUSN(college_id)) {
-      return NextResponse.json(
-        {
-          message: "Invalid USN format. Example: 1DS21CS123",
-          error: "Invalid USN format",
-        },
-        { status: 400 }
-      );
-    }
-  }
-
-  // Only one registration per person
-  const emailQuery = query(
-    collection(db, "recruitment2024"),
-    where("email", "==", email)
-  );
-
-  const phoneQuery = query(
-    collection(db, "recruitment2024"),
-    where("whatsapp_number", "==", whatsapp_number)
-  );
-
-  const collegeIdQuery = query(
-    collection(db, "recruitment2024"),
-    where("college_id", "==", college_id)
-  );
-
-  // Fetch results from all queries
-  const [emailSnapshot, phoneSnapshot, collegeIdSnapshot] = await Promise.all([
-    getDocs(emailQuery),
-    getDocs(phoneQuery),
-    getDocs(collegeIdQuery),
-  ]);
-
-  if (!emailSnapshot.empty) {
-    return NextResponse.json(
-      {
-        message: "Email is already registered!",
-        error: "Email is already registered!",
-      },
-      { status: 400 }
-    );
-  }
-
-  if (!phoneSnapshot.empty) {
-    return NextResponse.json(
-      {
-        message: "WhatsApp number is already registered!",
-        error: "WhatsApp number is already registered!",
-      },
-      { status: 400 }
-    );
-  }
-
-  if (!collegeIdSnapshot.empty) {
-    return NextResponse.json(
-      {
-        message: "College ID is already registered!",
-        error: "College ID is already registered!",
-      },
-      { status: 400 }
-    );
-  }
-
-  // reCAPTCHA verification
   const recaptchaToken = recaptcha_token;
+
   const details = {
     event: {
       token: recaptchaToken,
@@ -227,7 +283,9 @@ export async function POST(request: Request) {
         message: "reCAPTCHA token not found! Try again",
         error: "reCAPTCHA token not found!",
       },
-      { status: 400 }
+      {
+        status: 500,
+      }
     );
   }
 
@@ -241,33 +299,369 @@ export async function POST(request: Request) {
 
   const recaptchaResult = await recaptchaResponse.json();
   if (recaptchaResult.riskAnalysis.score < 0.7) {
-    return NextResponse.json(
-      {
-        message: "reCAPTCHA validation failed",
-        error: recaptchaResult["error-codes"],
-      },
-      { status: 400 }
-    );
+    return NextResponse.json({
+      message: "reCAPTCHA validation failed",
+      error: recaptchaResult["error-codes"],
+    });
   }
 
-  // Validate the rest of the data
-  const val = recruitValidate(data);
+  return NextResponse.json({ message: "Recaptcha validated!" });
+}
 
-  if (val.error) {
-    return NextResponse.json(
-      { message: "Validation error", error: val.error },
-      { status: 400 }
-    );
-  }
-
-  // Save to Firebase
+/**
+ * @swagger
+ * /api/registration/recruitment/sendOTP:
+ *   post:
+ *     summary: Send OTP for recruitment
+ *     description: This endpoint sends an OTP to the provided email and stores registration data temporarily.
+ *     tags:
+ *      - Recruitment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Email to send OTP to.
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "OTP sent successfully"
+ *       400:
+ *         description: Missing email or email already registered.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Email already registered"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal Server Error"
+ */
+async function sendOTP(request: Request) {
   try {
-    await addDoc(collection(db, "recruitment2024"), data);
-    return NextResponse.json({ message: "Registration successful" });
-  } catch (error) {
-    console.error(error);
+    await connectMongoDB();
+    while (mongoose.connection.readyState !== 1) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    const { email } = await request.json();
+    if (!email) {
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    }
+
+    const existingReg = await Promise.race([
+      RecruitmentModel.findOne({ email }).lean(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Database query timeout")), 8000)
+      ),
+    ]);
+
+    if (existingReg) {
+      return NextResponse.json(
+        { error: "Email already registered" },
+        { status: 400 }
+      );
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await Promise.race([
+      TempRecruitmentUserModel.findOneAndUpdate(
+        { email },
+        { otp, otpExpiresAt },
+        { upsert: true }
+      ),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("OTP save timeout")), 8000)
+      ),
+    ]);
+
+    const transporter = nodemailer.createTransport({
+      host: "server.hosting3.acm.org",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"Recruitment Registration" <${process.env.MAIL_USER}>`,
+      to: email,
+      subject: `[PointBlank Recruitment] Email Verification OTP: ${otp}`,
+      text: `
+      Your OTP for PointBlank Recruitment is:
+
+      >>> ${otp} <<<
+
+      It is valid for 10 minutes before it self-destructs.
+
+      - PointBlank Team`,
+    });
+
     return NextResponse.json(
-      { message: "An error occurred", error },
+      { message: "OTP sent successfully" },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * @swagger
+ * /api/registration/recruitment?action=verifyOTP:
+ *   post:
+ *     summary: Verify OTP for recruitment registration
+ *     description: This endpoint verifies the OTP sent to the user's email. It only validates the OTP and does not complete the registration process.
+ *     tags:
+ *      - Recruitment
+ *     parameters:
+ *       - in: query
+ *         name: action
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [verifyOTP]
+ *           description: Must be set to "verifyOTP"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email address where OTP was sent
+ *                 example: "user@domain.com"
+ *               otp:
+ *                 type: string
+ *                 pattern: '^[0-9]{6}$'
+ *                 description: The 6-digit OTP received via email
+ *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: OTP verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "OTP verified successfully!"
+ *       400:
+ *         description: Bad request - Missing fields or invalid/expired OTP
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   enum:
+ *                     - "Email and OTP required"
+ *                     - "Invalid or expired OTP"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal Server Error"
+ */
+async function verifyOTP(request: Request) {
+  try {
+    const { email, otp } = await request.json();
+
+    if (!email || !otp) {
+      return NextResponse.json(
+        { error: "Email and OTP required" },
+        { status: 400 }
+      );
+    }
+
+    const tempUser = await TempRecruitmentUserModel.findOne({ email });
+
+    if (!tempUser) {
+      return NextResponse.json(
+        { error: "Invalid or expired OTP" },
+        { status: 400 }
+      );
+    }
+
+    const isOTPValid = tempUser.otp === otp;
+    const isOTPExpired = tempUser.otpExpiresAt < new Date();
+
+    if (!isOTPValid || isOTPExpired) {
+      return NextResponse.json(
+        { error: "Invalid or expired OTP" },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: "OTP verified successfully!" },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * @swagger
+ * /api/registration/recruitment/addRegistration:
+ *   post:
+ *     summary: Add a new recruitment registration
+ *     description: This endpoint allows users to register for recruitment.
+ *     tags:
+ *      - Recruitment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Full name of the applicant.
+ *               email:
+ *                 type: string
+ *                 description: Email address.
+ *               whatsapp_number:
+ *                 type: string
+ *                 description: WhatsApp number.
+ *               college_id:
+ *                 type: string
+ *                 description: College ID or USN.
+ *               year_of_study:
+ *                 type: string
+ *                 description: Year of study.
+ *               branch:
+ *                 type: string
+ *                 description: Branch of study.
+ *               about:
+ *                 type: string
+ *                 description: About the applicant.
+ *     responses:
+ *       200:
+ *         description: Registration successful.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Registration successful!"
+ *       400:
+ *         description: Invalid data, missing required fields.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid data. All fields are required."
+ */
+async function addRegistration(request: Request) {
+  try {
+    const data = await request.json();
+
+    if (
+      !data ||
+      !data.name ||
+      !data.email ||
+      !data.whatsapp_number ||
+      !data.college_id ||
+      !data.year_of_study ||
+      !data.branch ||
+      !data.about
+    ) {
+      return NextResponse.json(
+        {
+          error: "Invalid data. All fields are required.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check if email, phone, or college_id already exists
+    const existingEmail = await RecruitmentModel.findOne({ email: data.email });
+    if (existingEmail) {
+      return NextResponse.json(
+        { error: "Email already registered" },
+        { status: 400 }
+      );
+    }
+
+    const existingPhone = await RecruitmentModel.findOne({
+      whatsapp_number: data.whatsapp_number,
+    });
+    if (existingPhone) {
+      return NextResponse.json(
+        { error: "Phone number already registered" },
+        { status: 400 }
+      );
+    }
+
+    const existingCollegeId = await RecruitmentModel.findOne({
+      college_id: data.college_id,
+    });
+    if (existingCollegeId) {
+      return NextResponse.json(
+        { error: "College ID already registered" },
+        { status: 400 }
+      );
+    }
+
+    const newDoc = new RecruitmentModel(data);
+    await newDoc.save();
+
+    return NextResponse.json({ message: "Registration successful!" });
+  } catch (error) {
+    console.error("Error adding registration:", error);
+    return NextResponse.json(
+      { error: "Failed to add registration.", details: error },
       { status: 500 }
     );
   }

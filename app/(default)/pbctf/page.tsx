@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 const PBCTFRegisterPage = () => {
   return (
     <div className="min-h-screen mt-10 bg-black text-green-400 font-mono overflow-hidden">
+      {/*PBCTF content commented out for future use
       <div className="hidden" id="secret-agent-flag" data-flag="pbctf{pls_h4ck_m3_d4ddy}">
         🕵️‍♂️ CTF SECRET AGENT FLAG: pbctf&#123;pls_h4ck_m3_d4ddy&#125; 🕵️‍♂️
       </div>
@@ -42,11 +43,11 @@ const PBCTFRegisterPage = () => {
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
             <div>
-              <div className="text-2xl font-bold text-green-300">PBCTF 2025</div>
+              <div className="text-2xl font-bold text-green-300">PBCTF 4.0</div>
               <div className="text-sm text-gray-400">Capture The Flag</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-green-300">10 to 5</div>
+              <div className="text-2xl font-bold text-green-300">10AM to 5PM</div>
               <div className="text-sm text-gray-400">Competition Hours</div>
             </div>
             <div>
@@ -65,6 +66,7 @@ const PBCTFRegisterPage = () => {
           <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
           <span className="text-green-300">Registration Status: OPEN</span>
         </motion.div>
+
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -92,6 +94,7 @@ const PBCTFRegisterPage = () => {
           backgroundSize: '20px 20px'
         }} />
       </div>
+      */}
     </div>
   );
 };
