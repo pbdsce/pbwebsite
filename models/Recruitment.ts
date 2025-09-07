@@ -149,13 +149,13 @@ const tempRecruitmentUserSchema = new Schema<TempRecruitmentUserDoc>(
 tempRecruitmentUserSchema.index({ otpExpiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const RecruitmentModel =
-  mongoose.models.recruitments ||
-  mongoose.model<RecruitmentDoc>("recruitments", recruitmentSchema);
+  mongoose.models.recruitment2025 ||
+  mongoose.model<RecruitmentDoc>("recruitment2025", recruitmentSchema);
 
 const TempRecruitmentUserModel =
-  mongoose.models.temprecruitmentusers ||
+  mongoose.models.temprecruitment2025 ||
   mongoose.model<TempRecruitmentUserDoc>(
-    "temprecruitmentusers",
+    "temprecruitment2025",
     tempRecruitmentUserSchema
   );
 

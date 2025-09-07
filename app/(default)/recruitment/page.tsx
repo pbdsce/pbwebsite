@@ -11,20 +11,19 @@ import Image from "next/image";
 const RegisterPage = () => {
   const router = useRouter();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.push("/login");
-      }
-    });
-    return () => unsubscribe();
-  }, [router]);
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
+  //     if (!user) {
+  //       router.push("/login");
+  //     }
+  //   });
+  //   return () => unsubscribe();
+  // }, [router]);
 
   return (
     <>
-
       <div className="w-50 mt-16 mx-auto flex flex-col items-center justify-center">
-        <Link href="https://www.codebattle.in/" target="_blank" rel="noopener noreferrer">
+        {/* <Link href="https://www.codebattle.in/" target="_blank" rel="noopener noreferrer">
           <Image
             src={"/images/codebattle.webp"}
             alt="recruitment-poster"
@@ -32,12 +31,10 @@ const RegisterPage = () => {
             width={1900}
             className="mt-9"
           />
-        </Link>
+        </Link> */}
         <div className="form-container my-2">
           <RecruitmentForm />
         </div>
-
-
       </div>
     </>
   );

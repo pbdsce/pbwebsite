@@ -177,15 +177,24 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
-    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    // const ip = request.headers.get("x-forwarded-for") || "unknown";
 
-    const { success } = await ratelimiter.limit(ip);
-    if (!success) {
-      return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });
-    }
+    // const { success } = await ratelimiter.limit(ip);
+    // if (!success) {
+    //   return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });
+    // }
 
     const { searchParams } = new URL(request.url);
     const action = searchParams.get("action");
+
+    console.log(`Recruitment API - Action: ${action}`);
+
+    if (!action) {
+      return NextResponse.json(
+        { error: "Action parameter is required" },
+        { status: 400 }
+      );
+    }
 
     if (action === "validateRecaptcha") {
       return validateRecaptcha(request);
@@ -204,7 +213,11 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error processing request:", error);
     return NextResponse.json(
-      { error: "An error occurred", details: error },
+      {
+        error: "An error occurred",
+        details: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
       { status: 500 }
     );
   }
@@ -360,15 +373,30 @@ async function validateRecaptcha(request: Request) {
  */
 async function sendOTP(request: Request) {
   try {
+    console.log("Starting OTP send process...");
+
     await connectMongoDB();
     while (mongoose.connection.readyState !== 1) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
+
     const { email } = await request.json();
+    console.log("OTP request for email:", email);
+
     if (!email) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: "Invalid email format" },
+        { status: 400 }
+      );
+    }
+
+    console.log("Checking for existing registration...");
     const existingReg = await Promise.race([
       RecruitmentModel.findOne({ email }).lean(),
       new Promise((_, reject) =>
@@ -377,6 +405,7 @@ async function sendOTP(request: Request) {
     ]);
 
     if (existingReg) {
+      console.log("Email already registered:", email);
       return NextResponse.json(
         { error: "Email already registered" },
         { status: 400 }
@@ -385,6 +414,7 @@ async function sendOTP(request: Request) {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    console.log("Generated OTP for:", email);
 
     await Promise.race([
       TempRecruitmentUserModel.findOneAndUpdate(
@@ -397,21 +427,79 @@ async function sendOTP(request: Request) {
       ),
     ]);
 
-    const transporter = nodemailer.createTransport({
-      host: "server.hosting3.acm.org",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS,
-      },
-    });
+    console.log("Sending email...");
 
-    await transporter.sendMail({
-      from: `"Recruitment Registration" <${process.env.MAIL_USER}>`,
-      to: email,
-      subject: `[PointBlank Recruitment] Email Verification OTP: ${otp}`,
-      text: `
+    // Check if email credentials are available
+    if (!process.env.MAIL_USER || !process.env.MAIL_PASS) {
+      console.error("Email credentials not configured");
+      return NextResponse.json(
+        { error: "Email service not configured" },
+        { status: 500 }
+      );
+    }
+
+    console.log("Email user:", process.env.MAIL_USER);
+
+    // Try multiple SMTP configurations
+    const smtpConfigs = [
+      // Configuration 1: Port 587 with TLS
+      {
+        host: "server.hosting3.acm.org",
+        port: 587,
+        secure: false,
+        auth: {
+          user: process.env.MAIL_USER,
+          pass: process.env.MAIL_PASS,
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+      },
+      // Configuration 2: Port 465 with SSL
+      {
+        host: "server.hosting3.acm.org",
+        port: 465,
+        secure: true,
+        auth: {
+          user: process.env.MAIL_USER,
+          pass: process.env.MAIL_PASS,
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+      },
+      // Configuration 3: Port 25 (fallback)
+      {
+        host: "server.hosting3.acm.org",
+        port: 25,
+        secure: false,
+        auth: {
+          user: process.env.MAIL_USER,
+          pass: process.env.MAIL_PASS,
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+      },
+    ];
+
+    let transporter;
+    let emailSent = false;
+
+    for (let i = 0; i < smtpConfigs.length; i++) {
+      try {
+        console.log(`Trying SMTP configuration ${i + 1}...`);
+        transporter = nodemailer.createTransport(smtpConfigs[i]);
+
+        // Verify connection configuration
+        await transporter.verify();
+        console.log(`SMTP configuration ${i + 1} verified successfully`);
+
+        await transporter.sendMail({
+          from: `"Recruitment Registration" <${process.env.MAIL_USER}>`,
+          to: email,
+          subject: `[PointBlank Recruitment] Email Verification OTP: ${otp}`,
+          text: `
       Your OTP for PointBlank Recruitment is:
 
       >>> ${otp} <<<
@@ -419,15 +507,37 @@ async function sendOTP(request: Request) {
       It is valid for 10 minutes before it self-destructs.
 
       - PointBlank Team`,
-    });
+        });
+
+        console.log("OTP sent successfully to:", email);
+        emailSent = true;
+        break;
+      } catch (error) {
+        console.error(`SMTP configuration ${i + 1} failed:`, error);
+        if (i === smtpConfigs.length - 1) {
+          // Last configuration failed
+          throw error;
+        }
+        // Try next configuration
+        continue;
+      }
+    }
+
+    if (!emailSent) {
+      throw new Error("All SMTP configurations failed");
+    }
 
     return NextResponse.json(
       { message: "OTP sent successfully" },
       { status: 200 }
     );
   } catch (error: any) {
+    console.error("Error sending OTP:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      {
+        error: "Failed to send OTP",
+        details: error.message || "Internal Server Error",
+      },
       { status: 500 }
     );
   }
@@ -605,63 +715,163 @@ async function verifyOTP(request: Request) {
  */
 async function addRegistration(request: Request) {
   try {
-    const data = await request.json();
+    console.log("Starting recruitment registration...");
 
-    if (
-      !data ||
-      !data.name ||
-      !data.email ||
-      !data.whatsapp_number ||
-      !data.college_id ||
-      !data.year_of_study ||
-      !data.branch ||
-      !data.about
-    ) {
+    const data = await request.json();
+    console.log("Received data:", JSON.stringify(data, null, 2));
+
+    // Validate required fields
+    const requiredFields = [
+      "name",
+      "email",
+      "whatsapp_number",
+      "college_id",
+      "year_of_study",
+      "branch",
+      "about",
+    ];
+    const missingFields = requiredFields.filter((field) => !data[field]);
+
+    if (missingFields.length > 0) {
+      console.log("Missing fields:", missingFields);
       return NextResponse.json(
         {
-          error: "Invalid data. All fields are required.",
+          error: "Missing required fields",
+          missingFields: missingFields,
+          received: Object.keys(data),
         },
         { status: 400 }
       );
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+      return NextResponse.json(
+        { error: "Invalid email format" },
+        { status: 400 }
+      );
+    }
+
+    // Validate phone format
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(data.whatsapp_number)) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid phone number format. Must be 10 digits starting with 6-9",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate college_id based on year
+    if (data.year_of_study === "1st year") {
+      const admissionNumberRegex = /^[1-9][0-9][A-Z]{4}[0-9]{4}$/;
+      if (!admissionNumberRegex.test(data.college_id)) {
+        return NextResponse.json(
+          {
+            error:
+              "Invalid Admission Number format for 1st year. Expected format: 19ABCD1234",
+          },
+          { status: 400 }
+        );
+      }
+    } else {
+      const usnRegex = /^[1][D][S][1-3][0-9][A-Z]{2}[0-9]{3}$/;
+      if (!usnRegex.test(data.college_id)) {
+        return NextResponse.json(
+          {
+            error:
+              "Invalid USN format for 2nd/3rd/4th year. Expected format: 1DS21CS123",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    console.log("Validating duplicates...");
+
     // Check if email, phone, or college_id already exists
-    const existingEmail = await RecruitmentModel.findOne({ email: data.email });
+    const [existingEmail, existingPhone, existingCollegeId] = await Promise.all(
+      [
+        RecruitmentModel.findOne({ email: data.email }),
+        RecruitmentModel.findOne({ whatsapp_number: data.whatsapp_number }),
+        RecruitmentModel.findOne({ college_id: data.college_id }),
+      ]
+    );
+
     if (existingEmail) {
+      console.log("Email already exists:", data.email);
       return NextResponse.json(
         { error: "Email already registered" },
         { status: 400 }
       );
     }
 
-    const existingPhone = await RecruitmentModel.findOne({
-      whatsapp_number: data.whatsapp_number,
-    });
     if (existingPhone) {
+      console.log("Phone already exists:", data.whatsapp_number);
       return NextResponse.json(
         { error: "Phone number already registered" },
         { status: 400 }
       );
     }
 
-    const existingCollegeId = await RecruitmentModel.findOne({
-      college_id: data.college_id,
-    });
     if (existingCollegeId) {
+      console.log("College ID already exists:", data.college_id);
       return NextResponse.json(
         { error: "College ID already registered" },
         { status: 400 }
       );
     }
 
+    console.log("Creating new recruitment document...");
     const newDoc = new RecruitmentModel(data);
     await newDoc.save();
+    console.log("Recruitment registration successful!");
 
     return NextResponse.json({ message: "Registration successful!" });
   } catch (error) {
-    console.error("Error adding registration:", error);
+    console.error("Error adding recruitment registration:", error);
+
+    if (error instanceof Error) {
+      // Handle Mongoose validation errors
+      if (error.name === "ValidationError") {
+        const validationErrors = Object.values(error).map(
+          (err: any) => err.message
+        );
+        return NextResponse.json(
+          {
+            error: "Validation failed",
+            details: validationErrors,
+            type: "validation_error",
+          },
+          { status: 400 }
+        );
+      }
+
+      // Handle duplicate key errors
+      if (
+        error.name === "MongoServerError" &&
+        error.message.includes("duplicate key")
+      ) {
+        return NextResponse.json(
+          {
+            error: "Duplicate entry detected",
+            details: error.message,
+            type: "duplicate_error",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     return NextResponse.json(
-      { error: "Failed to add registration.", details: error },
+      {
+        error: "Failed to add registration",
+        details: error instanceof Error ? error.message : String(error),
+        type: "server_error",
+      },
       { status: 500 }
     );
   }
