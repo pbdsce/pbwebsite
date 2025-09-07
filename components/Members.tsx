@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { FaEllipsisV } from "react-icons/fa";
+import { FaEllipsisV, FaRegBell } from "react-icons/fa";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
 import Image from "next/image";
@@ -308,10 +308,10 @@ export default function Members() {
                 heading={heading}
                 content={
                   <div className="flex justify-center">
-                    {/* {heading === "First Year" && (
-                      <div className="bg-gray-900 text-white p-4 rounded-lg shadow-lg flex items-center space-x-9 lg:w-7/12 justify-center">
+                    {heading === "First Year" && (
+                      <div className="bg-gray-900 text-white p-4 rounded-lg shadow-lg flex items-center space-x-9 lg:w-7/12 justify-center cursor-pointer" onClick={() => window.location.href = '/events'}>
                         <p className="text-xl font-bold lg:text-2xl text-center">
-                          Recruitment Incoming Soon!
+                          Register for Recruitment
                         </p>
                         <FaRegBell
                           className="text-[#00C853] text-2xl"
@@ -340,7 +340,7 @@ export default function Members() {
                           }
                         `}</style>
                       </div>
-                    )} */}
+                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
                       {data[heading]?.map((profile, cardIndex) => (
                         <div key={cardIndex} className="relative">
