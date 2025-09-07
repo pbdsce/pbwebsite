@@ -12,6 +12,7 @@ import AdditionalQuestions from "./pbctfForm/AdditionalQuestions";
 import StepCard from "./pbctfForm/StepCard";
 import SuccessScreen from "./pbctfForm/SuccessScreen";
 import type { FormData } from "./pbctfForm/types";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 // PARAGATI RAJ ARE YOU READING THIS
 // I MISS YOU
@@ -21,16 +22,20 @@ const pressStart2P = Press_Start_2P({
   subsets: ["latin"],
 });
 
+
+
 const PBCTFForm: React.FC = () => {
   const [isSuccess, setSuccess] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<string | null>(null);
-  
+
   const [token, setToken] = useState<string>();
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set([0]));
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [participant1EmailVerified, setParticipant1EmailVerified] = useState<boolean>(false);
   const [participant2EmailVerified, setParticipant2EmailVerified] = useState<boolean>(false);
+
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const {
     register,
@@ -41,31 +46,9 @@ const PBCTFForm: React.FC = () => {
     resetField,
   } = useForm<FormData>();
 
-  const getRecaptcha = async () => {
-    grecaptcha.enterprise.ready(async () => {
-      const Rtoken = await grecaptcha.enterprise.execute(
-        process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
-      );
-      setToken(Rtoken);
-    });
-  };
-
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/enterprise.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`;
-    script.async = true;
-    script.defer = true;
-    script.onload = getRecaptcha;
-    document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
-
   // Watch specific fields instead of entire objects to avoid unnecessary re-renders
   const participationType = watch("participationType");
-  
+
   // Watch individual fields for completion checking
   const participant1Name = watch("participant1.name");
   const participant1Email = watch("participant1.email");
@@ -161,49 +144,57 @@ const PBCTFForm: React.FC = () => {
     setCompletedSteps(newCompletedSteps);
 
     // Auto-expand next step when current step is completed
-    setExpandedSteps(prev => {
+    setExpandedSteps((prev) => {
       const newExpanded = new Set(prev);
-      
+
       // Expand step 1 when step 0 is completed
       if (newCompletedSteps.has(0) && !newExpanded.has(1)) {
         newExpanded.add(1);
       }
-      
+
       // Expand next step when step 1 is completed
-      if (newCompletedSteps.has(1) && !newExpanded.has(2) && !newExpanded.has(3)) {
+      if (
+        newCompletedSteps.has(1) &&
+        !newExpanded.has(2) &&
+        !newExpanded.has(3)
+      ) {
         if (participationType === "solo") {
           newExpanded.add(3); // Skip to step 3 (additional questions) for solo participants
         } else {
           newExpanded.add(2); // Go to step 2 for duo participants
         }
       }
-      
+
       // Expand step 3 when step 2 is completed (duo only)
-      if (participationType === "duo" && newCompletedSteps.has(2) && !newExpanded.has(3)) {
+      if (
+        participationType === "duo" &&
+        newCompletedSteps.has(2) &&
+        !newExpanded.has(3)
+      ) {
         newExpanded.add(3);
       }
-      
+
       // Expand step 4 (rules) when step 3 (additional questions) is completed
       if (newCompletedSteps.has(3) && !newExpanded.has(4)) {
         newExpanded.add(4);
       }
-      
+
       return newExpanded;
     });
   }, [
     participationType,
     participant1Name, participant1Email, participant1Phone, participant1Age, participant1Gender,
-    participant1ExperienceLevel, participant1Affiliation, participant1AffiliationName, 
+    participant1ExperienceLevel, participant1Affiliation, participant1AffiliationName,
     participant1PreviousCTF, participant1CTFNames, participant1EmailVerified,
     participant2Name, participant2Email, participant2Phone, participant2Age, participant2Gender,
-    participant2ExperienceLevel, participant2Affiliation, participant2AffiliationName, 
+    participant2ExperienceLevel, participant2Affiliation, participant2AffiliationName,
     participant2PreviousCTF, participant2CTFNames, participant2EmailVerified,
     howDidYouHear,
     agreeRules, consentLeaderboard, allowContact
   ]);
 
   const handleStepClick = (stepNumber: number) => {
-    setExpandedSteps(prev => {
+    setExpandedSteps((prev) => {
       const newExpanded = new Set(prev);
       if (newExpanded.has(stepNumber)) {
         newExpanded.delete(stepNumber);
@@ -238,12 +229,10 @@ const PBCTFForm: React.FC = () => {
     }
   };
 
-
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     setEmailError(null);
-
     try {
       if (!participant1EmailVerified) {
         setEmailError("Please verify Team Leader's email address before submitting");
@@ -279,7 +268,9 @@ const PBCTFForm: React.FC = () => {
           data.participant2 &&
           data.participant1.email === data.participant2.email
         ) {
-          setEmailError("Email addresses for Participant 1 and Participant 2 cannot be the same");
+          setEmailError(
+            "Email addresses for Participant 1 and Participant 2 cannot be the same"
+          );
           setIsSubmitting(false);
           return;
         }
@@ -290,7 +281,9 @@ const PBCTFForm: React.FC = () => {
           setIsSubmitting(false);
           return;
         }
-        const isPhoneUnique1 = await checkPhoneUniqueness(data.participant1.phone);
+        const isPhoneUnique1 = await checkPhoneUniqueness(
+          data.participant1.phone
+        );
         if (!isPhoneUnique1) {
           setEmailError("Phone number for Participant 1 already exists");
           setIsSubmitting(false);
@@ -304,12 +297,16 @@ const PBCTFForm: React.FC = () => {
             setIsSubmitting(false);
             return;
           }
-          const isPhoneUnique2 = await checkPhoneUniqueness(data.participant2.phone);
+          const isPhoneUnique2 = await checkPhoneUniqueness(
+            data.participant2.phone
+          );
           if (!isPhoneUnique2) {
             setEmailError("Phone number for Participant 2 already exists");
             setIsSubmitting(false);
             return;
           }
+
+
         }
 
         const response2 = await fetch(
@@ -338,8 +335,6 @@ const PBCTFForm: React.FC = () => {
     return <SuccessScreen />;
   }
 
-
-
   return (
     <div className="max-w-4xl mx-auto">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -349,9 +344,8 @@ const PBCTFForm: React.FC = () => {
           title="Choose Participation Mode"
           isCompleted={completedSteps.has(0)}
           isExpanded={expandedSteps.has(0)}
-          onStepClick={handleStepClick}
-        >
-          <ParticipationTypeSelection 
+          onStepClick={handleStepClick}>
+          <ParticipationTypeSelection
             register={register}
             participationType={participationType}
           />
@@ -360,33 +354,35 @@ const PBCTFForm: React.FC = () => {
         {/* Participant 1 */}
         <StepCard
           stepNumber={1}
-          title={participationType === 'solo' ? "Your Details" : "Team Leader Details"}
+          title={
+            participationType === "solo"
+              ? "Your Details"
+              : "Team Leader Details"
+          }
           isCompleted={completedSteps.has(1)}
           isExpanded={expandedSteps.has(1)}
-          onStepClick={handleStepClick}
-        >
-          <ParticipantForm 
-            participantNumber={1} 
-            register={register} 
-            errors={errors} 
+          onStepClick={handleStepClick}>
+          <ParticipantForm
+            participantNumber={1}
+            register={register}
+            errors={errors}
             watch={watch}
             onEmailVerificationChange={setParticipant1EmailVerified}
           />
         </StepCard>
 
         {/* Participant 2 (only for duo) */}
-        {participationType === 'duo' && (
+        {participationType === "duo" && (
           <StepCard
             stepNumber={2}
             title="Team Member Details"
             isCompleted={completedSteps.has(2)}
             isExpanded={expandedSteps.has(2)}
-            onStepClick={handleStepClick}
-          >
-            <ParticipantForm 
-              participantNumber={2} 
-              register={register} 
-              errors={errors} 
+            onStepClick={handleStepClick}>
+            <ParticipantForm
+              participantNumber={2}
+              register={register}
+              errors={errors}
               watch={watch}
               onEmailVerificationChange={setParticipant2EmailVerified}
             />
@@ -399,9 +395,8 @@ const PBCTFForm: React.FC = () => {
           title="Additional Questions"
           isCompleted={completedSteps.has(3)}
           isExpanded={expandedSteps.has(3)}
-          onStepClick={handleStepClick}
-        >
-          <AdditionalQuestions 
+          onStepClick={handleStepClick}>
+          <AdditionalQuestions
             register={register}
             errors={errors}
             watch={watch}
@@ -414,17 +409,15 @@ const PBCTFForm: React.FC = () => {
           title="Rules & Agreements"
           isCompleted={completedSteps.has(4)}
           isExpanded={expandedSteps.has(4)}
-          onStepClick={handleStepClick}
-        >
-          <RulesAgreements 
-            register={register}
-            errors={errors}
-          />
+          onStepClick={handleStepClick}>
+          <RulesAgreements register={register} errors={errors} />
         </StepCard>
 
         {emailError && (
           <div className="bg-red-900/20 border border-red-400/30 rounded-lg p-4">
-            <p className="text-red-400 font-mono text-sm text-center">{emailError}</p>
+            <p className="text-red-400 font-mono text-sm text-center">
+              {emailError}
+            </p>
           </div>
         )}
 
@@ -434,8 +427,7 @@ const PBCTFForm: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-green-400/10 hover:bg-green-400/20 border border-green-400 text-green-300 font-mono py-4 px-6 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group"
-            >
+              className="w-full bg-green-400/10 hover:bg-green-400/20 border border-green-400 text-green-300 font-mono py-4 px-6 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group">
               <span className="flex items-center justify-center gap-2">
                 {isSubmitting ? (
                   <>
@@ -445,7 +437,9 @@ const PBCTFForm: React.FC = () => {
                 ) : (
                   <>
                     <span>Complete Registration</span>
-                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                    <span className="group-hover:translate-x-1 transition-transform">
+                      →
+                    </span>
                   </>
                 )}
               </span>

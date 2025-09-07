@@ -1,5 +1,6 @@
 "use client";
 import PBCTFForm from "@/components/forms/pbctfForm";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { motion } from "framer-motion";
 
 const PBCTFRegisterPage = () => {
@@ -25,8 +26,15 @@ const PBCTFRegisterPage = () => {
 ██║     ██████╔╝╚██████╗   ██║   ██║     
 ╚═╝     ╚═════╝  ╚═════╝   ╚═╝   ╚═╝     
 `}
-            
-          </pre>
+            </pre>
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: "100%" }}
+              transition={{ duration: 2, delay: 1.3 }}
+              className="h-px bg-gradient-to-r from-transparent via-green-400 to-transparent mt-4"
+            />
+          </motion.div>
+
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: "100%" }}
@@ -50,12 +58,11 @@ const PBCTFRegisterPage = () => {
               <div className="text-2xl font-bold text-green-300">10AM to 5PM</div>
               <div className="text-sm text-gray-400">Competition Hours</div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-green-300">2nd August</div>
-              <div className="text-sm text-gray-400">Event Date</div>
+            <div className="p-6">
+              <PBCTFForm />
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -91,8 +98,10 @@ const PBCTFRegisterPage = () => {
             linear-gradient(rgba(34, 197, 94, 0.1) 1px, transparent 1px),
             linear-gradient(90deg, rgba(34, 197, 94, 0.1) 1px, transparent 1px)
           `,
-          backgroundSize: '20px 20px'
-        }} />
+              backgroundSize: "20px 20px",
+            }}
+          />
+        </div>
       </div>
       */}
     </div>
@@ -100,4 +109,3 @@ const PBCTFRegisterPage = () => {
 };
 
 export default PBCTFRegisterPage;
-

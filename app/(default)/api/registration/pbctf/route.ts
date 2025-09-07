@@ -58,7 +58,7 @@ import nodemailer from "nodemailer";
  *                   type: string
  *                   example: "Detailed error message"
  */
-//Check if USN exists
+//Check if email and phone exists
 export async function GET(request: Request) {
   await connectMongoDB();
   try {
@@ -182,12 +182,12 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
-    const ip = request.headers.get('x-forwarded-for') || 'unknown';
- 
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+
     const { success } = await ratelimiter.limit(ip);
     if (!success) {
-      return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
-    } 
+      return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });
+    }
 
     const { searchParams } = new URL(request.url);
     const action = searchParams.get("action");
@@ -273,13 +273,8 @@ async function validateRecaptcha(request: Request) {
   const { recaptcha_token } = formData;
 
   const recaptchaToken = recaptcha_token;
+  const secret = process.env.RECAPTCHA_SECRET_KEY!;
 
-  const details = {
-    event: {
-      token: recaptchaToken,
-      siteKey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
-    },
-  };
 
   if (!recaptchaToken) {
     return NextResponse.json(
@@ -293,22 +288,29 @@ async function validateRecaptcha(request: Request) {
     );
   }
 
-  const recaptchaResponse = await fetch(
-    `https://recaptchaenterprise.googleapis.com/v1/projects/${process.env.RECAPTCHA_PROJECT}/assessments?key=${process.env.RECAPTCHA_API_KEY}`,
-    {
-      method: "POST",
-      body: JSON.stringify(details),
-    }
-  );
+  // Verify the reCATPTCHA token
+
+  const recaptchaResponse = await fetch(`https://www.google.com/recaptcha/api/siteverify?secret=${secret}&response=${recaptchaToken}`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+
 
   const recaptchaResult = await recaptchaResponse.json();
-  if (recaptchaResult.riskAnalysis.score < 0.7) {
+
+  console.log(recaptchaResult);
+  if (recaptchaResult.score < 0.7 || recaptchaResult.success !== true) {
     return NextResponse.json({
       message: "reCAPTCHA validation failed",
-      error: recaptchaResult["error-codes"],
+      error: recaptchaResult.error_codes || "Invalid reCAPTCHA response",
     });
   }
 
+
+  // Return a response
   return NextResponse.json({ message: "Recaptcha validated!" });
 }
 
@@ -366,25 +368,19 @@ async function sendOTP(request: Request) {
   try {
     await connectMongoDB();
     while (mongoose.connection.readyState !== 1) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
     const { email } = await request.json();
     if (!email) {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
     const existingReg = await Promise.race([
       CtfRegsModel.findOne({
-        $or: [
-          { "participant1.email": email },
-          { "participant2.email": email },
-        ],
-      }).lean(), 
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Database query timeout')), 8000)
-      )
+        $or: [{ "participant1.email": email }, { "participant2.email": email }],
+      }).lean(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Database query timeout")), 8000)
+      ),
     ]);
 
     if (existingReg) {
@@ -402,18 +398,18 @@ async function sendOTP(request: Request) {
         { otp, otpExpiresAt },
         { upsert: true }
       ),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('OTP save timeout')), 8000)
-      )
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("OTP save timeout")), 8000)
+      ),
     ]);
     const transporter = nodemailer.createTransport({
-      host: 'server.hosting3.acm.org',
+      host: "server.hosting3.acm.org",
       port: 465,
       secure: true,
       auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
-      }
+      },
     });
 
     await transporter.sendMail({
@@ -434,7 +430,6 @@ async function sendOTP(request: Request) {
       { message: "OTP sent successfully" },
       { status: 200 }
     );
-
   } catch (error: any) {
     return NextResponse.json(
       { error: "Internal Server Error" },
@@ -498,7 +493,7 @@ async function sendOTP(request: Request) {
  *               properties:
  *                 error:
  *                   type: string
- *                   enum: 
+ *                   enum:
  *                     - "Email and OTP required"
  *                     - "Invalid or expired OTP"
  *                   examples:
@@ -630,7 +625,6 @@ async function addRegistration(request: Request) {
             p.previousCTF === "Yes" ? p.ctfNames : undefined,
           affiliationType: p.affiliation,
           affiliationName: p.affiliationName,
-          howDidYouHearAboutUs: p.howDidYouHear,
         },
       };
     };
@@ -642,6 +636,10 @@ async function addRegistration(request: Request) {
           ? transformParticipant(data.participant2)
           : undefined,
       participationType: data.participationType,
+      howDidYouHearAboutUs: data.howDidYouHear,
+      agreeRules: data.agreeRules,
+      consentLeaderboard: data.consentLeaderboard,
+      allowContact: data.allowContact,
     };
 
     const newDoc = new CtfRegsModel(registrationData);
