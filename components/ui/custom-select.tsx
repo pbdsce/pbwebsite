@@ -39,6 +39,7 @@ const CustomSelect = forwardRef<HTMLInputElement, CustomSelectProps>((
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const selectRef = useRef<HTMLDivElement>(null);
+  const dropdownId = `dropdown-${Math.random().toString(36).substr(2, 9)}`;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -134,6 +135,7 @@ const CustomSelect = forwardRef<HTMLInputElement, CustomSelectProps>((
         tabIndex={disabled ? -1 : 0}
         role="combobox"
         aria-expanded={isOpen}
+        aria-controls={dropdownId}
         aria-haspopup="listbox"
         aria-disabled={disabled}
       >
@@ -151,6 +153,7 @@ const CustomSelect = forwardRef<HTMLInputElement, CustomSelectProps>((
       <AnimatePresence>
         {isOpen && !disabled && (
           <motion.div
+            id={dropdownId}
             initial={{ opacity: 0, y: -4, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.95 }}
@@ -160,6 +163,7 @@ const CustomSelect = forwardRef<HTMLInputElement, CustomSelectProps>((
               bg-gray-900 border border-gray-700 rounded-xl shadow-lg
               max-h-60 overflow-auto
             "
+            role="listbox"
           >
             {options.map((option, index) => (
               <div
