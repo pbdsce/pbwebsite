@@ -375,25 +375,19 @@ async function sendOTP(request: Request) {
   try {
     await connectMongoDB();
     while (mongoose.connection.readyState !== 1) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
     const { email } = await request.json();
     if (!email) {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
     const existingReg = await Promise.race([
       CtfRegsModel.findOne({
-        $or: [
-          { "participant1.email": email },
-          { "participant2.email": email },
-        ],
-      }).lean(), 
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Database query timeout')), 8000)
-      )
+        $or: [{ "participant1.email": email }, { "participant2.email": email }],
+      }).lean(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Database query timeout")), 8000)
+      ),
     ]);
 
     if (existingReg) {
@@ -411,18 +405,18 @@ async function sendOTP(request: Request) {
         { otp, otpExpiresAt },
         { upsert: true }
       ),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('OTP save timeout')), 8000)
-      )
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("OTP save timeout")), 8000)
+      ),
     ]);
     const transporter = nodemailer.createTransport({
-      host: 'server.hosting3.acm.org',
+      host: "server.hosting3.acm.org",
       port: 465,
       secure: true,
       auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
-      }
+      },
     });
 
     await transporter.sendMail({
@@ -443,7 +437,6 @@ async function sendOTP(request: Request) {
       { message: "OTP sent successfully" },
       { status: 200 }
     );
-
   } catch (error: any) {
     return NextResponse.json(
       { error: "Internal Server Error" },
@@ -507,7 +500,7 @@ async function sendOTP(request: Request) {
  *               properties:
  *                 error:
  *                   type: string
- *                   enum: 
+ *                   enum:
  *                     - "Email and OTP required"
  *                     - "Invalid or expired OTP"
  *                   examples:

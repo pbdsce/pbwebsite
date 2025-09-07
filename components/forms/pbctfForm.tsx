@@ -241,10 +241,10 @@ const PBCTFForm: React.FC = () => {
     consentLeaderboard,
     allowContact,
     participant1Name, participant1Email, participant1Phone, participant1Age, participant1Gender,
-    participant1ExperienceLevel, participant1Affiliation, participant1AffiliationName, 
+    participant1ExperienceLevel, participant1Affiliation, participant1AffiliationName,
     participant1PreviousCTF, participant1CTFNames, participant1EmailVerified,
     participant2Name, participant2Email, participant2Phone, participant2Age, participant2Gender,
-    participant2ExperienceLevel, participant2Affiliation, participant2AffiliationName, 
+    participant2ExperienceLevel, participant2Affiliation, participant2AffiliationName,
     participant2PreviousCTF, participant2CTFNames, participant2EmailVerified,
     howDidYouHear,
     agreeRules, consentLeaderboard, allowContact
@@ -362,6 +362,8 @@ const PBCTFForm: React.FC = () => {
             setIsSubmitting(false);
             return;
           }
+
+
         }
 
         const response2 = await fetch(

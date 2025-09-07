@@ -33,8 +33,11 @@ const PBCTFRegisterPage = () => {
 ╚═╝     ╚═════╝  ╚═════╝   ╚═╝   ╚═╝     
 `}
 <<<<<<< HEAD
+<<<<<<< HEAD
           </pre>
 =======
+=======
+>>>>>>> c245160 (Set up recruitment form for registrations (#373))
             </pre>
             <motion.div
               initial={{ width: 0 }}
@@ -44,7 +47,10 @@ const PBCTFRegisterPage = () => {
             />
           </motion.div>
 
+<<<<<<< HEAD
 >>>>>>> 675798d (make changes to recruitment form)
+=======
+>>>>>>> c245160 (Set up recruitment form for registrations (#373))
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: "100%" }}
@@ -70,6 +76,7 @@ const PBCTFRegisterPage = () => {
               <div className="text-sm text-gray-400">Competition Duration</div>
             </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
             <div>
               <div className="text-2xl font-bold text-green-300">∞</div>
               <div className="text-sm text-gray-400">
@@ -79,6 +86,10 @@ const PBCTFRegisterPage = () => {
             <div className="p-6">
               <PBCTFForm />
 >>>>>>> 675798d (make changes to recruitment form)
+=======
+            <div className="p-6">
+              <PBCTFForm />
+>>>>>>> c245160 (Set up recruitment form for registrations (#373))
             </div>
           </motion.div>
         </div>
@@ -117,15 +128,21 @@ const PBCTFRegisterPage = () => {
             linear-gradient(90deg, rgba(34, 197, 94, 0.1) 1px, transparent 1px)
           `,
 <<<<<<< HEAD
+<<<<<<< HEAD
             backgroundSize: "20px 20px",
           }}
         />
 =======
+=======
+>>>>>>> c245160 (Set up recruitment form for registrations (#373))
               backgroundSize: "20px 20px",
             }}
           />
         </div>
+<<<<<<< HEAD
 >>>>>>> 675798d (make changes to recruitment form)
+=======
+>>>>>>> c245160 (Set up recruitment form for registrations (#373))
       </div>
       */}
     </div>
