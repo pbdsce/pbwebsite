@@ -282,7 +282,6 @@ async function validateRecaptcha(request: Request) {
   const recaptchaToken = recaptcha_token;
   const secret = process.env.RECAPTCHA_SECRET_KEY!;
 
-
   if (!recaptchaToken) {
     return NextResponse.json(
       {
@@ -297,14 +296,16 @@ async function validateRecaptcha(request: Request) {
 
   // Verify the reCATPTCHA token
 
-  const recaptchaResponse = await fetch(`https://www.google.com/recaptcha/api/siteverify?secret=${secret}&response=${recaptchaToken}`, {
-      method: 'POST',
+  const recaptchaResponse = await fetch(
+    `https://www.google.com/recaptcha/api/siteverify?secret=${secret}&response=${recaptchaToken}`,
+    {
+      method: "POST",
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
+        Accept: "application/json",
+        "Content-Type": "application/json",
       },
-    });
-
+    }
+  );
 
   const recaptchaResult = await recaptchaResponse.json();
 
@@ -315,7 +316,6 @@ async function validateRecaptcha(request: Request) {
       error: recaptchaResult.error_codes || "Invalid reCAPTCHA response",
     });
   }
-
 
   // Return a response
   return NextResponse.json({ message: "Recaptcha validated!" });
