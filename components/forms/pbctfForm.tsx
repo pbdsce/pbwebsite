@@ -12,6 +12,7 @@ import ParticipationTypeSelection from "./pbctfForm/ParticipationTypeSelection";
 import RulesAgreements from "./pbctfForm/RulesAgreements";
 import SuccessScreen from "./pbctfForm/SuccessScreen";
 import type { FormData } from "./pbctfForm/types";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 // PARAGATI RAJ ARE YOU READING THIS
 // I MISS YOU
@@ -20,6 +21,8 @@ const pressStart2P = Press_Start_2P({
   weight: "400",
   subsets: ["latin"],
 });
+
+
 
 const PBCTFForm: React.FC = () => {
   const [isSuccess, setSuccess] = useState<boolean>(false);
@@ -32,6 +35,8 @@ const PBCTFForm: React.FC = () => {
   const [participant1EmailVerified, setParticipant1EmailVerified] = useState<boolean>(false);
   const [participant2EmailVerified, setParticipant2EmailVerified] = useState<boolean>(false);
 
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
   const {
     register,
     handleSubmit,
@@ -40,28 +45,6 @@ const PBCTFForm: React.FC = () => {
     setValue,
     resetField,
   } = useForm<FormData>();
-
-  const getRecaptcha = async () => {
-    grecaptcha.enterprise.ready(async () => {
-      const Rtoken = await grecaptcha.enterprise.execute(
-        process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
-      );
-      setToken(Rtoken);
-    });
-  };
-
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/enterprise.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`;
-    script.async = true;
-    script.defer = true;
-    script.onload = getRecaptcha;
-    document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
 
   // Watch specific fields instead of entire objects to avoid unnecessary re-renders
   const participationType = watch("participationType");

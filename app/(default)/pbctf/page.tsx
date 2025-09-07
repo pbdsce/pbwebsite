@@ -1,5 +1,6 @@
 "use client";
 import PBCTFForm from "@/components/forms/pbctfForm";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { motion } from "framer-motion";
 
 const PBCTFRegisterPage = () => {
@@ -31,7 +32,19 @@ const PBCTFRegisterPage = () => {
 ██║     ██████╔╝╚██████╗   ██║   ██║     
 ╚═╝     ╚═════╝  ╚═════╝   ╚═╝   ╚═╝     
 `}
+<<<<<<< HEAD
           </pre>
+=======
+            </pre>
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: "100%" }}
+              transition={{ duration: 2, delay: 1.3 }}
+              className="h-px bg-gradient-to-r from-transparent via-green-400 to-transparent mt-4"
+            />
+          </motion.div>
+
+>>>>>>> 675798d (make changes to recruitment form)
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: "100%" }}
@@ -56,14 +69,19 @@ const PBCTFRegisterPage = () => {
               <div className="text-2xl font-bold text-green-300">8H</div>
               <div className="text-sm text-gray-400">Competition Duration</div>
             </div>
+<<<<<<< HEAD
             <div>
               <div className="text-2xl font-bold text-green-300">∞</div>
               <div className="text-sm text-gray-400">
                 Learning Opportunities
               </div>
+=======
+            <div className="p-6">
+              <PBCTFForm />
+>>>>>>> 675798d (make changes to recruitment form)
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -98,9 +116,16 @@ const PBCTFRegisterPage = () => {
             linear-gradient(rgba(34, 197, 94, 0.1) 1px, transparent 1px),
             linear-gradient(90deg, rgba(34, 197, 94, 0.1) 1px, transparent 1px)
           `,
+<<<<<<< HEAD
             backgroundSize: "20px 20px",
           }}
         />
+=======
+              backgroundSize: "20px 20px",
+            }}
+          />
+        </div>
+>>>>>>> 675798d (make changes to recruitment form)
       </div>
       */}
     </div>

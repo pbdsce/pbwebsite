@@ -280,13 +280,8 @@ async function validateRecaptcha(request: Request) {
   const { recaptcha_token } = formData;
 
   const recaptchaToken = recaptcha_token;
+  const secret = process.env.RECAPTCHA_SECRET_KEY!;
 
-  const details = {
-    event: {
-      token: recaptchaToken,
-      siteKey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
-    },
-  };
 
   if (!recaptchaToken) {
     return NextResponse.json(
@@ -300,22 +295,29 @@ async function validateRecaptcha(request: Request) {
     );
   }
 
-  const recaptchaResponse = await fetch(
-    `https://recaptchaenterprise.googleapis.com/v1/projects/${process.env.RECAPTCHA_PROJECT}/assessments?key=${process.env.RECAPTCHA_API_KEY}`,
-    {
-      method: "POST",
-      body: JSON.stringify(details),
-    }
-  );
+  // Verify the reCATPTCHA token
+
+  const recaptchaResponse = await fetch(`https://www.google.com/recaptcha/api/siteverify?secret=${secret}&response=${recaptchaToken}`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+
 
   const recaptchaResult = await recaptchaResponse.json();
-  if (recaptchaResult.riskAnalysis.score < 0.7) {
+
+  console.log(recaptchaResult);
+  if (recaptchaResult.score < 0.7 || recaptchaResult.success !== true) {
     return NextResponse.json({
       message: "reCAPTCHA validation failed",
-      error: recaptchaResult["error-codes"],
+      error: recaptchaResult.error_codes || "Invalid reCAPTCHA response",
     });
   }
 
+
+  // Return a response
   return NextResponse.json({ message: "Recaptcha validated!" });
 }
 

@@ -54,7 +54,7 @@ const backgroundSchema = new Schema({
 
 const participantSchema = new Schema<Participant>({
   name: { type: String, required: true },
-  email: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
   age: { type: Number, required: true },
   gender: {
     type: String,
@@ -62,7 +62,7 @@ const participantSchema = new Schema<Participant>({
     required: true,
   },
   background: { type: backgroundSchema, required: true },
-  phone: { type: String, required: true },
+  phone: { type: String, required: true, unique: true },
 });
 
 const registrationSchema = new Schema<Registration>({
