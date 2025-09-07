@@ -50,7 +50,6 @@ const RecruitmentForm: React.FC = () => {
     },
   });
 
-  const router = useRouter();
   const watchedYear = watch("year_of_study");
   const watchedEmail = watch("email");
 
