@@ -5,7 +5,7 @@ import FlickeringGrid from "@/components/magicui/flickering-grid";
 import { cn } from "@/lib/server/utils";
 import TypingAnimation from "@/components/ui/typing-animation";
 import "../app/css/additional-styles/landing.css";
-import PBCTFbanner from "@/components/PBCTFbanner";
+import SIHbanner from "@/components/SIHbanner";
 
 
 export default function Hero() {
@@ -32,7 +32,7 @@ export default function Hero() {
                       <span className="bg-[#00c853] p-2 sm:p-3 rounded-xl" style={{ wordBreak: 'keep-all' }}>tech-community</span> from Dayananda Sagar College of Engineering.
                     </p>
                   </div>
-                  {/* <PBCTFbanner/> */}
+                  <SIHbanner/>
                 </div>
               </div>
             </div>
