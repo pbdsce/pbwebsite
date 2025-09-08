@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import CustomSelect from "@/components/ui/custom-select";
 import OTPVerificationForm from "./recruitmentForm/OTPVerificationForm";
 import ReviewInformationForm from "./recruitmentForm/ReviewInformationForm";
+import { set } from "lodash";
 
 interface FormData {
   name: string;
@@ -306,6 +307,7 @@ const RecruitmentForm: React.FC = () => {
       } else {
         await handleSendOTP();
       }
+      setIsSubmitting(false);
       return;
     }
 
