@@ -33,7 +33,7 @@ export default function Hero() {
                       <span className="bg-[#00c853] p-2 sm:p-3 rounded-xl" style={{ wordBreak: 'keep-all' }}>tech-community</span> from Dayananda Sagar College of Engineering.
                     </p>
                   </div>
-                  <div className="flex flex-col items-center gap-2 p-1 transform scale-75 ">
+                  <div className="flex flex-col items-center gap-3 p-1 transform scale-90 sm:scale-75">
                   <RecruitmentBanner />
                   <SIHbanner />
                   </div>
