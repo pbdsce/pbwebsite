@@ -6,6 +6,84 @@ import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
+// Email rotation system - 20 PointBlank email accounts
+const EMAIL_ACCOUNTS = [
+  "rahul@pointblank.club",
+  "mohit@pointblank.club",
+  "yash@pointblank.club",
+  "maaz@pointblank.club",
+  "aditya@pointblank.club",
+  "prakhar@pointblank.club",
+  "pratik@pointblank.club",
+  "priyanshu@pointblank.club",
+  "kritik@pointblank.club",
+  "dhruv@pointblank.club",
+  "yuktha@pointblank.club",
+  "aswin@pointblank.club",
+  "prajwal@pointblank.club",
+  "vivek@pointblank.club",
+  "naman@pointblank.club",
+  "tushar@pointblank.club",
+  "gaurav@pointblank.club",
+  "hansh@pointblank.club",
+  "calan@pointblank.club",
+  "uttkarsh@pointblank.club",
+];
+
+// Function to get email account based on user's email hash for consistent distribution
+function getEmailAccountByHash(userEmail: string): string {
+  let hash = 0;
+  for (let i = 0; i < userEmail.length; i++) {
+    const char = userEmail.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  const index = Math.abs(hash) % EMAIL_ACCOUNTS.length;
+  const email = EMAIL_ACCOUNTS[index];
+  console.log(
+    `Email selection for "${userEmail}": Using account ${index + 1}/${
+      EMAIL_ACCOUNTS.length
+    } - ${email}`
+  );
+  return email;
+}
+
+// Function to get email account based on current time for load distribution
+function getEmailAccountByTime(): string {
+  const now = Date.now();
+  const index = Math.floor(now / 1000) % EMAIL_ACCOUNTS.length; // Changes every second
+  const email = EMAIL_ACCOUNTS[index];
+  console.log(
+    `Time-based email selection: Using account ${index + 1}/${
+      EMAIL_ACCOUNTS.length
+    } - ${email}`
+  );
+  return email;
+}
+
+// Function to get email account with hybrid approach (hash + time)
+function getEmailAccountHybrid(userEmail: string): string {
+  const hashBased = getEmailAccountByHash(userEmail);
+  const timeBased = getEmailAccountByTime();
+
+  // Use hash for consistency, but add time component for load distribution
+  const hash = userEmail.split("").reduce((a, b) => {
+    a = (a << 5) - a + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+
+  const timeOffset = Math.floor(Date.now() / 60000) % EMAIL_ACCOUNTS.length; // Changes every minute
+  const index = (Math.abs(hash) + timeOffset) % EMAIL_ACCOUNTS.length;
+  const email = EMAIL_ACCOUNTS[index];
+
+  console.log(
+    `Hybrid email selection for "${userEmail}": Using account ${index + 1}/${
+      EMAIL_ACCOUNTS.length
+    } - ${email}`
+  );
+  return email;
+}
+
 /**
  * @swagger
  * /api/registration/recruitment:
@@ -438,9 +516,11 @@ async function sendOTP(request: Request) {
       );
     }
 
-    console.log("Email user:", process.env.MAIL_USER);
+    // Get email account using hybrid approach (hash + time) for better distribution
+    const currentEmailAccount = getEmailAccountHybrid(email);
+    console.log("Selected email account for user:", currentEmailAccount);
 
-    // Try multiple SMTP configurations
+    // Try multiple SMTP configurations with rotated email account
     const smtpConfigs = [
       // Configuration 1: Port 587 with TLS
       {
@@ -448,7 +528,7 @@ async function sendOTP(request: Request) {
         port: 587,
         secure: false,
         auth: {
-          user: process.env.MAIL_USER,
+          user: currentEmailAccount,
           pass: process.env.MAIL_PASS,
         },
         tls: {
@@ -461,7 +541,7 @@ async function sendOTP(request: Request) {
         port: 465,
         secure: true,
         auth: {
-          user: process.env.MAIL_USER,
+          user: currentEmailAccount,
           pass: process.env.MAIL_PASS,
         },
         tls: {
@@ -474,7 +554,7 @@ async function sendOTP(request: Request) {
         port: 25,
         secure: false,
         auth: {
-          user: process.env.MAIL_USER,
+          user: currentEmailAccount,
           pass: process.env.MAIL_PASS,
         },
         tls: {
@@ -496,7 +576,7 @@ async function sendOTP(request: Request) {
         console.log(`SMTP configuration ${i + 1} verified successfully`);
 
         await transporter.sendMail({
-          from: `"Recruitment Registration" <${process.env.MAIL_USER}>`,
+          from: `"PointBlank Recruitment" <${currentEmailAccount}>`,
           to: email,
           subject: `[PointBlank Recruitment] Email Verification OTP: ${otp}`,
           text: `
@@ -509,7 +589,9 @@ async function sendOTP(request: Request) {
       - PointBlank Team`,
         });
 
-        console.log("OTP sent successfully to:", email);
+        console.log(
+          `OTP sent successfully to: ${email} using account: ${currentEmailAccount}`
+        );
         emailSent = true;
         break;
       } catch (error) {
