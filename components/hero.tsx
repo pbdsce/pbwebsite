@@ -6,11 +6,12 @@ import { cn } from "@/lib/server/utils";
 import TypingAnimation from "@/components/ui/typing-animation";
 import "../app/css/additional-styles/landing.css";
 import SIHbanner from "@/components/SIHbanner";
+import RecruitmentBanner from "@/components/RecruitmentBanner";
 
 
 export default function Hero() {
   return (
-    <section className="relative h-screen flex justify-center items-center">
+    <section className="relative min-h-screen md:h-screen flex justify-center items-center">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="pt-20 sm:pt-32 pb-5 md:pt-40 md:pb-5">
             <div className="pb-5 md:pb-5">
@@ -32,7 +33,10 @@ export default function Hero() {
                       <span className="bg-[#00c853] p-2 sm:p-3 rounded-xl" style={{ wordBreak: 'keep-all' }}>tech-community</span> from Dayananda Sagar College of Engineering.
                     </p>
                   </div>
-                  <SIHbanner/>
+                  <div className="flex flex-col items-center gap-2 p-1 transform scale-75 ">
+                  <RecruitmentBanner />
+                  <SIHbanner />
+                  </div>
                 </div>
               </div>
             </div>
