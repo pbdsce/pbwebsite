@@ -10,6 +10,8 @@ import { getErrorMessage } from "@/lib/client/clientUtils";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import CustomSelect from "@/components/ui/custom-select";
+import OTPVerificationForm from "./recruitmentForm/OTPVerificationForm";
+import ReviewInformationForm from "./recruitmentForm/ReviewInformationForm";
 
 interface FormData {
   name: string;
@@ -27,9 +29,24 @@ const RecruitmentForm: React.FC = () => {
   const [mode, setMode] = useState<boolean>(false);
   const [display, setDisplay] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSubmissionComplete, setIsSubmissionComplete] =
+    useState<boolean>(false);
+
+  // New flow states
+  const [currentStep, setCurrentStep] = useState<"form" | "otp" | "review">(
+    "form"
+  );
+  const [formDataForSubmission, setFormDataForSubmission] =
+    useState<FormData | null>(null);
+  const [isOTPVerified, setIsOTPVerified] = useState<boolean>(false);
+  const [verifiedEmail, setVerifiedEmail] = useState<string>(""); // Track which email was verified
+
+  // OTP related states
   const [isSendingOTP, setIsSendingOTP] = useState<boolean>(false);
-  const [otpSent, setOtpSent] = useState<boolean>(false);
+  const [isVerifyingOTP, setIsVerifyingOTP] = useState<boolean>(false);
+  const [otp, setOtp] = useState<string>("");
   const [otpError, setOtpError] = useState<string>("");
+  const [resendTimer, setResendTimer] = useState<number>(0);
 
   const {
     register,
@@ -53,9 +70,27 @@ const RecruitmentForm: React.FC = () => {
     },
   });
 
-  const router = useRouter();
   const watchedYear = watch("year_of_study");
   const watchedEmail = watch("email");
+
+  // Timer effect for OTP resend
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [resendTimer]);
+
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentStep]);
 
   // Update mode when year changes
   useEffect(() => {
@@ -76,6 +111,7 @@ const RecruitmentForm: React.FC = () => {
   const sendOTP = async (email: string): Promise<boolean> => {
     setIsSendingOTP(true);
     setOtpError("");
+    clearErrors("email"); // Clear any existing email errors
     try {
       const response = await fetch(
         "/api/registration/recruitment?action=sendOTP",
@@ -91,16 +127,29 @@ const RecruitmentForm: React.FC = () => {
       const result = await response.json();
 
       if (!response.ok || result.error) {
-        setOtpError(result.error || "Failed to send OTP");
+        const errorMessage = result.error || "Failed to send OTP";
+        setOtpError(errorMessage);
+        toast.error(errorMessage);
+        // Also set form error for email field
+        setError("email", {
+          type: "manual",
+          message: errorMessage,
+        });
         return false;
       }
 
       toast.success("OTP sent to your email!");
-      setOtpSent(true);
+      setResendTimer(60);
       return true;
     } catch (error) {
       console.error("OTP send error:", error);
-      setOtpError("Failed to send OTP");
+      const errorMessage = "Failed to send OTP";
+      setOtpError(errorMessage);
+      toast.error(errorMessage);
+      setError("email", {
+        type: "manual",
+        message: errorMessage,
+      });
       return false;
     } finally {
       setIsSendingOTP(false);
@@ -108,6 +157,8 @@ const RecruitmentForm: React.FC = () => {
   };
 
   const verifyOTP = async (email: string, otp: string): Promise<boolean> => {
+    setIsVerifyingOTP(true);
+    setOtpError("");
     try {
       const response = await fetch(
         "/api/registration/recruitment?action=verifyOTP",
@@ -128,11 +179,16 @@ const RecruitmentForm: React.FC = () => {
       }
 
       setOtpError("");
+      setIsOTPVerified(true);
+      setVerifiedEmail(email); // Store the verified email
+      toast.success("OTP verified successfully!");
       return true;
     } catch (error) {
       console.error("OTP verification error:", error);
       setOtpError("OTP verification failed");
       return false;
+    } finally {
+      setIsVerifyingOTP(false);
     }
   };
 
@@ -170,7 +226,7 @@ const RecruitmentForm: React.FC = () => {
     if (!email) {
       setError("email", {
         type: "manual",
-        message: "Please enter your email first"
+        message: "Please enter your email first",
       });
       return;
     }
@@ -180,49 +236,93 @@ const RecruitmentForm: React.FC = () => {
     if (!emailRegex.test(email)) {
       setError("email", {
         type: "manual",
-        message: "Please enter a valid email address"
+        message: "Please enter a valid email address",
       });
       return;
     }
 
     // Clear any existing email errors
     clearErrors("email");
-    await sendOTP(email);
+    const success = await sendOTP(email);
+    if (success) {
+      setCurrentStep("otp");
+    } else {
+      // If sendOTP failed, the error will be displayed via toast or form error
+      // Don't transition to OTP step
+    }
+  };
+
+  const handleOTPVerification = async () => {
+    if (!otp || otp.length !== 6) {
+      setOtpError("Please enter a valid 6-digit OTP");
+      return;
+    }
+
+    if (!formDataForSubmission) {
+      setOtpError("Form data not found");
+      return;
+    }
+
+    const success = await verifyOTP(formDataForSubmission.email, otp);
+    if (success) {
+      setCurrentStep("review");
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (!formDataForSubmission) return;
+
+    const success = await sendOTP(formDataForSubmission.email);
+    if (success) {
+      setOtp("");
+      setOtpError("");
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const handleOTPChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+    setOtp(value);
+    setOtpError("");
+  };
+
+  // Helper function to check if email verification is still valid
+  const isEmailStillVerified = (email: string): boolean => {
+    return isOTPVerified && verifiedEmail === email;
   };
 
   const onSubmit: SubmitHandler<FormData> = async (data: FormData) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-
-    try {
-      // Step 1: Verify OTP if it was sent
-      if (otpSent) {
-        const otpValid = await verifyOTP(data.email, data.otp);
-        if (!otpValid) {
-          return;
-        }
+    if (currentStep === "form") {
+      setFormDataForSubmission(data);
+      if (isEmailStillVerified(data.email)) {
+        setCurrentStep("review");
       } else {
-        // If OTP not sent yet, send it first
-        const otpSent = await sendOTP(data.email);
-        if (!otpSent) {
-          return;
-        }
-        toast("Please enter the OTP sent to your email and submit again", {
-          icon: "ℹ️",
-        });
-        return;
+        await handleSendOTP();
       }
+      return;
+    }
 
-      // Step 2: Submit registration
-      const registrationSuccess = await submitRegistration(data);
-      if (registrationSuccess) {
-        setSuccess(true);
+    if (currentStep === "review" && isOTPVerified) {
+      setIsSubmitting(true);
+      try {
+        const registrationSuccess = await submitRegistration(data);
+        if (registrationSuccess) {
+          setIsSubmissionComplete(true);
+          setSuccess(true);
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        toast.error(getErrorMessage(error));
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      toast.error(getErrorMessage(error));
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -237,40 +337,93 @@ const RecruitmentForm: React.FC = () => {
     );
   }
 
+  const handleBackToForm = () => {
+    setCurrentStep("form");
+    setOtp("");
+    setOtpError("");
+
+    if (formDataForSubmission) {
+      Object.entries(formDataForSubmission).forEach(([key, value]) => {
+        setValue(key as keyof FormData, value);
+      });
+    }
+  };
+
+  if (currentStep === "otp") {
+    return (
+      <OTPVerificationForm
+        formDataForSubmission={formDataForSubmission}
+        otp={otp}
+        otpError={otpError}
+        isVerifyingOTP={isVerifyingOTP}
+        isSendingOTP={isSendingOTP}
+        resendTimer={resendTimer}
+        onOTPChange={handleOTPChange}
+        onVerifyOTP={handleOTPVerification}
+        onResendOTP={handleResendOTP}
+        onBackToForm={handleBackToForm}
+        formatTime={formatTime}
+      />
+    );
+  }
+
+  const handleEditInformation = () => {
+    setCurrentStep("form");
+    if (formDataForSubmission) {
+      Object.entries(formDataForSubmission).forEach(([key, value]) => {
+        setValue(key as keyof FormData, value);
+      });
+    }
+  };
+
+  const handleSubmitRegistration = async (data: FormData) => {
+    await onSubmit(data);
+  };
+
+  if (currentStep === "review" && formDataForSubmission) {
+    return (
+      <ReviewInformationForm
+        formDataForSubmission={formDataForSubmission}
+        isSubmitting={isSubmitting}
+        isSubmissionComplete={isSubmissionComplete}
+        isEmailStillVerified={isEmailStillVerified}
+        onEditInformation={handleEditInformation}
+        onSubmitRegistration={handleSubmitRegistration}
+      />
+    );
+  }
+
   return (
     <>
       <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
         <div className="w-full max-w-2xl mx-auto p-6 sm:p-8 lg:p-10 rounded-3xl bg-black/40 backdrop-blur-md shadow-2xl border border-gray-800">
-          <motion.div 
+          <motion.div
             className="mb-4 text-center"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+            transition={{ duration: 0.6 }}>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
               Recruitment Form
             </h1>
           </motion.div>
-          
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             <div className="space-y-6">
-              <motion.div 
+              <motion.div
                 className="text-center mb-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-              >
+                transition={{ duration: 0.5, delay: 0.1 }}>
                 <h5 className="text-sm text-gray-400">
                   <span className="text-red-500"> * </span>Fields are required
                 </h5>
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 className="space-y-2"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
+                transition={{ duration: 0.5, delay: 0.2 }}>
                 <label className="block text-sm font-medium text-gray-300">
                   Full Name<span className="text-red-500"> * </span>
                 </label>
@@ -292,7 +445,9 @@ const RecruitmentForm: React.FC = () => {
                   className="w-full px-4 py-3 rounded-xl border border-gray-700 bg-gray-900/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-600"
                 />
                 {errors.name && (
-                  <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.name.message}
+                  </p>
                 )}
               </motion.div>
 
@@ -300,8 +455,7 @@ const RecruitmentForm: React.FC = () => {
                 className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
+                transition={{ duration: 0.5, delay: 0.3 }}>
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-300">
                     Branch<span className="text-red-500"> * </span>
@@ -310,7 +464,10 @@ const RecruitmentForm: React.FC = () => {
                     {...register("branch", {
                       required: "Branch is required",
                     })}
-                    options={branches.map(branch => ({ value: branch, label: branch }))}
+                    options={branches.map((branch) => ({
+                      value: branch,
+                      label: branch,
+                    }))}
                     value={watch("branch") || ""}
                     onChange={(value) => {
                       setValue("branch", value);
@@ -329,7 +486,10 @@ const RecruitmentForm: React.FC = () => {
                     {...register("year_of_study", {
                       required: "Year of study is required",
                     })}
-                    options={years.map(year => ({ value: year, label: year }))}
+                    options={years.map((year) => ({
+                      value: year,
+                      label: year,
+                    }))}
                     value={watch("year_of_study") || ""}
                     onChange={(value) => {
                       setValue("year_of_study", value);
@@ -347,8 +507,7 @@ const RecruitmentForm: React.FC = () => {
                   className="space-y-2"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                >
+                  transition={{ duration: 0.5, delay: 0.4 }}>
                   {mode === true ? (
                     <>
                       <label className="block text-sm font-medium text-gray-300">
@@ -391,7 +550,9 @@ const RecruitmentForm: React.FC = () => {
                     </>
                   )}
                   {errors.college_id && (
-                    <p className="text-red-400 text-sm mt-1">{errors.college_id.message}</p>
+                    <p className="text-red-400 text-sm mt-1">
+                      {errors.college_id.message}
+                    </p>
                   )}
                 </motion.div>
               )}
@@ -400,80 +561,45 @@ const RecruitmentForm: React.FC = () => {
                 className="space-y-2"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-              >
+                transition={{ duration: 0.5, delay: 0.5 }}>
                 <label className="block text-sm font-medium text-gray-300">
-                  Email<span className="text-red-500"> * </span>
+                  <div className="flex items-center gap-2">
+                    <span>
+                      Email<span className="text-red-500"> * </span>
+                    </span>
+                    {watchedEmail && isEmailStillVerified(watchedEmail) && (
+                      <span className="text-green-400 text-xs flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span>
+                        Verified
+                      </span>
+                    )}
+                  </div>
                 </label>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    {...register("email", {
-                      required: "Email is required",
-                      pattern: {
-                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                        message: "Invalid email format",
-                      },
-                    })}
-                    name="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    className="flex-1 px-4 py-3 rounded-xl border border-gray-700 bg-gray-900/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-600"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSendOTP}
-                    disabled={isSendingOTP || !watchedEmail}
-                    className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl px-6 py-3 hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap font-medium transition-all duration-200 shadow-lg hover:shadow-green-500/25 transform hover:scale-[1.02]"
-                  >
-                    {isSendingOTP
-                      ? "Sending..."
-                      : otpSent
-                      ? "Resend OTP"
-                      : "Send OTP"}
-                  </button>
-                </div>
+                <input
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      message: "Invalid email format",
+                    },
+                  })}
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-700 bg-gray-900/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-600"
+                />
                 {errors.email && (
-                  <p className="text-red-400 text-sm mt-1">{errors.email.message}</p>
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.email.message}
+                  </p>
                 )}
               </motion.div>
 
-              {otpSent && (
-                <motion.div
-                  className="space-y-2"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.6 }}
-                >
-                  <label className="block text-sm font-medium text-gray-300">
-                    Enter OTP<span className="text-red-500"> * </span>
-                  </label>
-                  <input
-                    {...register("otp", {
-                      required: "OTP is required",
-                      pattern: {
-                        value: /^[0-9]{6}$/,
-                        message: "OTP must be 6 digits",
-                      },
-                    })}
-                    name="otp"
-                    type="text"
-                    placeholder="Enter 6-digit OTP"
-                    maxLength={6}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-700 bg-gray-900/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-600 text-center text-xl tracking-wider font-mono"
-                  />
-                  {errors.otp && (
-                    <p className="text-red-400 text-sm mt-1">{errors.otp.message}</p>
-                  )}
-                  {otpError && <p className="text-red-400 text-sm mt-1">{otpError}</p>}
-                </motion.div>
-              )}
-
               <motion.div
                 className="space-y-2"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.7 }}
-              >
+                transition={{ duration: 0.5, delay: 0.7 }}>
                 <label className="block text-sm font-medium text-gray-300">
                   WhatsApp Number
                   <span className="text-red-500"> * </span>
@@ -493,7 +619,9 @@ const RecruitmentForm: React.FC = () => {
                   className="w-full px-4 py-3 rounded-xl border border-gray-700 bg-gray-900/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-600"
                 />
                 {errors.whatsapp_number && (
-                  <p className="text-red-400 text-sm mt-1">{errors.whatsapp_number.message}</p>
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.whatsapp_number.message}
+                  </p>
                 )}
               </motion.div>
 
@@ -501,8 +629,7 @@ const RecruitmentForm: React.FC = () => {
                 className="space-y-2"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.8 }}
-              >
+                transition={{ duration: 0.5, delay: 0.8 }}>
                 <label className="block text-sm font-medium text-gray-300">
                   Tell us something about yourself (max 150 words)
                   <span className="text-red-500"> * </span>
@@ -526,7 +653,9 @@ const RecruitmentForm: React.FC = () => {
                   className="w-full px-4 py-3 rounded-xl border border-gray-700 bg-gray-900/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-600 resize-none"
                 />
                 {errors.about && (
-                  <p className="text-red-400 text-sm mt-1">{errors.about.message}</p>
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.about.message}
+                  </p>
                 )}
               </motion.div>
 
@@ -534,18 +663,18 @@ const RecruitmentForm: React.FC = () => {
                 className="pt-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.9 }}
-              >
+                transition={{ duration: 0.5, delay: 0.9 }}>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl py-3 px-6 hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-base transition-all duration-200 shadow-lg hover:shadow-green-500/25 transform hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  {isSubmitting
+                  disabled={isSubmitting || isSubmissionComplete}
+                  className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl py-3 px-6 hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-base transition-all duration-200 shadow-lg hover:shadow-green-500/25 transform hover:scale-[1.02] active:scale-[0.98]">
+                  {isSubmissionComplete
+                    ? "Registration Complete!"
+                    : isSubmitting
                     ? "Processing..."
-                    : otpSent
-                    ? "Submit Registration"
-                    : "Send OTP & Continue"}
+                    : watchedEmail && isEmailStillVerified(watchedEmail)
+                    ? "Review Information"
+                    : "Continue"}
                 </button>
               </motion.div>
             </div>
