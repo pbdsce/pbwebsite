@@ -309,7 +309,7 @@ export default function Members() {
                 content={
                   <div className="flex flex-col items-center space-y-6 w-full">
                     {heading === "First Year" && (
-                      <div className="bg-gray-900 text-white p-4 rounded-lg shadow-lg flex items-center space-x-9 lg:w-7/12 justify-center cursor-pointer" onClick={() => window.location.href = '/events'}>
+                      <div className="bg-gray-900 text-white p-4 rounded-lg shadow-lg flex items-center space-x-9 lg:w-7/12 justify-center cursor-pointer" onClick={() => window.location.href = '/recruitment'}>
                         <p className="text-xl font-bold lg:text-2xl text-center">
                           Register for Recruitment
                         </p>
