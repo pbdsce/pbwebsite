@@ -7,6 +7,7 @@ import TypingAnimation from "@/components/ui/typing-animation";
 import "../app/css/additional-styles/landing.css";
 import SIHbanner from "@/components/SIHbanner";
 import RecruitmentBanner from "@/components/RecruitmentBanner";
+import RecruitmentBanner from "@/components/RecruitmentBanner";
 
 
 export default function Hero() {
