@@ -15,6 +15,7 @@ interface Background {
   participationDetails?: string;
   affiliationType: "Student" | "Professional" | "Hobbyist";
   affiliationName: string;
+  howDidYouHearAboutUs?: string[];
 }
 
 export interface Registration extends Document {
@@ -26,18 +27,6 @@ export interface Registration extends Document {
   consentLeaderboard: boolean;
   allowContact: boolean;
 }
-
-export interface Registration extends Document {
-  participant1: Participant;
-  participant2?: Participant;
-  participationType: "solo" | "duo";
-  howDidYouHearAboutUs?: string[];
-  agreeRules: boolean;
-  consentLeaderboard: boolean;
-  allowContact: boolean;
-}
-
-export interface TempCTFUserDoc extends Document, TempCTFUser {}
 
 const backgroundSchema = new Schema({
   experienceLevel: {
@@ -91,6 +80,20 @@ const registrationSchema = new Schema<Registration>({
   consentLeaderboard: { type: Boolean, required: true },
   allowContact: { type: Boolean, required: true },
 });
+
+interface TempCTFUserDoc extends Document {
+  email: string;
+  otp: string;
+  otpExpiresAt: Date;
+}
+
+const tempCTFUserSchema = new Schema<TempCTFUserDoc>({
+  email: { type: String, required: true, unique: true },
+  otp: { type: String, required: true },
+  otpExpiresAt: { type: Date, required: true },
+});
+
+tempCTFUserSchema.index({ otpExpiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const CtfRegsModel =
   mongoose.models.ctfregs ||

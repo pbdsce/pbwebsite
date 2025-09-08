@@ -82,7 +82,10 @@ const PBCTFForm: React.FC = () => {
   useEffect(() => {
     if (participationType === "solo") {
       resetField("participant2");
+<<<<<<< HEAD
       setCompletedSteps((prev) => {
+=======
+>>>>>>> 997ed2aab8083922dcf51dcea64420868cd6334e
       setParticipant2EmailVerified(false);
       setCompletedSteps(prev => {
         const newSet = new Set(prev);
@@ -157,6 +160,7 @@ const PBCTFForm: React.FC = () => {
 
     // Step 3: Additional Questions complete
 <<<<<<< HEAD
+<<<<<<< HEAD
     const additionalQuestionsComplete =
       howDidYouHear &&
       howDidYouHear.length > 0 &&
@@ -164,6 +168,9 @@ const PBCTFForm: React.FC = () => {
 =======
     const additionalQuestionsComplete = howDidYouHear && howDidYouHear.length > 0;
 >>>>>>> f210968 (Refactor: Remove secret flag logic from PBCTF form and Additional Questions component)
+=======
+    const additionalQuestionsComplete = howDidYouHear && howDidYouHear.length > 0;
+>>>>>>> 997ed2aab8083922dcf51dcea64420868cd6334e
     if (additionalQuestionsComplete) {
       newCompletedSteps.add(3);
     }

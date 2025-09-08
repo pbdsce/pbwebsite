@@ -5,6 +5,87 @@ import { TempRecruitmentUserModel } from "@/models/Recruitment";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+<<<<<<< HEAD
+=======
+
+// Email rotation system - 20 PointBlank email accounts
+const EMAIL_ACCOUNTS = [
+  "rahul@pointblank.club",
+  "mohit@pointblank.club",
+  "yash@pointblank.club",
+  "maaz@pointblank.club",
+  "aditya@pointblank.club",
+  "prakhar@pointblank.club",
+  "pratik@pointblank.club",
+  "priyanshu@pointblank.club",
+  "kritik@pointblank.club",
+  "dhruv@pointblank.club",
+  "yuktha@pointblank.club",
+  "aswin@pointblank.club",
+  "prajwal@pointblank.club",
+  "vivek@pointblank.club",
+  "naman@pointblank.club",
+  "tushar@pointblank.club",
+  "gaurav@pointblank.club",
+  "hansh@pointblank.club",
+  "calan@pointblank.club",
+  "uttkarsh@pointblank.club",
+];
+
+// Function to get email account based on user's email hash for consistent distribution
+function getEmailAccountByHash(userEmail: string): string {
+  let hash = 0;
+  for (let i = 0; i < userEmail.length; i++) {
+    const char = userEmail.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  const index = Math.abs(hash) % EMAIL_ACCOUNTS.length;
+  const email = EMAIL_ACCOUNTS[index];
+  console.log(
+    `Email selection for "${userEmail}": Using account ${index + 1}/${
+      EMAIL_ACCOUNTS.length
+    } - ${email}`
+  );
+  return email;
+}
+
+// Function to get email account based on current time for load distribution
+function getEmailAccountByTime(): string {
+  const now = Date.now();
+  const index = Math.floor(now / 1000) % EMAIL_ACCOUNTS.length; // Changes every second
+  const email = EMAIL_ACCOUNTS[index];
+  console.log(
+    `Time-based email selection: Using account ${index + 1}/${
+      EMAIL_ACCOUNTS.length
+    } - ${email}`
+  );
+  return email;
+}
+
+// Function to get email account with hybrid approach (hash + time)
+function getEmailAccountHybrid(userEmail: string): string {
+  const hashBased = getEmailAccountByHash(userEmail);
+  const timeBased = getEmailAccountByTime();
+
+  // Use hash for consistency, but add time component for load distribution
+  const hash = userEmail.split("").reduce((a, b) => {
+    a = (a << 5) - a + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+
+  const timeOffset = Math.floor(Date.now() / 60000) % EMAIL_ACCOUNTS.length; // Changes every minute
+  const index = (Math.abs(hash) + timeOffset) % EMAIL_ACCOUNTS.length;
+  const email = EMAIL_ACCOUNTS[index];
+
+  console.log(
+    `Hybrid email selection for "${userEmail}": Using account ${index + 1}/${
+      EMAIL_ACCOUNTS.length
+    } - ${email}`
+  );
+  return email;
+}
+>>>>>>> 997ed2aab8083922dcf51dcea64420868cd6334e
 
 /**
  * @swagger
@@ -60,17 +141,22 @@ import nodemailer from "nodemailer";
  *                   example: "An error occurred"
  */
 <<<<<<< HEAD
+<<<<<<< HEAD
 // Add a new registration
 export async function POST(request: Request) {
 <<<<<<< HEAD
 =======
 export async function GET(request: Request) {
 >>>>>>> c245160 (Set up recruitment form for registrations (#373))
+=======
+export async function GET(request: Request) {
+>>>>>>> 997ed2aab8083922dcf51dcea64420868cd6334e
   await connectMongoDB();
   try {
     const { searchParams } = new URL(request.url);
     const identifier = searchParams.get("identifier");
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+<<<<<<< HEAD
 
     if (identifier && emailRegex.test(identifier)) {
       const existing = await RecruitmentModel.findOne({
@@ -438,6 +524,224 @@ async function validateRecaptcha(request: Request) {
   // reCAPTCHA verification
 =======
 >>>>>>> c245160 (Set up recruitment form for registrations (#373))
+=======
+
+    if (identifier && emailRegex.test(identifier)) {
+      const existing = await RecruitmentModel.findOne({
+        email: identifier,
+      });
+      if (existing) {
+        return NextResponse.json(
+          { message: "email already exists", isUnique: false },
+          { status: 200 }
+        );
+      }
+      return NextResponse.json(
+        { message: "email not registered", isUnique: true },
+        { status: 403 }
+      );
+    } else {
+      const existing = await RecruitmentModel.findOne({
+        whatsapp_number: identifier,
+      });
+      if (existing) {
+        return NextResponse.json(
+          { message: "phone already exists", isUnique: false },
+          { status: 200 }
+        );
+      }
+      return NextResponse.json(
+        { message: "phone not registered", isUnique: true },
+        { status: 403 }
+      );
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error details:", error.message);
+      return NextResponse.json(
+        { error: "An error occurred", details: error.message },
+        { status: 500 }
+      );
+    } else {
+      console.error("Unknown error:", error);
+      return NextResponse.json(
+        { error: "An unknown error occurred" },
+        { status: 500 }
+      );
+    }
+  }
+}
+
+/**
+ * @swagger
+ * /api/registration/recruitment:
+ *   post:
+ *     summary: Handle recruitment actions
+ *     description: This endpoint handles different recruitment actions like reCAPTCHA validation, OTP sending, OTP verification, or adding a registration.
+ *     tags:
+ *      - Recruitment
+ *     parameters:
+ *       - in: query
+ *         name: action
+ *         required: true
+ *         schema:
+ *           type: string
+ *           description: Action to perform (validateRecaptcha, sendOTP, verifyOTP, addRegistration)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               recaptcha_token:
+ *                 type: string
+ *                 description: The reCAPTCHA token for validation.
+ *               email:
+ *                 type: string
+ *                 description: Email for OTP operations.
+ *               otp:
+ *                 type: string
+ *                 description: OTP for verification.
+ *     responses:
+ *       200:
+ *         description: Successful operation based on action.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Operation successful!"
+ *       400:
+ *         description: Invalid action specified or missing data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid action specified"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "An error occurred"
+ */
+export async function POST(request: Request) {
+  try {
+    // const ip = request.headers.get("x-forwarded-for") || "unknown";
+
+    // const { success } = await ratelimiter.limit(ip);
+    // if (!success) {
+    //   return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });
+    // }
+
+    const { searchParams } = new URL(request.url);
+    const action = searchParams.get("action");
+
+    console.log(`Recruitment API - Action: ${action}`);
+
+    if (!action) {
+      return NextResponse.json(
+        { error: "Action parameter is required" },
+        { status: 400 }
+      );
+    }
+
+    if (action === "validateRecaptcha") {
+      return validateRecaptcha(request);
+    } else if (action === "sendOTP") {
+      return sendOTP(request);
+    } else if (action === "verifyOTP") {
+      return verifyOTP(request);
+    } else if (action === "addRegistration") {
+      return addRegistration(request);
+    } else {
+      return NextResponse.json(
+        { error: "Invalid action specified" },
+        { status: 400 }
+      );
+    }
+  } catch (error) {
+    console.error("Error processing request:", error);
+    return NextResponse.json(
+      {
+        error: "An error occurred",
+        details: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * @swagger
+ * /api/registration/recruitment/validateRecaptcha:
+ *   post:
+ *     summary: Validate reCAPTCHA token
+ *     description: This endpoint validates the reCAPTCHA token to verify if the user is human.
+ *     tags:
+ *      - Recruitment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               recaptcha_token:
+ *                 type: string
+ *                 description: The reCAPTCHA token for validation.
+ *     responses:
+ *       200:
+ *         description: reCAPTCHA validated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Recaptcha validated!"
+ *       500:
+ *         description: reCAPTCHA validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "reCAPTCHA validation failed"
+ *                 error:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *       400:
+ *         description: Bad Request when reCAPTCHA token is missing.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "reCAPTCHA token not found! Try again"
+ */
+async function validateRecaptcha(request: Request) {
+  const formData = await request.json();
+  const { recaptcha_token } = formData;
+
+>>>>>>> 997ed2aab8083922dcf51dcea64420868cd6334e
   const recaptchaToken = recaptcha_token;
 
   const details = {
@@ -471,7 +775,10 @@ async function validateRecaptcha(request: Request) {
   if (recaptchaResult.riskAnalysis.score < 0.7) {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 997ed2aab8083922dcf51dcea64420868cd6334e
     return NextResponse.json({
       message: "reCAPTCHA validation failed",
       error: recaptchaResult["error-codes"],
@@ -598,9 +905,17 @@ async function sendOTP(request: Request) {
       );
     }
 
+<<<<<<< HEAD
     console.log("Email user:", process.env.MAIL_USER);
 
     // Try multiple SMTP configurations
+=======
+    // Get email account using hybrid approach (hash + time) for better distribution
+    const currentEmailAccount = getEmailAccountHybrid(email);
+    console.log("Selected email account for user:", currentEmailAccount);
+
+    // Try multiple SMTP configurations with rotated email account
+>>>>>>> 997ed2aab8083922dcf51dcea64420868cd6334e
     const smtpConfigs = [
       // Configuration 1: Port 587 with TLS
       {
@@ -608,7 +923,11 @@ async function sendOTP(request: Request) {
         port: 587,
         secure: false,
         auth: {
+<<<<<<< HEAD
           user: process.env.MAIL_USER,
+=======
+          user: currentEmailAccount,
+>>>>>>> 997ed2aab8083922dcf51dcea64420868cd6334e
           pass: process.env.MAIL_PASS,
         },
         tls: {
@@ -621,7 +940,11 @@ async function sendOTP(request: Request) {
         port: 465,
         secure: true,
         auth: {
+<<<<<<< HEAD
           user: process.env.MAIL_USER,
+=======
+          user: currentEmailAccount,
+>>>>>>> 997ed2aab8083922dcf51dcea64420868cd6334e
           pass: process.env.MAIL_PASS,
         },
         tls: {
@@ -634,7 +957,11 @@ async function sendOTP(request: Request) {
         port: 25,
         secure: false,
         auth: {
+<<<<<<< HEAD
           user: process.env.MAIL_USER,
+=======
+          user: currentEmailAccount,
+>>>>>>> 997ed2aab8083922dcf51dcea64420868cd6334e
           pass: process.env.MAIL_PASS,
         },
         tls: {
@@ -656,7 +983,11 @@ async function sendOTP(request: Request) {
         console.log(`SMTP configuration ${i + 1} verified successfully`);
 
         await transporter.sendMail({
+<<<<<<< HEAD
           from: `"Recruitment Registration" <${process.env.MAIL_USER}>`,
+=======
+          from: `"PointBlank Recruitment" <${currentEmailAccount}>`,
+>>>>>>> 997ed2aab8083922dcf51dcea64420868cd6334e
           to: email,
           subject: `[PointBlank Recruitment] Email Verification OTP: ${otp}`,
           text: `
@@ -669,7 +1000,13 @@ async function sendOTP(request: Request) {
       - PointBlank Team`,
         });
 
+<<<<<<< HEAD
         console.log("OTP sent successfully to:", email);
+=======
+        console.log(
+          `OTP sent successfully to: ${email} using account: ${currentEmailAccount}`
+        );
+>>>>>>> 997ed2aab8083922dcf51dcea64420868cd6334e
         emailSent = true;
         break;
       } catch (error) {
@@ -693,11 +1030,15 @@ async function sendOTP(request: Request) {
     );
   } catch (error: any) {
     console.error("Error sending OTP:", error);
+<<<<<<< HEAD
 >>>>>>> c245160 (Set up recruitment form for registrations (#373))
+=======
+>>>>>>> 997ed2aab8083922dcf51dcea64420868cd6334e
     return NextResponse.json(
       {
         error: "Failed to send OTP",
         details: error.message || "Internal Server Error",
+<<<<<<< HEAD
       },
       { status: 500 }
     );
@@ -1513,6 +1854,343 @@ async function addRegistration(request: Request) {
 >>>>>>> 675798d (make changes to recruitment form)
 =======
 >>>>>>> c245160 (Set up recruitment form for registrations (#373))
+=======
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * @swagger
+ * /api/registration/recruitment?action=verifyOTP:
+ *   post:
+ *     summary: Verify OTP for recruitment registration
+ *     description: This endpoint verifies the OTP sent to the user's email. It only validates the OTP and does not complete the registration process.
+ *     tags:
+ *      - Recruitment
+ *     parameters:
+ *       - in: query
+ *         name: action
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [verifyOTP]
+ *           description: Must be set to "verifyOTP"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: The email address where OTP was sent
+ *                 example: "user@domain.com"
+ *               otp:
+ *                 type: string
+ *                 pattern: '^[0-9]{6}$'
+ *                 description: The 6-digit OTP received via email
+ *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: OTP verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "OTP verified successfully!"
+ *       400:
+ *         description: Bad request - Missing fields or invalid/expired OTP
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   enum:
+ *                     - "Email and OTP required"
+ *                     - "Invalid or expired OTP"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Internal Server Error"
+ */
+async function verifyOTP(request: Request) {
+  try {
+    const { email, otp } = await request.json();
+
+    if (!email || !otp) {
+      return NextResponse.json(
+        { error: "Email and OTP required" },
+        { status: 400 }
+      );
+    }
+
+    const tempUser = await TempRecruitmentUserModel.findOne({ email });
+
+    if (!tempUser) {
+      return NextResponse.json(
+        { error: "Invalid or expired OTP" },
+        { status: 400 }
+      );
+    }
+
+    const isOTPValid = tempUser.otp === otp;
+    const isOTPExpired = tempUser.otpExpiresAt < new Date();
+
+    if (!isOTPValid || isOTPExpired) {
+      return NextResponse.json(
+        { error: "Invalid or expired OTP" },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: "OTP verified successfully!" },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * @swagger
+ * /api/registration/recruitment/addRegistration:
+ *   post:
+ *     summary: Add a new recruitment registration
+ *     description: This endpoint allows users to register for recruitment.
+ *     tags:
+ *      - Recruitment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Full name of the applicant.
+ *               email:
+ *                 type: string
+ *                 description: Email address.
+ *               whatsapp_number:
+ *                 type: string
+ *                 description: WhatsApp number.
+ *               college_id:
+ *                 type: string
+ *                 description: College ID or USN.
+ *               year_of_study:
+ *                 type: string
+ *                 description: Year of study.
+ *               branch:
+ *                 type: string
+ *                 description: Branch of study.
+ *               about:
+ *                 type: string
+ *                 description: About the applicant.
+ *     responses:
+ *       200:
+ *         description: Registration successful.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Registration successful!"
+ *       400:
+ *         description: Invalid data, missing required fields.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid data. All fields are required."
+ */
+async function addRegistration(request: Request) {
+  try {
+    console.log("Starting recruitment registration...");
+
+    const data = await request.json();
+    console.log("Received data:", JSON.stringify(data, null, 2));
+
+    // Validate required fields
+    const requiredFields = [
+      "name",
+      "email",
+      "whatsapp_number",
+      "college_id",
+      "year_of_study",
+      "branch",
+      "about",
+    ];
+    const missingFields = requiredFields.filter((field) => !data[field]);
+
+    if (missingFields.length > 0) {
+      console.log("Missing fields:", missingFields);
+      return NextResponse.json(
+        {
+          error: "Missing required fields",
+          missingFields: missingFields,
+          received: Object.keys(data),
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+      return NextResponse.json(
+        { error: "Invalid email format" },
+        { status: 400 }
+      );
+    }
+
+    // Validate phone format
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(data.whatsapp_number)) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid phone number format. Must be 10 digits starting with 6-9",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate college_id based on year
+    if (data.year_of_study === "1st year") {
+      const admissionNumberRegex = /^[1-9][0-9][A-Z]{4}[0-9]{4}$/;
+      if (!admissionNumberRegex.test(data.college_id)) {
+        return NextResponse.json(
+          {
+            error:
+              "Invalid Admission Number format for 1st year. Expected format: 19ABCD1234",
+          },
+          { status: 400 }
+        );
+      }
+    } else {
+      const usnRegex = /^[1][D][S][1-3][0-9][A-Z]{2}[0-9]{3}$/;
+      if (!usnRegex.test(data.college_id)) {
+        return NextResponse.json(
+          {
+            error:
+              "Invalid USN format for 2nd/3rd/4th year. Expected format: 1DS21CS123",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    console.log("Validating duplicates...");
+
+    // Check if email, phone, or college_id already exists
+    const [existingEmail, existingPhone, existingCollegeId] = await Promise.all(
+      [
+        RecruitmentModel.findOne({ email: data.email }),
+        RecruitmentModel.findOne({ whatsapp_number: data.whatsapp_number }),
+        RecruitmentModel.findOne({ college_id: data.college_id }),
+      ]
+    );
+
+    if (existingEmail) {
+      console.log("Email already exists:", data.email);
+      return NextResponse.json(
+        { error: "Email already registered" },
+        { status: 400 }
+      );
+    }
+
+    if (existingPhone) {
+      console.log("Phone already exists:", data.whatsapp_number);
+      return NextResponse.json(
+        { error: "Phone number already registered" },
+        { status: 400 }
+      );
+    }
+
+    if (existingCollegeId) {
+      console.log("College ID already exists:", data.college_id);
+      return NextResponse.json(
+        { error: "College ID already registered" },
+        { status: 400 }
+      );
+    }
+
+    console.log("Creating new recruitment document...");
+    const newDoc = new RecruitmentModel(data);
+    await newDoc.save();
+    console.log("Recruitment registration successful!");
+
+    return NextResponse.json({ message: "Registration successful!" });
+  } catch (error) {
+    console.error("Error adding recruitment registration:", error);
+
+    if (error instanceof Error) {
+      // Handle Mongoose validation errors
+      if (error.name === "ValidationError") {
+        const validationErrors = Object.values(error).map(
+          (err: any) => err.message
+        );
+        return NextResponse.json(
+          {
+            error: "Validation failed",
+            details: validationErrors,
+            type: "validation_error",
+          },
+          { status: 400 }
+        );
+      }
+
+      // Handle duplicate key errors
+      if (
+        error.name === "MongoServerError" &&
+        error.message.includes("duplicate key")
+      ) {
+        return NextResponse.json(
+          {
+            error: "Duplicate entry detected",
+            details: error.message,
+            type: "duplicate_error",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    return NextResponse.json(
+      {
+        error: "Failed to add registration",
+        details: error instanceof Error ? error.message : String(error),
+        type: "server_error",
+      },
+>>>>>>> 997ed2aab8083922dcf51dcea64420868cd6334e
       { status: 500 }
     );
   }
