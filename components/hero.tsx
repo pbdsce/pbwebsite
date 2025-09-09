@@ -18,19 +18,19 @@ export default function Hero() {
               <div className="max-w-6xl mx-auto">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:gap-8">
                   {/* Left content */}
-                  <div className="flex-1">
+                  <div className="flex-1 lg:max-w-2xl xl:max-w-2xl lg:flex lg:flex-col lg:justify-center">
                     <TypingAnimation
-                      className="text-3xl sm:text-3xl md:text-4xl font-bold mb-6 sm:mb-8"
+                      className="hero-text text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-bold mb-4 sm:mb-6"
                       text="Hey there! 👋"
                       duration={50}
                     />
                     <p
-                      className="text-3xl sm:text-3xl md:text-4xl text-gray-100 mb-6 sm:mb-8 font-bold"
+                      className="hero-text text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl text-gray-100 mb-4 sm:mb-6 font-bold leading-tight"
                       data-aos="zoom-y-out"
                       data-aos-delay="450"
                     >
                       We are a student-run<br />
-                      <span className="bg-[#00c853] p-2 sm:p-3 rounded-xl" style={{ wordBreak: 'keep-all' }}>tech-community</span> from Dayananda Sagar College of Engineering.
+                      <span className="bg-[#00c853] px-2  sm:px-3 sm:py-1 rounded-xl" style={{ wordBreak: 'keep-all' }}>tech-community</span> from Dayananda Sagar College of Engineering.
                     </p>
                   </div>
                   <div className="flex flex-col items-center gap-3 p-1 transform scale-90 sm:scale-75 hero-banners">
@@ -43,7 +43,7 @@ export default function Hero() {
           </div>
         </div>
       <FlickeringGrid
-        className="z-1 absolute inset-0 size-full"
+        className="z-1 absolute inset-0 w-full h-full"
         squareSize={8}
         gridGap={10}
         color="green"

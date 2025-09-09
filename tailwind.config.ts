@@ -199,6 +199,7 @@ module.exports = {
       screens: {
         "2gl": "750px", // Custom breakpoint for 2 columns
         "3gl": "1070px", // Custom breakpoint for 3 cloumns
+        "landscape": { "raw": "(orientation: landscape)" }, // Landscape orientation breakpoint
       },
 
     },

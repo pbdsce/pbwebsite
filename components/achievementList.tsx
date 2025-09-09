@@ -64,6 +64,7 @@
       img: "gsoclogo.webp",
     },
     {
+      id: 9.5,
       name: "Aayush Kumar",
       username: "@LFX",
       body: "LiFT Scholarship Holder",

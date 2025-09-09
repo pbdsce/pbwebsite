@@ -4,7 +4,7 @@ import Link from 'next/link';
 export default function RecruitmentBanner() {
     return (
         <div 
-            className="flex-shrink-0 w-full lg:w-[32rem]"
+            className="w-full"
             data-aos="zoom-y-out"
             data-aos-delay="800"
         >
