@@ -103,3 +103,15 @@ h1{
   gap: 5rem;
 }
 
+/* Mobile landscape: prevent banners from pushing hero text upward */
+@media (orientation: landscape) and (max-height: 560px) {
+  .hero-section { 
+    min-height: auto !important; 
+    height: auto !important; 
+    align-items: flex-start !important; 
+    padding-top: 0.25rem !important; 
+    margin-bottom: 2rem !important; 
+  }
+  .hero-banners { transform: scale(0.6) !important; margin-top: 0.25rem !important; }
+}
+
