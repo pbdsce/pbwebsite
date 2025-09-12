@@ -4,11 +4,7 @@ import Link from 'next/link';
 export default function RecruitmentBanner() {
     return (
         <div 
-<<<<<<< HEAD
             className="w-full"
-=======
-            className="flex-shrink-0 w-full lg:w-[32rem]"
->>>>>>> 1b5d01f (Recruitment Banner goes to Prod (#385))
             data-aos="zoom-y-out"
             data-aos-delay="800"
         >
