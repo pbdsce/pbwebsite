@@ -262,8 +262,7 @@ export async function POST(request: Request) {
     // if (!success) {
     //   return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });
     // }
-    const { user, error } = await requireAuth(request);
-    if (error) return error;
+
 
     const { searchParams } = new URL(request.url);
     const action = searchParams.get("action");
