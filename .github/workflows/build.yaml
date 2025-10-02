@@ -29,4 +29,4 @@ jobs:
       - name: Build the project
         run: npm run build
         env:
-          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ github.event_name == 'push' && secrets.FIREBASE_SERVICE_ACCOUNT_JSON || '' }}
