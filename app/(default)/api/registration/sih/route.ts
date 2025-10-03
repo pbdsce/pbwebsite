@@ -3,7 +3,6 @@ import connectMongoDB from "@/lib/dbConnect";
 import { sihValidate } from "@/lib/server/utils";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/requireAuth";
 /**
  * @swagger
  * components:
@@ -159,9 +158,6 @@ const validateCollegeID = (enrollment_id:string) => /^[1][D][S][1-2][0-9][A-Z][A
 
 export async function POST(request: Request) {
   await connectMongoDB();
-
-  const { user, error } = await requireAuth(request);
-  if (error) return error;
   
   const formData = await request.json();
   const { recaptcha_token, ...data } = formData;
