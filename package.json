@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prepare": "husky"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
@@ -60,6 +61,7 @@
     "@types/nodemailer": "^6.4.17",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.13",
+    "husky": "^9.1.7",
     "tailwindcss": "^3.3.6"
   },
   "overrides": {
