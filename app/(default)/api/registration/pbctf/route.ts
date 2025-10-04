@@ -4,7 +4,6 @@ import CtfRegsModel, { TempCTFUserModel } from "@/models/CTFRegs";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import { requireAuth } from "@/lib/requireAuth";
 
 /**
  * @swagger
@@ -182,8 +181,6 @@ export async function GET(request: Request) {
  *                   example: "An error occurred"
  */
 export async function POST(request: Request) {
-  const { user, error } = await requireAuth(request);
-  if (error) return error;
   try {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
 
