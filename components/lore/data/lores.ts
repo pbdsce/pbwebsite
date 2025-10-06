@@ -73,7 +73,7 @@ export const Lores: Lore[] = [
     ]    
   },
   {
-    id: 'indiafoss',
+    id: 'indiafoss2025',
     title: 'IndiaFOSS',
     date: 'September 2025',
     location: 'Nimhans Convention Centre, Karnataka',
