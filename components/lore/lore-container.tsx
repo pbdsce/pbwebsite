@@ -38,7 +38,7 @@ const LoresContainer = ({ Lores }: LoresContainerProps) => {
     >
       {Lores.map((Lore, index) => (
         <LoreCard
-          key={Lore.id}
+          key={index}
           lore={Lore}
           isExpanded={expandedLore === Lore.id}
           onCardClick={() => handleLoreClick(Lore.id)}
