@@ -168,7 +168,7 @@ const EventsPage = () => {
           </h2>
           {pastEvents.length > 0 ? (
             <div className="sm:flex flex-wrap justify-around gap-4 px-4">
-              {pastEvents.map((event) => (
+              {pastEvents.slice().reverse().map((event) => (
                 <EventCard
                   key={event.id}
                   event={event}
