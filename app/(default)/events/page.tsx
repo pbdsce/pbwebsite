@@ -146,7 +146,7 @@ const EventsPage = () => {
           {/* Future Events */}
           {futureEvents.length > 0 ? (
             <div className="sm:flex flex-wrap justify-around gap-4 px-4">
-              {futureEvents.map((event) => (
+              {futureEvents.slice().reverse().map((event) => (
                 <EventCard
                   key={event.id}
                   event={event}
