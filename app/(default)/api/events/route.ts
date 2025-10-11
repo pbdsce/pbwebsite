@@ -156,7 +156,7 @@ export async function GET(request: Request) {
   await connectMongoDB();
   try {
     
-    const eventSnapshot = await Eventmodel.find().sort({ eventDate: 1 });
+    const eventSnapshot = await Eventmodel.find().sort({ eventDate: -1 });
     const eventsList = eventSnapshot.map((event: any) => ({
       id: event.id,
       eventName: event.eventName,
