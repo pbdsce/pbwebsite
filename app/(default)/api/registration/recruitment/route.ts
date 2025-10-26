@@ -141,15 +141,32 @@ function getEmailAccountHybrid(userEmail: string): string {
  */
 export async function GET(request: Request) {
   await connectMongoDB();
+  
+  // Wait for connection with timeout
+  const connectionTimeout = 10000;
+  const startTime = Date.now();
+  
+  while (mongoose.connection.readyState !== 1) {
+    if (Date.now() - startTime > connectionTimeout) {
+      throw new Error("Database connection timeout");
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  
   try {
     const { searchParams } = new URL(request.url);
     const identifier = searchParams.get("identifier");
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (identifier && emailRegex.test(identifier)) {
-      const existing = await RecruitmentModel.findOne({
-        email: identifier,
-      });
+      const existing = await Promise.race([
+        RecruitmentModel.findOne({
+          email: identifier,
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Email check timeout")), 5000)
+        ),
+      ]);
       if (existing) {
         return NextResponse.json(
           { message: "email already exists", isUnique: false },
@@ -161,9 +178,14 @@ export async function GET(request: Request) {
         { status: 403 }
       );
     } else {
-      const existing = await RecruitmentModel.findOne({
-        whatsapp_number: identifier,
-      });
+      const existing = await Promise.race([
+        RecruitmentModel.findOne({
+          whatsapp_number: identifier,
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Phone check timeout")), 5000)
+        ),
+      ]);
       if (existing) {
         return NextResponse.json(
           { message: "phone already exists", isUnique: false },
@@ -809,6 +831,19 @@ async function verifyOTP(request: Request) {
 async function addRegistration(request: Request) {
   try {
     console.log("Starting recruitment registration...");
+    
+    await connectMongoDB();
+    
+    // Wait for connection with timeout
+    const connectionTimeout = 10000;
+    const startTime = Date.now();
+    
+    while (mongoose.connection.readyState !== 1) {
+      if (Date.now() - startTime > connectionTimeout) {
+        throw new Error("Database connection timeout");
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
 
     const data = await request.json();
     console.log("Received data:", JSON.stringify(data, null, 2));
@@ -888,9 +923,24 @@ async function addRegistration(request: Request) {
     // Check if email, phone, or college_id already exists
     const [existingEmail, existingPhone, existingCollegeId] = await Promise.all(
       [
-        RecruitmentModel.findOne({ email: data.email }),
-        RecruitmentModel.findOne({ whatsapp_number: data.whatsapp_number }),
-        RecruitmentModel.findOne({ college_id: data.college_id }),
+        Promise.race([
+          RecruitmentModel.findOne({ email: data.email }),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Email check timeout")), 5000)
+          ),
+        ]),
+        Promise.race([
+          RecruitmentModel.findOne({ whatsapp_number: data.whatsapp_number }),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Phone check timeout")), 5000)
+          ),
+        ]),
+        Promise.race([
+          RecruitmentModel.findOne({ college_id: data.college_id }),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("College ID check timeout")), 5000)
+          ),
+        ]),
       ]
     );
 
@@ -920,7 +970,14 @@ async function addRegistration(request: Request) {
 
     console.log("Creating new recruitment document...");
     const newDoc = new RecruitmentModel(data);
-    await newDoc.save();
+    
+    await Promise.race([
+      newDoc.save(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Save operation timeout")), 10000)
+      ),
+    ]);
+    
     console.log("Recruitment registration successful!");
 
     return NextResponse.json({ message: "Registration successful!" });
