@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import LoadingBrackets from "@/components/ui/loading-brackets";
+import { apiFetch } from "@/lib/apiFetch";
 
 interface Achievement {
   title: string;
@@ -69,7 +70,7 @@ export default function AchievementsPage() {
     async function fetchAchievers() {
       try {
         setIsLoading(true);
-        const response = await fetch("/api/achievements-category");
+        const response = await apiFetch("/api/achievements-category");
 
         // Validate response
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -194,9 +195,13 @@ export default function AchievementsPage() {
       formData.append("image", newAchievement.image || "");
       formData.append("name", newAchievement.name || "");
       formData.append("achievements", JSON.stringify(newAchievement.achievements));
-      const response = await axios.post("/api/achievements-category", formData);
-      if (response.data && response.data.data) {
-        setAchievers(prev => [...prev, response.data.data]);
+      const response = await apiFetch("/api/achievements-category", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      if (data && data.data) {
+        setAchievers(prev => [...prev, data.data]);
         setIsModalOpen(false);
         toast.success("Achievement added successfully");
       } else {
@@ -237,9 +242,13 @@ export default function AchievementsPage() {
       formData.append("name", editName);
       formData.append("achievements", JSON.stringify(editAchievements.achievements));
       if (editAchievements.image instanceof File) formData.append("image", editAchievements.image);
-      const response = await axios.put("/api/achievements-category", formData);
-      if (response.data && response.data.data) {
-        setAchievers(prev => prev.map(achiever => achiever.name === editName ? response.data.data : achiever));
+      const response = await apiFetch("/api/achievements-category", {
+        method: "PUT",
+        body: formData,
+      });
+      const data = await response.json();
+      if (data && data.data) {
+        setAchievers(prev => prev.map(achiever => achiever.name === editName ? data.data : achiever));
         setIsEditModalOpen(false);
         toast.success("Achievement updated successfully");
       } else {
@@ -257,8 +266,11 @@ export default function AchievementsPage() {
       return;
     }
     try {
-      const response = await axios.delete(`/api/achievements-category?name=${encodeURIComponent(deleteConfirmName)}`);
-      if (response.data) {
+      const response = await apiFetch(`/api/achievements-category?name=${encodeURIComponent(deleteConfirmName)}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+      if (data) {
         setAchievers(prev => prev.filter(achiever => achiever.name !== deleteConfirmName));
         setIsDeleteModalOpen(false);
         toast.success("Achievement deleted successfully");

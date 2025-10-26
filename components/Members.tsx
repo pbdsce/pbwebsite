@@ -9,6 +9,7 @@ import Card from "./ui/Card";
 import CollapsibleSection from "./ui/CollapsibleSection";
 import { useStore } from "@/lib/zustand/store";
 import LoadingBrackets from "@/components/ui/loading-brackets";
+import { apiFetch } from "@/lib/apiFetch";
 
 interface Member {
   id?: string;
@@ -106,7 +107,7 @@ export default function Members() {
         formData.append("file", image as Blob);
         formData.append("name", newMember.name);
         try {
-          const response = await fetch("/api/membersData/upload", {
+          const response = await apiFetch("/api/membersData/upload", {
             method: "POST",
             body: formData,
           });
@@ -133,7 +134,7 @@ export default function Members() {
       if (newMember.id) {
         // Update member in Firestore
         try {
-          const response = await fetch(`/api/membersData`, {
+          const response = await apiFetch(`/api/membersData`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -157,7 +158,7 @@ export default function Members() {
       } else {
         // Add new member to Firestore
         try {
-          const response = await fetch("/api/membersData", {
+          const response = await apiFetch("/api/membersData", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -213,7 +214,7 @@ export default function Members() {
 
   const handleDeleteMember = async (id: string) => {
     try {
-      const response = await fetch("/api/membersData", {
+      const response = await apiFetch("/api/membersData", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

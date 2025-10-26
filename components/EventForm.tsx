@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useStore } from "@/lib/zustand/store";
+import { apiFetch } from "@/lib/apiFetch";
 
 interface EventFormProps {
   refreshEvents?: () => Promise<void>; // Optional refresh function
@@ -21,7 +22,7 @@ const EventForm: React.FC<EventFormProps> = ({ refreshEvents }) => {
     formData.append("file", file);
     formData.append("name", eventName || 'event-' + Date.now()); // Fallback name if eventName is empty
 
-    const response = await fetch("/api/events/upload", {
+    const response = await apiFetch("/api/events/upload", {
       method: "POST",
       body: formData,
     });
@@ -62,7 +63,7 @@ const EventForm: React.FC<EventFormProps> = ({ refreshEvents }) => {
       return;
     }
     try {
-      const response = await fetch("/api/events", {
+      const response = await apiFetch("/api/events", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

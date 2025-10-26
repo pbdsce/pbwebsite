@@ -9,11 +9,13 @@ import EventCard from "../../../components/EventCard";
 import Sidebar from "../../../components/Sidebar";
 import { useStore } from "@/lib/zustand/store";
 import LoadingBrackets from "@/components/ui/loading-brackets";
+import { apiFetch } from "@/lib/apiFetch";
 
 const EventsPage = () => {
   const [showForm, setShowForm] = useState(false);
   const { isLoggedIn, setLoggedIn } = useStore();
   const [isLoading, setIsLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const [events, setEvents] = useState<
     {
       id: string;
@@ -43,18 +45,15 @@ const EventsPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
-      try {
-        if (user) {
-          setLoggedIn(true);
-        } else {
-          setLoggedIn(false);
-        }
-      } catch (error) {
-        console.log("Error getting document:", error);
-      }
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setLoggedIn(!!user);
+      setAuthLoading(false);
+
+      fetchEvents();
     });
-  }, [isLoggedIn]);
+
+    return () => unsubscribe();
+  }, []);
 
   const fetchEvents = async () => {
     try{
@@ -77,7 +76,7 @@ const EventsPage = () => {
   // Deleting an event
   const deleteEvent = async (eventId: string, event: any) => {
     try {
-      await fetch(`/api/events/?eventid=${eventId}`, {
+      await apiFetch(`/api/events/?eventid=${eventId}`, {
         method: "DELETE",
       });
       setEvents((prevEvents) =>

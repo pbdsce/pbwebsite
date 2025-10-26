@@ -158,6 +158,7 @@ const validateCollegeID = (enrollment_id:string) => /^[1][D][S][1-2][0-9][A-Z][A
 
 export async function POST(request: Request) {
   await connectMongoDB();
+  
   const formData = await request.json();
   const { recaptcha_token, ...data } = formData;
   

@@ -5,6 +5,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/Firebase";
 import "swagger-ui-react/swagger-ui.css";
 import { useStore } from "@/lib/zustand/store";
+import { apiFetch } from "@/lib/apiFetch";
 
 const SwaggerUI = dynamic(() => import("swagger-ui-react"), {
   ssr: false,
@@ -27,7 +28,7 @@ export default function ApiDoc() {
         try {
           setLoggedIn(true);
           // Get the API docs with the user's UID as a query parameter
-          const docsResp = await fetch(`/api/docs?uid=${uid}`);
+          const docsResp = await apiFetch(`/api/docs?uid=${uid}`);
           if (docsResp.ok) {
             const swaggerData = await docsResp.json();
             setSwaggerConfig(swaggerData);

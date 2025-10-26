@@ -113,7 +113,29 @@ The application will be accessible at [http://localhost:3000](http://localhost:3
 
 **Note**: When using devcontainers, you'll still need to set up Infisical for environment variables. Follow steps 4 and 5 from the standard setup instructions above.
 
----
+## **Code Quality & Git Hooks**
+
+This project uses **Husky** to ensure code quality before commits.
+
+### **What is Husky?**
+Husky automatically runs linting checks before you commit code, helping maintain code quality and consistency across the project.
+
+### **Setup (Automatic)**
+Husky is automatically installed when you run `npm install`. The `prepare` script in `package.json` handles the setup.
+
+### **Pre-commit Checks**
+Before each commit, Husky will:
+- Run `npm run lint` (Next.js ESLint)
+- Check for linting errors in your code
+- **Block the commit** if errors are found (warnings are allowed)
+
+### **What to Do if Commit is Blocked**
+If your commit fails due to linting errors:
+
+1. **Fix the errors** shown in the terminal output
+2. Stage your fixes: `git add .`
+3. Try committing again: `git commit -m "your message"`
+
 
 ## **Contributing**  
 
