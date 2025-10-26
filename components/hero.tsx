@@ -35,7 +35,7 @@ export default function Hero() {
                   </div>
                   <div className="flex flex-col items-center gap-3 p-1 transform scale-90 sm:scale-75 hero-banners">
                   <RecruitmentBanner />
-                  <SIHbanner />
+                  {/*<SIHbanner />*/}
                   </div>
                 </div>
               </div>
