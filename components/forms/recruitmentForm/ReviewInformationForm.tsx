@@ -9,14 +9,14 @@ interface FormData {
   year_of_study: string;
   branch: string;
   about: string;
-  otp: string;
+  // otp: string;
 }
 
 interface ReviewInformationFormProps {
   formDataForSubmission: FormData;
   isSubmitting: boolean;
   isSubmissionComplete: boolean;
-  isEmailStillVerified: (email: string) => boolean;
+  // isEmailStillVerified: (email: string) => boolean;
   onEditInformation: () => void;
   onSubmitRegistration: (data: FormData) => void;
 }
@@ -25,7 +25,7 @@ const ReviewInformationForm: React.FC<ReviewInformationFormProps> = ({
   formDataForSubmission,
   isSubmitting,
   isSubmissionComplete,
-  isEmailStillVerified,
+  // isEmailStillVerified,
   onEditInformation,
   onSubmitRegistration,
 }) => {
@@ -61,12 +61,14 @@ const ReviewInformationForm: React.FC<ReviewInformationFormProps> = ({
                   <p className="text-white font-medium truncate">
                     {formDataForSubmission.email}
                   </p>
+                  {/*
                   {isEmailStillVerified(formDataForSubmission.email) && (
                     <span className="text-green-400 text-xs flex items-center gap-1 ml-2 flex-shrink-0">
                       <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span>
                       Verified
                     </span>
                   )}
+                  */}
                 </div>
               </div>
               <div>

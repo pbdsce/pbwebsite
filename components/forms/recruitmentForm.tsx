@@ -10,9 +10,9 @@ import { getErrorMessage } from "@/lib/client/clientUtils";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import CustomSelect from "@/components/ui/custom-select";
-import OTPVerificationForm from "./recruitmentForm/OTPVerificationForm";
+// import OTPVerificationForm from "./recruitmentForm/OTPVerificationForm";
 import ReviewInformationForm from "./recruitmentForm/ReviewInformationForm";
-import { set } from "lodash";
+// import { set } from "lodash";
 
 interface FormData {
   name: string;
@@ -22,7 +22,7 @@ interface FormData {
   year_of_study: string;
   branch: string;
   about: string;
-  otp: string;
+  // otp: string;
 }
 
 const RecruitmentForm: React.FC = () => {
@@ -34,11 +34,12 @@ const RecruitmentForm: React.FC = () => {
     useState<boolean>(false);
 
   // New flow states
-  const [currentStep, setCurrentStep] = useState<"form" | "otp" | "review">(
+  const [currentStep, setCurrentStep] = useState<"form" | /* "otp" | */ "review">(
     "form"
   );
   const [formDataForSubmission, setFormDataForSubmission] =
     useState<FormData | null>(null);
+  /*
   const [isOTPVerified, setIsOTPVerified] = useState<boolean>(false);
   const [verifiedEmail, setVerifiedEmail] = useState<string>(""); // Track which email was verified
 
@@ -48,6 +49,7 @@ const RecruitmentForm: React.FC = () => {
   const [otp, setOtp] = useState<string>("");
   const [otpError, setOtpError] = useState<string>("");
   const [resendTimer, setResendTimer] = useState<number>(0);
+  */
 
   const {
     register,
@@ -67,13 +69,14 @@ const RecruitmentForm: React.FC = () => {
       year_of_study: "",
       branch: "",
       about: "",
-      otp: "",
+      // otp: "",
     },
   });
 
   const watchedYear = watch("year_of_study");
   const watchedEmail = watch("email");
 
+  /*
   // Timer effect for OTP resend
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -87,6 +90,7 @@ const RecruitmentForm: React.FC = () => {
       if (interval) clearInterval(interval);
     };
   }, [resendTimer]);
+  */
 
   // Scroll to top when step changes
   useEffect(() => {
@@ -109,6 +113,7 @@ const RecruitmentForm: React.FC = () => {
     setDisplay(true);
   };
 
+  /*
   const sendOTP = async (email: string): Promise<boolean> => {
     setIsSendingOTP(true);
     setOtpError("");
@@ -156,7 +161,9 @@ const RecruitmentForm: React.FC = () => {
       setIsSendingOTP(false);
     }
   };
+  */
 
+  /*
   const verifyOTP = async (email: string, otp: string): Promise<boolean> => {
     setIsVerifyingOTP(true);
     setOtpError("");
@@ -192,6 +199,7 @@ const RecruitmentForm: React.FC = () => {
       setIsVerifyingOTP(false);
     }
   };
+  */
 
   const submitRegistration = async (data: FormData): Promise<boolean> => {
     try {
@@ -222,6 +230,7 @@ const RecruitmentForm: React.FC = () => {
     }
   };
 
+  /*
   const handleSendOTP = async () => {
     const email = getValues("email");
     if (!email) {
@@ -252,7 +261,9 @@ const RecruitmentForm: React.FC = () => {
       // Don't transition to OTP step
     }
   };
+  */
 
+  /*
   const handleOTPVerification = async () => {
     if (!otp || otp.length !== 6) {
       setOtpError("Please enter a valid 6-digit OTP");
@@ -269,7 +280,9 @@ const RecruitmentForm: React.FC = () => {
       setCurrentStep("review");
     }
   };
+  */
 
+  /*
   const handleResendOTP = async () => {
     if (!formDataForSubmission) return;
 
@@ -279,39 +292,49 @@ const RecruitmentForm: React.FC = () => {
       setOtpError("");
     }
   };
+  */
 
+  /*
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+  */
 
+  /*
   const handleOTPChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 6);
     setOtp(value);
     setOtpError("");
   };
+  */
 
+  /*
   // Helper function to check if email verification is still valid
   const isEmailStillVerified = (email: string): boolean => {
     return isOTPVerified && verifiedEmail === email;
   };
+  */
 
   const onSubmit: SubmitHandler<FormData> = async (data: FormData) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     if (currentStep === "form") {
       setFormDataForSubmission(data);
+      /*
       if (isEmailStillVerified(data.email)) {
         setCurrentStep("review");
       } else {
         await handleSendOTP();
       }
+      */
+      setCurrentStep("review"); // Directly go to review step
       setIsSubmitting(false);
       return;
     }
 
-    if (currentStep === "review" && isOTPVerified) {
+    if (currentStep === "review" /* && isOTPVerified */) {
       setIsSubmitting(true);
       try {
         const registrationSuccess = await submitRegistration(data);
@@ -339,6 +362,7 @@ const RecruitmentForm: React.FC = () => {
     );
   }
 
+  /*
   const handleBackToForm = () => {
     setCurrentStep("form");
     setOtp("");
@@ -350,7 +374,9 @@ const RecruitmentForm: React.FC = () => {
       });
     }
   };
+  */
 
+  /*
   if (currentStep === "otp") {
     return (
       <OTPVerificationForm
@@ -368,6 +394,7 @@ const RecruitmentForm: React.FC = () => {
       />
     );
   }
+  */
 
   const handleEditInformation = () => {
     setCurrentStep("form");
@@ -388,7 +415,7 @@ const RecruitmentForm: React.FC = () => {
         formDataForSubmission={formDataForSubmission}
         isSubmitting={isSubmitting}
         isSubmissionComplete={isSubmissionComplete}
-        isEmailStillVerified={isEmailStillVerified}
+        // isEmailStillVerified={isEmailStillVerified}
         onEditInformation={handleEditInformation}
         onSubmitRegistration={handleSubmitRegistration}
       />
@@ -569,12 +596,14 @@ const RecruitmentForm: React.FC = () => {
                     <span>
                       Email<span className="text-red-500"> * </span>
                     </span>
+                    {/*
                     {watchedEmail && isEmailStillVerified(watchedEmail) && (
                       <span className="text-green-400 text-xs flex items-center gap-1">
                         <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span>
                         Verified
                       </span>
                     )}
+                    */}
                   </div>
                 </label>
                 <input
@@ -674,9 +703,12 @@ const RecruitmentForm: React.FC = () => {
                     ? "Registration Complete!"
                     : isSubmitting
                     ? "Processing..."
-                    : watchedEmail && isEmailStillVerified(watchedEmail)
+                    : /*
+                    watchedEmail && isEmailStillVerified(watchedEmail)
                     ? "Review Information"
-                    : "Continue"}
+                    : "Continue"
+                    */
+                      "Review Information"}
                 </button>
               </motion.div>
             </div>

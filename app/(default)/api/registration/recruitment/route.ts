@@ -1,11 +1,12 @@
 import connectMongoDB from "@/lib/dbConnect";
 import { ratelimiter } from "@/lib/ratelimiter";
 import RecruitmentModel from "@/models/Recruitment";
-import { TempRecruitmentUserModel } from "@/models/Recruitment";
+// import { TempRecruitmentUserModel } from "@/models/Recruitment";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
+// import nodemailer from "nodemailer";
 
+/*
 // Email rotation system - 20 PointBlank email accounts
 const EMAIL_ACCOUNTS = [
   "rahul@pointblank.club",
@@ -83,6 +84,7 @@ function getEmailAccountHybrid(userEmail: string): string {
   );
   return email;
 }
+*/
 
 /**
  * @swagger
@@ -277,11 +279,15 @@ export async function POST(request: Request) {
 
     if (action === "validateRecaptcha") {
       return validateRecaptcha(request);
-    } else if (action === "sendOTP") {
+    }
+    /*
+    else if (action === "sendOTP") {
       return sendOTP(request);
     } else if (action === "verifyOTP") {
       return verifyOTP(request);
-    } else if (action === "addRegistration") {
+    } 
+    */
+    else if (action === "addRegistration") {
       return addRegistration(request);
     } else {
       return NextResponse.json(
@@ -400,7 +406,7 @@ async function validateRecaptcha(request: Request) {
   return NextResponse.json({ message: "Recaptcha validated!" });
 }
 
-/**
+/*
  * @swagger
  * /api/registration/recruitment/sendOTP:
  *   post:
@@ -450,6 +456,7 @@ async function validateRecaptcha(request: Request) {
  *                   type: string
  *                   example: "Internal Server Error"
  */
+/*
 async function sendOTP(request: Request) {
   try {
     console.log("Starting OTP send process...");
@@ -625,6 +632,7 @@ async function sendOTP(request: Request) {
     );
   }
 }
+*/
 
 /**
  * @swagger
@@ -696,6 +704,7 @@ async function sendOTP(request: Request) {
  *                   type: string
  *                   example: "Internal Server Error"
  */
+/*
 async function verifyOTP(request: Request) {
   try {
     const { email, otp } = await request.json();
@@ -737,6 +746,7 @@ async function verifyOTP(request: Request) {
     );
   }
 }
+*/
 
 /**
  * @swagger
