@@ -107,5 +107,23 @@ export const Lores: Lore[] = [
       'https://res.cloudinary.com/pbsite/image/upload/v1759690730/rn4dx1xvb4kbfwk1ffur.webp',
       'https://res.cloudinary.com/pbsite/image/upload/v1759690782/ismvntrahstjggpqiqy7.webp'
     ]
+  },
+  {
+    id: "Anthargange2025",
+    title: "Anthargange Trek",
+    date: "November 2025",
+    location: "Anthargange, Karnataka",
+    preview: "After getting selected for SIH, the teams headed to Anthargange for a trek to celebrate the milestone and reset before the real grind began",
+    story: [
+      "Fresh off our SIH selection, we planned a trek to Anthargange as a way to celebrate the win and take a breather from the intense preparation phase. It was a much-needed break after weeks of brainstorming, pitching, and late-night discussions.",
+      "The trek itself was challenging yet refreshing, pushing us physically while giving us space to disconnect from screens and deadlines. The climb, caves, and rocky paths made it a shared experience that brought the team closer together.",
+      "By the end of the trek, the sense of achievement from both SIH selection and completing Anthargange left us more motivated than ever, ready to return with renewed energy and focus for the next phase."
+    ],
+    images: [
+      'https://res.cloudinary.com/pbsite/image/upload/v1765734234/c1bvobwmipi2zjuy55t1.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1765734315/sunmxsviorkgvqxmz32g.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1765734841/fufeut6btms6wh1dzoqx.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1765734874/sf6i9uffusybbjyptibe.webp'
+    ]
   }
 ];
