@@ -32,9 +32,9 @@ const RegisterPage = () => {
             className="mt-9"
           />
         </Link> */}
-        <div className="form-container my-2">
+        {/* <div className="form-container my-2">
           <RecruitmentForm />
-        </div>
+        </div> */}
       </div>
     </>
   );
