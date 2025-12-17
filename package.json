@@ -33,7 +33,7 @@
     "lucide-react": "^0.419.0",
     "mongodb": "^6.15.0",
     "mongoose": "^8.9.2",
-    "next": "^15.0.3",
+    "next": "15.0.7",
     "next-swagger-doc": "^0.4.1",
     "next-themes": "^0.3.0",
     "nodemailer": "^7.0.5",
