@@ -27,11 +27,12 @@ interface Achiever {
     LIFT?: Achievement[];
     Hackathons?: Achievement[];
     CP?: Achievement[];
+    ACM?: Achievement[];
     [key: string]: Achievement[] | undefined;
   };
 }
 
-const VALID_CATEGORIES = ['GSoC', 'LFX', 'SIH', 'LIFT', 'Hackathons', 'CP'] as const;
+const VALID_CATEGORIES = ['GSoC', 'LFX', 'SIH', 'LIFT', 'Hackathons', 'CP', 'ACM'] as const;
 type ValidCategory = typeof VALID_CATEGORIES[number];
 
 const headingText = "We Build. We Ship. We Win.";
@@ -203,6 +204,8 @@ export default function AchievementsPage() {
       if (data && data.data) {
         setAchievers(prev => [...prev, data.data]);
         setIsModalOpen(false);
+        setEditName("");
+        setNewAchievement({ achievements: {} });
         toast.success("Achievement added successfully");
       } else {
         throw new Error("Invalid response from server");
@@ -250,6 +253,8 @@ export default function AchievementsPage() {
       if (data && data.data) {
         setAchievers(prev => prev.map(achiever => achiever.name === editName ? data.data : achiever));
         setIsEditModalOpen(false);
+        setEditName("");
+        setNewAchievement({ achievements: {} });
         toast.success("Achievement updated successfully");
       } else {
         throw new Error("Invalid response from server");

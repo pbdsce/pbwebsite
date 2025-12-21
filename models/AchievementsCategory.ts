@@ -15,6 +15,7 @@ const achievementsCategorySchema = new mongoose.Schema({
     LIFT: [achievementSchema],
     Hackathons: [achievementSchema],
     CP: [achievementSchema],
+    ACM: [achievementSchema],
   },
 }, { collection: 'achievements_category' });
 
