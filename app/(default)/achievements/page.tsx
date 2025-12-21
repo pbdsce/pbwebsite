@@ -607,7 +607,7 @@ export default function AchievementsPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          const category = prompt("Enter category name (GSoC, LFX, SIH, LIFT, Hackathons, CP):");
+                          const category = prompt("Enter category name (GSoC, LFX, SIH, LIFT, Hackathons, CP, ACM):");
                           if (category && VALID_CATEGORIES.includes(category as ValidCategory)) {
                             handleAddAchievement(category);
                           } else if (category) {
@@ -750,7 +750,7 @@ export default function AchievementsPage() {
                         <button
                           type="button"
                           onClick={() => {
-                            const category = prompt("Enter category name (GSoC, LFX, SIH, LIFT, Hackathons, CP):");
+                            const category = prompt("Enter category name (GSoC, LFX, SIH, LIFT, Hackathons, CP, ACM):");
                             if (category && VALID_CATEGORIES.includes(category as ValidCategory)) {
                               handleEditAddAchievement(category);
                             } else if (category) {
