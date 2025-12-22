@@ -1,6 +1,25 @@
 import { Lore } from '@/components/lore/types/lore';
 
-export const Lores: Lore[] = [
+const Lores: Lore[] = [
+  {
+    
+    id: 'indiafoss2025',
+    title: 'IndiaFOSS',
+    date: 'September 2025',
+    location: 'Nimhans Convention Centre, Karnataka',
+    preview: 'Point Blank got a front row seat to the magic of IndiaFOSS this year.',
+    story: [
+      "At FOSS United’s IndiaFOSS, Point Blank juniors had the incredible opportunity to volunteer and witness one of India’s largest tech conferences in action. From observing operations to connecting with open source leaders, the experience was eye-opening.",
+      "They met remarkable individuals like Dr. Kailash Nadh and Chad Whitacre, gaining insights that will shape their journey in open source and community building. Mentorship and inspiration were around every corner.",
+      "The weekend not only strengthened Point Blank’s vision of building impactful open source communities but also gave juniors a firsthand look at what it takes to organize high-impact tech events, sparking new ideas for the future.",
+    ],
+    images: [
+      'https://res.cloudinary.com/pbsite/image/upload/v1759431418/z0ygpwbrx7z8jjbywiil.jpg',
+      'https://res.cloudinary.com/pbsite/image/upload/v1759690042/qfgiqwxb1pg4jywjyadb.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1759690213/tz4dypcdjxhun9xfjbgq.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1759690240/ccky5yiw8e5lzpd6rvlz.webp'
+    ]    
+  },
   {
     id: "Anthargange2025",
     title: "Anthargange Trek",
@@ -20,25 +39,6 @@ export const Lores: Lore[] = [
     ]
   },
   {
-
-    id: 'indiafoss2025',
-    title: 'IndiaFOSS',
-    date: 'September 2025',
-    location: 'Nimhans Convention Centre, Karnataka',
-    preview: 'Point Blank got a front row seat to the magic of IndiaFOSS this year.',
-    story: [
-      "At FOSS United’s IndiaFOSS, Point Blank juniors had the incredible opportunity to volunteer and witness one of India’s largest tech conferences in action. From observing operations to connecting with open source leaders, the experience was eye-opening.",
-      "They met remarkable individuals like Dr. Kailash Nadh and Chad Whitacre, gaining insights that will shape their journey in open source and community building. Mentorship and inspiration were around every corner.",
-      "The weekend not only strengthened Point Blank’s vision of building impactful open source communities but also gave juniors a firsthand look at what it takes to organize high-impact tech events, sparking new ideas for the future.",
-    ],
-    images: [
-      'https://res.cloudinary.com/pbsite/image/upload/v1759431418/z0ygpwbrx7z8jjbywiil.jpg',
-      'https://res.cloudinary.com/pbsite/image/upload/v1759690042/qfgiqwxb1pg4jywjyadb.webp',
-      'https://res.cloudinary.com/pbsite/image/upload/v1759690213/tz4dypcdjxhun9xfjbgq.webp',
-      'https://res.cloudinary.com/pbsite/image/upload/v1759690240/ccky5yiw8e5lzpd6rvlz.webp'
-    ]    
-  },
-  {
     id: "chad",
     title: "Chad Whitacre on Open Source",
     date: "September 2025",
@@ -54,30 +54,6 @@ export const Lores: Lore[] = [
       'https://res.cloudinary.com/pbsite/image/upload/v1759690703/fsnw2jtyhv1tudh9zqgv.webp',
       'https://res.cloudinary.com/pbsite/image/upload/v1759690730/rn4dx1xvb4kbfwk1ffur.webp',
       'https://res.cloudinary.com/pbsite/image/upload/v1759690782/ismvntrahstjggpqiqy7.webp'
-    ]
-  },
-  {
-    id: 'coorg',
-    title: 'Escape to Coorg',
-    date: 'April 2025',
-    location: 'Coorg, Karnataka',
-    preview: 'What did Point Blank do after submitting their GSoC proposals?',
-    story: [ "Logically speaking, after grinding for 6 months straight, the only logical escape was in the middle of the mountains. What PB did was simple, Click on the submit button, book a bus and run straight to the middle of nowhere."
-            ,"The Coorg lore consists of the campfire at 1am, The 10km long trek to the middle of the clouds, the nights they spent dancing in the bus, the thousands of inside jokes and the relief that now the results were no longer in their hands.",
-            "That year, PB produced 8 Mentees and 3 Mentors in GSOC, the highest in PB History. As one of the leads of the time Sky Said 'May the lore finally find its peace here', hinting to the fact that when he submitted his proposal in 2024, the first thing he also did was run straight to Coorg."
-            ,"Point Blank is pretty sure the people at the coffee plantation and the leeches on the Tadiandamol Trek will remember them, that Coorg will remain a piece of PB lore for years to come."
-    ],
-    images: [
-      'https://res.cloudinary.com/pbsite/image/upload/v1745004377/IMG_0123_awx0jq.webp',
-      'https://res.cloudinary.com/pbsite/image/upload/v1745004378/IMG_0282_ixp2jr.webp',
-      'https://res.cloudinary.com/pbsite/image/upload/v1745004379/IMG_0945_ck9k3b.webp',
-      'https://res.cloudinary.com/pbsite/image/upload/v1745004379/IMG_0946_vco3wg.webp',
-      'https://res.cloudinary.com/pbsite/image/upload/v1745004380/IMG_0961_uq9t1u.webp',
-      'https://res.cloudinary.com/pbsite/image/upload/v1745004382/IMG_1230_hgikcu.webp',
-      'https://res.cloudinary.com/pbsite/image/upload/v1745004383/IMG_8480_fwrmxg.webp',
-      'https://res.cloudinary.com/pbsite/image/upload/v1745004383/IMG_1173_yrzp1f.webp',
-      'https://res.cloudinary.com/pbsite/image/upload/v1745004384/IMG_1351_oop1r6.webp',
-      'https://res.cloudinary.com/pbsite/image/upload/v1745004385/IMG_20250411_190650938_HDR_kvyrwq.webp',
     ]
   },
   {
@@ -105,6 +81,30 @@ export const Lores: Lore[] = [
     ]    
   },
   {
+    id: 'coorg',
+    title: 'Escape to Coorg',
+    date: 'April 2025',
+    location: 'Coorg, Karnataka',
+    preview: 'What did Point Blank do after submitting their GSoC proposals?',
+    story: [ "Logically speaking, after grinding for 6 months straight, the only logical escape was in the middle of the mountains. What PB did was simple, Click on the submit button, book a bus and run straight to the middle of nowhere."
+            ,"The Coorg lore consists of the campfire at 1am, The 10km long trek to the middle of the clouds, the nights they spent dancing in the bus, the thousands of inside jokes and the relief that now the results were no longer in their hands.",
+            "That year, PB produced 8 Mentees and 3 Mentors in GSOC, the highest in PB History. As one of the leads of the time Sky Said 'May the lore finally find its peace here', hinting to the fact that when he submitted his proposal in 2024, the first thing he also did was run straight to Coorg."
+            ,"Point Blank is pretty sure the people at the coffee plantation and the leeches on the Tadiandamol Trek will remember them, that Coorg will remain a piece of PB lore for years to come."
+    ],
+    images: [
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004377/IMG_0123_awx0jq.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004378/IMG_0282_ixp2jr.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004379/IMG_0945_ck9k3b.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004379/IMG_0946_vco3wg.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004380/IMG_0961_uq9t1u.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004382/IMG_1230_hgikcu.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004383/IMG_8480_fwrmxg.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004383/IMG_1173_yrzp1f.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004384/IMG_1351_oop1r6.webp',
+      'https://res.cloudinary.com/pbsite/image/upload/v1745004385/IMG_20250411_190650938_HDR_kvyrwq.webp',
+    ]
+  },
+  {
     id: 'trek',
     title: 'Shivagange Trek',
     date: 'September 2024',
@@ -128,3 +128,40 @@ export const Lores: Lore[] = [
     ]    
   },
 ];
+
+//Order the Lores in correct order
+
+const monthOrder:any = {
+  january: 1,
+  february: 2,
+  march: 3,
+  april: 4,
+  may: 5,
+  june: 6,
+  july: 7,
+  august: 8,
+  september: 9,
+  october: 10,
+  november: 11,
+  december: 12
+};
+
+
+for (let i = 0;i< Lores.length-1;i++){
+  let Month1 = Lores[i]?.date.split(" ")[0].toLowerCase();
+  let Year1 = Number(Lores[i]?.date.split(" ")[1]);
+  for(let k = i+1;k< Lores.length;k++){
+    let Month2 = Lores[k]?.date.split(" ")[0].toLowerCase();
+    let Year2 = Number(Lores[k]?.date.split(" ")[1]);
+
+    if((Year2>Year1)||(Year1==Year2 && monthOrder[Month2]>monthOrder[Month1])){
+      let temp =  Lores[i];
+      Lores[i] = Lores[k];
+      Lores[k] = temp;
+
+    }
+
+  }
+}
+
+export {Lores};
