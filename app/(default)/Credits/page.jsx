@@ -6,6 +6,7 @@ import { PinContainer } from "./creditcards/credits";
 import { useRouter } from "next/navigation";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { PuffLoader } from "react-spinners";
+import { useStore } from "@/lib/zustand/store";
 
 export default function PinPage() {
   const [contributors, setContributors] = useState([]);
