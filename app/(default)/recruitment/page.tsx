@@ -10,7 +10,9 @@ import Image from "next/image";
 
 const RegisterPage = () => {
   const router = useRouter();
-
+  useEffect(()=>{
+    router.push("/not-found");
+  },[router]);
   // useEffect(() => {
   //   const unsubscribe = onAuthStateChanged(auth, (user) => {
   //     if (!user) {
