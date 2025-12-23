@@ -1,8 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/Firebase";
 import { useStore } from "@/lib/zustand/store";
 import toast from "react-hot-toast";
 import React from "react";
@@ -43,7 +41,7 @@ export default function AchievementsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newAchievement, setNewAchievement] = useState<Partial<Achiever>>({ achievements: {} });
-  const { isLoggedIn, setLoggedIn } = useStore();
+  const { isLoggedIn } = useStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editName, setEditName] = useState("");
   const [editAchievements, setEditAchievements] = useState<Partial<Achiever>>({ achievements: {} });
@@ -52,19 +50,6 @@ export default function AchievementsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isInitialRender, setIsInitialRender] = useState(true);
   const [buttonsRendered, setButtonsRendered] = useState(false);
-
-  //Strict auth state change handler
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user: any) => {
-      try {
-        setLoggedIn(!!user);
-      } catch (error) {
-        console.error("Auth state change error:", error);
-        toast.error("Authentication error occurred");
-      }
-    });
-    return () => unsubscribe();
-  }, [setLoggedIn]);
 
   // Strict achievements fetching with comprehensive error handling
   useEffect(() => {
@@ -115,7 +100,7 @@ export default function AchievementsPage() {
           ...(prev.achievements?.[category] || []),
           { title: "", description: "" }
         ]
-      }
+      },
     }));
   };
 

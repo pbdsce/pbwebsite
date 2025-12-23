@@ -1,7 +1,7 @@
-import { db } from "@/Firebase";
+// import { db } from "@/Firebase";
 import connectMongoDB from "@/lib/dbConnect";
 import { sihValidate } from "@/lib/server/utils";
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+// import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { NextResponse } from "next/server";
 /**
  * @swagger
@@ -293,22 +293,22 @@ export async function POST(request: Request) {
   }
 
   // Check for duplicate email registration
-  const { team_info: { team_leader: { email } } } = data;
-  const q = query(
-    collection(db, "sih2024"),
-    where("team_info.team_leader.email", "==", email)
-  );
-  const querySnapshot = await getDocs(q);
+  // const { team_info: { team_leader: { email } } } = data;
+  // const q = query(
+  //   collection(db, "sih2024"),
+  //   where("team_info.team_leader.email", "==", email)
+  // );
+  // const querySnapshot = await getDocs(q);
 
-  if (!querySnapshot.empty) {
-    return NextResponse.json(
-      {
-        message: "Email is already registered!",
-        error: "Email is already registered!",
-      },
-      { status: 400 }
-    );
-  }
+  // if (!querySnapshot.empty) {
+  //   return NextResponse.json(
+  //     {
+  //       message: "Email is already registered!",
+  //       error: "Email is already registered!",
+  //     },
+  //     { status: 400 }
+  //   );
+  // }
 
   //Validate Project Details
   if(
@@ -361,8 +361,8 @@ export async function POST(request: Request) {
 
   try {
     // Save to Firebase
-    const docRef = await addDoc(collection(db, "sih2024"), data);
-    return NextResponse.json({ message: "Registration successful", id: docRef.id });
+    // const docRef = await addDoc(collection(db, "sih2024"), data);
+    return NextResponse.json({ message: "Registration successful", id: "docRef.id" });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
