@@ -15,8 +15,6 @@ import {
 } from "@/lib/constants/dropdownOptions";
 import { useRouter } from "next/navigation";
 import Success from "./success";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/Firebase";
 
 const SIHMultiStepForm: React.FC = () => {
   const { formData, setFormData } = useFormContext();
@@ -35,14 +33,6 @@ const SIHMultiStepForm: React.FC = () => {
 
   useEffect(() => {
     router.push("/");
-  });
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.push("/login");
-      }
-    });
   });
 
   const {

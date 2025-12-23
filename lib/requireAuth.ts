@@ -1,29 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
-import { verifyFirebaseToken } from "./firebaseAdmin";
+import { NextResponse } from "next/server";
+import verifyAuth from "@/lib/client/verifyAuth";
 
-const ADMIN_DOMAIN = 'pointblank.club';
-
-export async function requireAuth(request: Request) {
-  const authHeader = request.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
-  }
-
-  const token = authHeader.split(" ")[1];
+export async function requireAuth(request?: Request) {
   try {
-    const decodedToken = await verifyFirebaseToken(token);
-    const userEmail = decodedToken.email;
-
-    if (!userEmail || !userEmail.endsWith(`@${ADMIN_DOMAIN}`)) {
-          return {
-              error: NextResponse.json({
-                  error: "Forbidden"
-              }, { status: 403 })
-        };
-    }  
-    console.log("Decoded Token:", decodedToken);
-    return { user: decodedToken };
+    const user = await verifyAuth();
+    if (!user?.email)
+      return {
+        error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+      };
+    console.log("Authenticated user:", user);
+    return { user };
   } catch (err) {
-    return { error: NextResponse.json({ error: "Invalid token" }, { status: 401 }) };
+    return {
+      error: NextResponse.json({ error: "Invalid token" }, { status: 401 }),
+    };
   }
 }
