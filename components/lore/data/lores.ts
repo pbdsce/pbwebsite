@@ -4,7 +4,7 @@ export const Lores: Lore[] = [
   {
     id: 'coorg',
     title: 'Escape to Coorg',
-    date: 'April 2025',
+    date: Date.UTC(2025,3),
     location: 'Coorg, Karnataka',
     preview: 'What did Point Blank do after submitting their GSoC proposals?',
     story: [ "Logically speaking, after grinding for 6 months straight, the only logical escape was in the middle of the mountains. What PB did was simple, Click on the submit button, book a bus and run straight to the middle of nowhere."
@@ -28,7 +28,7 @@ export const Lores: Lore[] = [
   {
     id: 'nitk',
     title: 'Victory at NITK',
-    date: 'January 2025',
+    date: Date.UTC(2025,0),
     location: 'Surathkal, Karnataka',
     preview: 'How Point Blank claimed their position at the biggest NIT in India',
     story: [ "Now the NITK Hackverse Hackathon is a big deal for Point Blank. Not only is it the biggest hackathon of the top NIT in India, the lore goes that their seniors had previously gone to this hackathon during their college days but were defeated. Hence, this battle was personal.",
@@ -52,7 +52,7 @@ export const Lores: Lore[] = [
   {
     id: 'trek',
     title: 'Shivagange Trek',
-    date: 'September 2024',
+    date: Date.UTC(2024,8),
     location: 'Shivagange, Karnataka',
     preview: 'Post SIH 2024 and IICT 2024, Point Blank deserved a break again.',
     story: [
@@ -75,7 +75,7 @@ export const Lores: Lore[] = [
   {
     id: 'indiafoss2025',
     title: 'IndiaFOSS',
-    date: 'September 2025',
+    date: Date.UTC(2025,8),
     location: 'Nimhans Convention Centre, Karnataka',
     preview: 'Point Blank got a front row seat to the magic of IndiaFOSS this year.',
     story: [
@@ -93,7 +93,7 @@ export const Lores: Lore[] = [
   {
     id: "chad",
     title: "Chad Whitacre on Open Source",
-    date: "September 2025",
+    date: Date.UTC(2025,8),
     location: "Dayananda Sagar College of Engineering",
     preview: "Chad Whitacre, Head of Open Source at Sentry, shared his journey and insights on open source and its impact on tech.",
     story: [
@@ -111,7 +111,7 @@ export const Lores: Lore[] = [
   {
     id: "Anthargange2025",
     title: "Anthargange Trek",
-    date: "November 2025",
+    date: Date.UTC(2025,10),
     location: "Anthargange, Karnataka",
     preview: "After getting selected for SIH, the teams headed to Anthargange for a trek to celebrate the milestone and reset before the real grind began",
     story: [
@@ -126,4 +126,7 @@ export const Lores: Lore[] = [
       'https://res.cloudinary.com/pbsite/image/upload/v1765734874/sf6i9uffusybbjyptibe.webp'
     ]
   }
-];
+].sort((i,j)=>{
+
+  return j.date - i.date
+});
