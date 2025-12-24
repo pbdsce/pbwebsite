@@ -3,12 +3,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { Transition } from '@headlessui/react';
 import Link from 'next/link';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/Firebase';
-import { useStore } from "@/lib/zustand/store";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGithub } from '@fortawesome/free-brands-svg-icons'; 
-
+import { useRouter } from 'next/navigation';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGithub } from "@fortawesome/free-brands-svg-icons";
+import { useStore } from '@/lib/zustand/store';
 
 const mobileNavItems = [
   { href: "https://github.com/pbdsce", label: "GitHub", isExternal: true, icon: faGithub },
@@ -26,24 +24,8 @@ export default function MobileMenu() {
 
   const trigger = useRef<HTMLButtonElement>(null);
   const mobileNav = useRef<HTMLDivElement>(null);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const { reset } = useStore();
-
-  const handleLogout = async () => {
-    
-    await auth.signOut();
-    setLoggedIn(false);
-    reset();
-    
-  }
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setLoggedIn(true);
-      }
-    });
-  });
+  const { isLoggedIn } = useStore();
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -140,9 +122,16 @@ export default function MobileMenu() {
                 Contact Us
               </Link>
             </li> */}
-            {loggedIn ? (
+            {isLoggedIn ? (
               <li>
-                <button onClick={handleLogout} className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" >
+                <button
+                  className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center"
+                  onClick={() => {
+                    useStore.getState().setLoggedIn(false);
+                    localStorage.removeItem("admin_token");
+                    router.push("/admin/logout");
+                  }}
+                >
                   Logout
                 </button>
               </li>
