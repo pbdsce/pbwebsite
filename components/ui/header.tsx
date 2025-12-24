@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useStore } from "@/lib/zustand/store";
@@ -25,30 +26,7 @@ const navItems = [
 export default function Header() {
   const [top, setTop] = useState(true);
   const pathname = usePathname();
-  const [loggedIn, setLoggedIn] = useState(false);
-  const { reset } = useStore();
-
-  const handleLogout = async () => {
-    
-    await auth.signOut();
-    setLoggedIn(false);
-    reset();
-    
-  }
-
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setLoggedIn(true);
-      } else {
-        setLoggedIn(false);
-      }
-    });
-
-    // Clean up the listener when the component unmounts
-    return () => unsubscribe();
-  }, []);
+  const { isLoggedIn } = useStore();
 
   // Detect whether the user has scrolled the page down by 10px
   const scrollHandler = () => {
@@ -74,37 +52,37 @@ export default function Header() {
           </div>
           <nav className="hidden md:flex md:grow">
             <ul className="flex grow justify-end flex-wrap items-center">
-              {navItems.map((item, index) => (
-                <li key={index}>
+             {navItems.map((item, index) => (
+              <li key={index}>
                 <Link href={item.href} {...(item.isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
-                    <p
-                      className={`font-medium ${
-                        pathname === item.href
-                          ? "font-extrabold text-white"
-                          : "text-gray-300"
+                  <p
+                    className={`font-medium ${
+                      pathname === item.href
+                        ? "font-extrabold text-white"
+                        : "text-gray-300"
                     } hover:text-white ${item.specialPadding ? "px-5" : "px-2 lg:px-5"} py-3 flex items-center transition duration-150 ease-in-out`}
-                    >
+                  >
                     {item.icon && <FontAwesomeIcon icon={item.icon} className="mr-2" size="lg" />}
-                      {item.label}
-                    </p>
-                  </Link>
-                </li>
-              ))}
-              {loggedIn && (
-                <li>
-                  <Link href="/docs">
-                    <p
-                      className={`font-medium ${
-                        pathname === "/docs"
-                          ? "font-extrabold text-white"
-                          : "text-gray-300"
-                      } hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}
-                    >
-                      Docs
-                    </p>
-                  </Link>
-                </li>
-              )}
+                    {item.label}
+                  </p>
+                </Link>
+              </li>
+            ))}
+            {isLoggedIn && (
+              <li>
+                <Link href="/docs">
+                  <p
+                    className={`font-medium ${
+                      pathname === "/docs"
+                        ? "font-extrabold text-white"
+                        : "text-gray-300"
+                    } hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}
+                  >
+                    Docs
+                  </p>
+                </Link>
+              </li>
+            )}
               {/* <li>
                 <Link href="mailto:admin@pointblank.club">
                 <p className={`font-medium ${pathname === '/contact' ? 'font-extrabold text-white' : 'text-gray-300'} hover:text-white px-2 lg:px-5 py-3 flex items-center transition duration-150 ease-in-out`}>Contact Us</p>
@@ -130,7 +108,7 @@ export default function Header() {
                     </p>
                   </button>
                 ) : (
-                  <></>
+          <></>        
                 )}
               </li>
             </ul>
