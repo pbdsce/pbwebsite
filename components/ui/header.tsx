@@ -14,9 +14,8 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
 const navItems = [
   { href: "https://github.com/pbdsce", label: "GitHub", isExternal: true, icon: faGithub},
-  // { href: "/recruitment", label: "Recruitment" },
+  { href: "https://careers.pointblank.club/", label: "Hire Us" },
   { href: "/events", label: "Events" },
-  { href: "https://career.pointblank.club", label: "Hire Us" },
   { href: "/leads", label: "Leads" },
   { href: "/lore", label: "Lore" },
   { href: "/members", label: "Members", specialPadding: true },
