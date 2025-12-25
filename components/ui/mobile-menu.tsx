@@ -15,6 +15,7 @@ const mobileNavItems = [
   { href: "/leads", label: "Leads" },
   { href: "/lore", label: "Lore" },
   { href: "/members", label: "Members" },
+  { href: "/alumni", label: "Alumni"},
   { href: "/achievements", label: "Achievements" },
   { href: "/hustle", label: "Hustle Results" }
 ];

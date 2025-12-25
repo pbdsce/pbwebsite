@@ -20,7 +20,6 @@ interface Member {
 }
 
 const headings = [
-  "Alumni",
   "Fourth Year",
   "Third Year",
   "Second Year",
