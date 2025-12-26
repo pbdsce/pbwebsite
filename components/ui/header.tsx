@@ -17,7 +17,7 @@ const navItems = [
   { href: "/leads", label: "Leads" },
   { href: "/lore", label: "Lore" },
   { href: "/members", label: "Members", specialPadding: true },
-  { href: "/alumni", label: "Alumni"},
+  { href: "/alumni", label: "Alumni", specialPadding: true},
   { href: "/achievements", label: "Achievements" },
   { href: "/hustle", label: "Hustle Results" },
 ];
