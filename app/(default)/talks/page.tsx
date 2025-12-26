@@ -32,7 +32,6 @@ export default function TalksPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [isInitialRender, setIsInitialRender] = useState(true);
 
-  // FIX: Stable timer to prevent hydration mismatch
   useEffect(() => {
     const timer = setTimeout(() => setIsInitialRender(false), 3000);
     return () => clearTimeout(timer);
@@ -47,21 +46,18 @@ export default function TalksPage() {
   return (
     <main className="min-h-screen bg-black text-white relative flex flex-col font-sans overflow-x-hidden">
 
-      {/* 1. THE PERMANENT FIX FOR MINGLING: 
-          This is a physical block that clears the wrapped header rows.
-          We use a hard pixel height because your header is 'fixed'.
-      */}
+      
       <div
         className="w-full h-[220px] md:h-[280px] flex-shrink-0"
         aria-hidden="true"
       />
 
-      {/* Background Glows */}
+      
       <div className="fixed top-0 left-1/4 w-96 h-96 bg-green-500/10 rounded-full blur-[120px] -z-10" />
       <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-green-500/5 rounded-full blur-[120px] -z-10" />
 
       <div className="max-w-7xl mx-auto pb-20 px-6 relative z-10 w-full flex flex-col items-center">
-        {/* HERO SECTION */}
+        
         <header className="relative mb-24 text-center">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -81,7 +77,7 @@ export default function TalksPage() {
           </motion.p>
         </header>
 
-        {/* CATEGORY FILTERS */}
+        
         <div className="flex flex-wrap justify-center gap-4 mb-20">
           {["All", "Conferences", "Talks"].map((cat) => (
             <button
