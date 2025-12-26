@@ -2,7 +2,14 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import TalkCard from "@/components/TalkCard";
-
+type Category = "All" | "Conferences" | "Talks";
+const CATEGORY_DESCRIPTIONS = {
+  All: "A showcase of talks and conferences by the talented members of Point Blank.",
+  Conferences:
+    "Our members representing Point Blank on global stages and major tech summits.",
+  Talks:
+    "Internal deep-dives, community workshops, and technical sharing sessions.",
+};
 const TALKS_DATA = [
   {
     id: "talk-1",
@@ -45,19 +52,15 @@ export default function TalksPage() {
 
   return (
     <main className="min-h-screen bg-black text-white relative flex flex-col font-sans overflow-x-hidden">
-
-      
       <div
         className="w-full h-[220px] md:h-[280px] flex-shrink-0"
         aria-hidden="true"
       />
 
-      
       <div className="fixed top-0 left-1/4 w-96 h-96 bg-green-500/10 rounded-full blur-[120px] -z-10" />
       <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-green-500/5 rounded-full blur-[120px] -z-10" />
 
       <div className="max-w-7xl mx-auto pb-20 px-6 relative z-10 w-full flex flex-col items-center">
-        
         <header className="relative mb-24 text-center">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -67,17 +70,16 @@ export default function TalksPage() {
             We Speak. We Share. We Lead.
           </motion.h1>
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
+            key={activeCategory} // Adding a key makes the text animate when it changes
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
             className="text-lg md:text-xl text-zinc-500 mt-6 italic"
           >
-            A showcase of talks and conferences by the talented members of
-            PointBlank
+            {CATEGORY_DESCRIPTIONS[activeCategory]}
           </motion.p>
         </header>
 
-        
         <div className="flex flex-wrap justify-center gap-4 mb-20">
           {["All", "Conferences", "Talks"].map((cat) => (
             <button
