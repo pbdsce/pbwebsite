@@ -2,12 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/Firebase";
 import { PinContainer } from "./creditcards/credits";
 import { useRouter } from "next/navigation";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { PuffLoader } from "react-spinners";
+import { useStore } from "@/lib/zustand/store";
 
 export default function PinPage() {
   const [contributors, setContributors] = useState([]);
@@ -17,26 +16,7 @@ export default function PinPage() {
   const [isEditingEdit, setIsEditingEdit] = useState(false);
   const [selectedCredit, setSelectedCredit] = useState(null);
   const router = useRouter();
-  const [isLoggedIn, setLoggedIn] = useState(false);
-
-  useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const uid = user.uid;
-        try {
-          const resp = await fetch(`/api/admin?uid=${uid}`);
-          const data = await resp.json();
-          if (data.isLoggedIn) {
-            setLoggedIn(true);
-          } else {
-            setLoggedIn(false);
-          }
-        } catch (error) {
-          console.log("Error getting document:", error);
-        }
-      }
-    });
-  }, []);
+  const { isLoggedIn } = useStore();
 
   useEffect(() => {
     const fetchContributors = async () => {

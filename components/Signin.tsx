@@ -1,108 +1,73 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  isSignInWithEmailLink,
-  signInWithEmailLink,
-  sendSignInLinkToEmail,
-} from "firebase/auth";
-import { auth } from "../Firebase";
 import "../app/globals.css";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import {
+  sendVerificationEmail,
+  verifyToken,
+} from "@/lib/server/auth";
+import { useStore } from "@/lib/zustand/store";
 
 const SignIn = () => {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isButtonLocked, setIsButtonLocked] = useState(true);
+  const { setLoggedIn, isLoggedIn} = useStore();
+  const router = useRouter();
 
   useEffect(() => {
-    const checkLock = async () => {
-      setIsButtonLocked(true);
-
-      try {
-        const res = await fetch('/api/check_timer');
-        const { remaining } = await res.json();
-
-        if (remaining > 0) {
-          setTimeout(() => {
-            setIsButtonLocked(false);
-          }, remaining);
+    const token = new URLSearchParams(window.location.search).get("token");
+    if (token) {
+      verifyToken(token).then((auth) => {
+        if (auth && auth.email) {
+          localStorage.setItem("admin_token", token);
+          setLoggedIn(true);
+          toast.success("Successfully signed in!");
+          router.push("/");
         } else {
           setIsButtonLocked(false);
+          toast.error("Invalid or expired token.");
         }
-      } catch (err) {
-        console.error("Failed to fetch timer:", err);
-        setIsButtonLocked(false);
-      }
-    };
-
-    checkLock();
-  }, []);
+      });
+    } else {
+      setIsButtonLocked(false);
+    }
+  }, [router, setLoggedIn]);
 
   const handleSignIn = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if(isButtonLocked) return;
+    if (isButtonLocked) return;
     setIsButtonLocked(true);
 
-    try{
-      await fetch('/api/start_timer', { method: 'POST' });
-      const res = await fetch('/api/signin_validation',{
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({email}),
-      });
-      
-      if(!res.ok){
-        const {error} = await res.json();
-        toast.error(error || "Email validation failed");
-        return;
+    try {
+      const eMailRegex = new RegExp(
+        /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i
+      );
+
+      // Check if the email is valid
+      if (!eMailRegex.test(email))
+        return toast.error("Please enter a valid email address");
+
+      const res = await sendVerificationEmail(email);
+      if (!res) {
+        setIsLoading(false);
+        return toast.error("Acess denied");
       }
-
-      setIsLoading(true);
-    
-      const actionCodeSettings = {
-        url: `${window.location.origin}/admin`,
-        handleCodeInApp: true,
-      };
-
-      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-      window.localStorage.setItem("emailForSignIn", email);
-      toast.success("Verification link sent to your email!");
-    } catch (signupErr: any) {
-      toast.error(signupErr.message || "Failed to sign up");
-      console.error("Email link error:", signupErr);
-    }finally{
+      setIsLoading(false);
+      setEmail("");
+      setIsButtonLocked(false);
+      return toast.success("Verification link sent to your email!");
+    } catch (err: any) {
+      setIsLoading(false);
+      toast.error(err.message || "Failed sign in");
+      console.error("Email link error:", err);
+    } finally {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    const signInWithEmail = async () => {
-      if (isSignInWithEmailLink(auth, window.location.href)) {
-        let email = window.localStorage.getItem("emailForSignIn");
-
-        if (!email) {
-          toast.error("Email is required to complete sign-in.");
-          return;
-        }
-
-        try {
-          await signInWithEmailLink(auth, email, window.location.href);
-          window.localStorage.removeItem("emailForSignIn");
-          toast.success("Signed in successfully!");
-          router.push("/");
-        } catch (err) {
-          console.error("Sign-in failed:", err);
-          toast.error("Sign-in failed. Try again.");
-        }
-      }
-    };
-
-    signInWithEmail();
-  }, []);
 
   return (
     <div className="max-w-md bg-[#151916] p-12 rounded-xl shadow-lg shadow-green-600/100">
