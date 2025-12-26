@@ -19,18 +19,18 @@ const TALKS_DATA = [
     location: "@Keploy",
     description:
       "An exploration into how student-led open source initiatives are shaping the next generation of developer tools.",
-    type: "Conferences",
+    type: "Talks",
     link: "https://blog.pointblank.club/open-source-future",
   },
   {
     id: "talk-2",
-    name: "Rahul Jagwani",
-    title: "Scaling Community Tech",
-    conference: "GSoC '23",
+    name: "Ashutosh Pandey",
+    title: "Innovations in Compiler Technology (IICT) Workshop",
+    conference: "IICT",
     location: "@BMI",
     description:
-      "Sharing the technical hurdles and triumphs of building a platform that supports thousands of concurrent users for events.",
-    type: "Talks",
+      "Hosted at IISc Bengaluru, IICT is a premier deep-tech workshop dedicated to the world of compilers and systems engineering. We bring together industry leaders and academic researchers to explore the cutting edge of high-performance computing. It is the ultimate hub for those looking to build the core software that powers modern technology.",
+    type: "Conferences",
     link: "https://blog.pointblank.club/scaling-community",
   },
 ];
