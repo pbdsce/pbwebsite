@@ -1,4 +1,4 @@
-import Alumni from "@/components/Alumni"
+import Alumni from "@/components/alumni"
 
 export const metadata = {
     title: 'Alumni',

@@ -20,45 +20,32 @@ export default function Alumni() {
 
   useEffect(() => {
     const fetchAlumni = async () => {
-      try {
-        const res = await fetch("/api/membersData");
-        const data: Member[] = await res.json();
-
-        const alumniOnly = data
-          .filter((member) => member.year === "Alumni")
-          .sort((a, b) => a.name.localeCompare(b.name));
-
-        setAlumni(alumniOnly);
-      } catch (error) {
-        console.error("Error fetching alumni:", error);
-      } finally {
-        setLoading(false);
-      }
+      const res = await fetch("/api/membersData");
+      const data: Member[] = await res.json();
+      setAlumni(
+        data
+          .filter((m) => m.year === "Alumni")
+          .sort((a, b) => a.name.localeCompare(b.name))
+      );
+      setLoading(false);
     };
-
     fetchAlumni();
   }, []);
 
-  return (
-    <main className="flex flex-col items-center mt-24 bg-black min-h-screen">
-      <h1 className="text-4xl font-bold text-white mb-10">Alumni</h1>
+  if (loading) return <LoadingBrackets />;
 
-      {loading ? (
-        <LoadingBrackets />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16">
-          {alumni.map((profile, index) => (
-            <Card
-              key={profile.id ?? index}
-              name={profile.name}
-              role={profile.role}
-              company={profile.company || ""}
-              linkedInUrl={profile.linkedInUrl || ""}
-              imageUrl={profile.imageUrl || ""}
-            />
-          ))}
-        </div>
-      )}
-    </main>
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16">
+      {alumni.map((profile) => (
+        <Card
+          key={profile.id}
+          name={profile.name}
+          role={profile.role}
+          company={profile.company || ""}
+          linkedInUrl={profile.linkedInUrl || ""}
+          imageUrl={profile.imageUrl || ""}
+        />
+      ))}
+    </div>
   );
 }
