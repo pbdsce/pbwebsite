@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { FaEllipsisV, FaRegBell } from "react-icons/fa";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/Firebase";
 import Image from "next/image";
 import Card from "./ui/Card";
 import CollapsibleSection from "./ui/CollapsibleSection";
@@ -58,21 +56,7 @@ export default function Members() {
     setOpenIndex(openIndex === index ? -1 : index);
   };
 
-  const { isLoggedIn, setLoggedIn } = useStore();
-
-  useEffect(() => {
-    onAuthStateChanged(auth, async (user : any) => {
-      try {
-        if (user) {
-          setLoggedIn(true);
-        } else {
-          setLoggedIn(false);
-        }
-      } catch (error) {
-        console.log("Error getting document:", error);
-      }
-    });
-  }, [isLoggedIn]);
+  const { isLoggedIn } = useStore();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
