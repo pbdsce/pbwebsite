@@ -20,7 +20,6 @@ interface Member {
 }
 
 const headings = [
-  "Alumni",
   "Fourth Year",
   "Third Year",
   "Second Year",
@@ -28,9 +27,7 @@ const headings = [
 ];
 
 export default function Members() {
-  const [openIndex, setOpenIndex] = useState<number>(
-    headings.indexOf("Alumni")
-  );
+  const [openIndex, setOpenIndex] = useState<number>(-1);
   const [data, setData] = useState<{ [key: string]: Member[] }>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [showForm, setShowForm] = useState<boolean>(false);
