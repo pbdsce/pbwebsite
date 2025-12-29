@@ -1,59 +1,64 @@
-import { cn } from "@/lib/server/utils";
-import HyperText from "./magicui/hyper-text";
-import Image from "next/image";
+"use client";
+
+
+import type { ReactNode } from "react";
 import Carousel from "@/components/carousel.component";
+import { cn } from "@/lib/server/utils";
+
 
 interface ActivityCardProps {
-    LeftAligned: boolean;
-    Title: string;
-    Subtitle: string | React.ReactNode;
-    Description: string;
-    ImageSrc: string[];
+ leftAligned: boolean;
+ title: string;
+ subtitle?: ReactNode;
+ description: string;
+ images?: string[];
 }
 
-export default function ActivityCard({...props}: ActivityCardProps) {
-    return (
-        <div
-            className={cn(
-                "flex flex-col-reverse md:flex-row gap-4 h-full px-4 sm:px-8 md:px-24 text-center",
-                !props.LeftAligned ? "md:text-left" : "md:text-right",
-                props.LeftAligned ? "" : "md:flex-row-reverse",
-            )}
-            data-aos="zoom-y-out"
-            data-aos-delay="150"
-        >
-            <div className="highlight flex-6">
-                <div className="flex flex-col p-4 md:p-24 justify-center content-center bg-black-800">
-                    <div
-                        className={cn(
-                            "mx-auto",
-                            !props.LeftAligned ? "md:mr-auto md:ml-0" : "md:ml-auto md:mr-0"
-                        )}
-                    >
-                        <HyperText
-                            className={cn("text-2xl sm:text-3xl font-bold text-green-500")}
-                            duration={200}
-                            text={props.Title}
-                        />
-                    </div>
-                    <h2 className="text-xl sm:text-2xl font-semibold mb-4 -mt-2 sm:-mt-4 px-0">
-                        {props.Subtitle}
-                    </h2>
-                    <p className="text-base sm:text-lg px-0 text-gray-300">
-                        {props.Description}
-                    </p>
-                </div>
-            </div>
 
-            <div className="highlight flex-6 my-auto px-4 sm:px-8">
-                <div className="highlight w-full h-64 sm:w-96 sm:h-96 flex items-center justify-center bg-black-900">
-                <Carousel 
-                    slides={props.ImageSrc}
-                    useScrollHoverEffects={true}
-                    className="ActivityCard"
-                />
-                </div>
-            </div>
-        </div>
-    );
+export default function ActivityCard({
+ leftAligned,
+ title,
+ subtitle,
+ description,
+ images,
+}: ActivityCardProps) {
+ return (
+   <section className="w-full py-20 bg-neutral-950 overflow-hidden">
+     <div
+       className={cn(
+         "grid grid-cols-1 lg:grid-cols-2 items-center",
+         leftAligned && "lg:[&>*:first-child]:order-2"
+       )}
+     >
+       {/* IMAGE — full-width, edge-adjacent */}
+       <div className="relative w-full">
+         <div className="relative aspect-[16/9] overflow-hidden pl-10 pr-10">
+           <Carousel slides={images ?? []} />
+         </div>   
+       </div>
+
+
+       {/* TEXT — constrained */}
+       <div className="px-6 lg:px-20">
+         <div className="max-w-xl">
+           <h3 className="text-6xl md:text-4xl font-semibold tracking-tight text-green-400">
+             {title}
+           </h3>
+
+
+           {subtitle && (
+             <div className="mt-4 text-[30px] uppercase tracking-[0.55em] text-gray-500">
+               {subtitle}
+             </div>
+           )}
+
+
+           <p className="mt-6 text-base md:text-xl leading-[1.8] text-gray-500 ">
+             {description}
+           </p>
+         </div>
+       </div>
+     </div>
+   </section>
+ );
 }
