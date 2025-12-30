@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import Marquee from "@/components/magicui/marquee";
 import { apiFetch } from "@/lib/apiFetch";
+import LoadingBrackets from "@/components/ui/loading-brackets";
 import { AchievementTile, TileData } from "@/components/AchievementTiles";
 interface Achievement {
   title: string;
@@ -46,7 +47,6 @@ const CATEGORY_CONFIG: Record<string, { img: string; username: string }> = {
   "HackNocturne by SMVIT": { img: "hacknocturne.webp", username: "@Hackathon" },
   "Centuriton": { img: "centuriton.webp", username: "@Hackathon" },
   "Genesys Hackathon by PES": { img: "genesys.webp", username: "@Hackathon" },
-  "Hackman V8": { img: "hackman.webp", username: "@Hackathon" },
 };
 
 function Achievements() {
@@ -110,26 +110,62 @@ function Achievements() {
     };
   }, [achievers]);
 
-  if (isLoading) return <div className="h-96 flex items-center justify-center text-white">Loading...</div>;
-  if (rows.firstRow.length === 0) return null;
 
-  return (
+return (
+  <>
+    <style>
+      {`
+        @keyframes blinker {
+          to { opacity: 0; }
+        }
+
+        div[style*="overflow-x-auto"]::-webkit-scrollbar {
+          display: none !important;
+        }
+
+        div[style*="overflow-x-auto"] {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}
+    </style>
+
     <div className="py-10 select-none">
+      {/* Heading is always visible */}
       <div className="container mx-auto px-4 mb-8">
         <h2 className="text-3xl sm:text-4xl text-center font-black text-white">
           Achievements
         </h2>
       </div>
-      
-      <div className="relative flex flex-col gap-4">
-        <Marquee pauseOnHover style={{ "--duration": `${rows.fDuration}s` } as React.CSSProperties}>
-          {rows.firstRow.map((item) => <AchievementTile key={item.id} {...item} />)}
-        </Marquee>
-        <Marquee reverse pauseOnHover style={{ "--duration": `${rows.sDuration}s` } as React.CSSProperties}>
-          {rows.secondRow.map((item) => <AchievementTile key={item.id} {...item} />)}
-        </Marquee>
-      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center items-center min-h-[50vh] md:min-h-[60vh]">
+          <LoadingBrackets />
+        </div>
+      ) : (
+        <div className="relative flex flex-col gap-4 md:gap-6 lg:gap-8">
+          <Marquee
+            pauseOnHover
+            style={{ "--duration": `${rows.fDuration}s` } as React.CSSProperties}
+          >
+            {rows.firstRow.map((item) => (
+              <AchievementTile key={item.id} {...item} />
+            ))}
+          </Marquee>
+
+          <Marquee
+            reverse
+            pauseOnHover
+            style={{ "--duration": `${rows.sDuration}s` } as React.CSSProperties}
+          >
+            {rows.secondRow.map((item) => (
+              <AchievementTile key={item.id} {...item} />
+            ))}
+          </Marquee>
+        </div>
+      )}
     </div>
-  );
+  </>
+);
 }
 export default Achievements;
