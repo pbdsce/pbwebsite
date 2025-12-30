@@ -23,7 +23,6 @@ export const swaggerOptions = {
     ],
     tags: [
       { name: 'Achievements', description: 'Achievements management endpoints' },
-      { name: 'Admin', description: 'Administrative endpoints' },
       { name: 'Credits', description: 'Credit management endpoints' },
       { name: 'Events', description: 'Event management endpoints' },
       { name: 'Hustle', description: 'Hustle and leaderboard related endpoints' },
@@ -63,7 +62,6 @@ export const swaggerOptions = {
   },
   apis: [
     './app/(default)/api/achievements/route.ts',
-    './app/(default)/api/admin/route.ts',
     './app/(default)/api/credits/**/route.ts',
     './app/(default)/api/events/route.ts',
     './app/(default)/api/hustle/**/route.ts',
