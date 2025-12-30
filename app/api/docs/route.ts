@@ -1,5 +1,3 @@
-import { db } from "@/Firebase";
-import { doc, getDoc } from "firebase/firestore";
 import { getApiDocs } from '@/lib/swagger';
 import { NextResponse } from 'next/server';
 import { requireAuth } from "@/lib/requireAuth";
@@ -9,16 +7,10 @@ export const revalidate = 0;
 
 export async function GET(request: Request) {
   try {
-    const { user, error } = await requireAuth(request);
-    if (error) return error;
-
-    // Check admin status
-    const adminDocRef = doc(db, "admin", user.uid);
-    const adminDocSnap = await getDoc(adminDocRef);
-
-    if (!adminDocSnap) {
+    const user = await requireAuth(request);
+    if (!user.user?.email) {
       return NextResponse.json(
-        { error: 'Access denied. Admin privileges required.' },
+        { error: "Access denied. Admin privileges required." },
         { status: 403 }
       );
     }
