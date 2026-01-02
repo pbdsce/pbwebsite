@@ -1,8 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/Firebase";
 import { useStore } from "@/lib/zustand/store";
 import toast from "react-hot-toast";
 import React from "react";
@@ -27,11 +25,12 @@ interface Achiever {
     LIFT?: Achievement[];
     Hackathons?: Achievement[];
     CP?: Achievement[];
+    ACM?: Achievement[];
     [key: string]: Achievement[] | undefined;
   };
 }
 
-const VALID_CATEGORIES = ['GSoC', 'LFX', 'SIH', 'LIFT', 'Hackathons', 'CP'] as const;
+const VALID_CATEGORIES = ['GSoC', 'LFX', 'SIH', 'LIFT', 'Hackathons', 'CP', 'ACM'] as const;
 type ValidCategory = typeof VALID_CATEGORIES[number];
 
 const headingText = "We Build. We Ship. We Win.";
@@ -42,7 +41,7 @@ export default function AchievementsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newAchievement, setNewAchievement] = useState<Partial<Achiever>>({ achievements: {} });
-  const { isLoggedIn, setLoggedIn } = useStore();
+  const { isLoggedIn } = useStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editName, setEditName] = useState("");
   const [editAchievements, setEditAchievements] = useState<Partial<Achiever>>({ achievements: {} });
@@ -51,19 +50,6 @@ export default function AchievementsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isInitialRender, setIsInitialRender] = useState(true);
   const [buttonsRendered, setButtonsRendered] = useState(false);
-
-  //Strict auth state change handler
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user: any) => {
-      try {
-        setLoggedIn(!!user);
-      } catch (error) {
-        console.error("Auth state change error:", error);
-        toast.error("Authentication error occurred");
-      }
-    });
-    return () => unsubscribe();
-  }, [setLoggedIn]);
 
   // Strict achievements fetching with comprehensive error handling
   useEffect(() => {
@@ -114,7 +100,7 @@ export default function AchievementsPage() {
           ...(prev.achievements?.[category] || []),
           { title: "", description: "" }
         ]
-      }
+      },
     }));
   };
 
@@ -203,6 +189,8 @@ export default function AchievementsPage() {
       if (data && data.data) {
         setAchievers(prev => [...prev, data.data]);
         setIsModalOpen(false);
+        setEditName("");
+        setNewAchievement({ achievements: {} });
         toast.success("Achievement added successfully");
       } else {
         throw new Error("Invalid response from server");
@@ -250,6 +238,8 @@ export default function AchievementsPage() {
       if (data && data.data) {
         setAchievers(prev => prev.map(achiever => achiever.name === editName ? data.data : achiever));
         setIsEditModalOpen(false);
+        setEditName("");
+        setNewAchievement({ achievements: {} });
         toast.success("Achievement updated successfully");
       } else {
         throw new Error("Invalid response from server");
@@ -602,7 +592,7 @@ export default function AchievementsPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          const category = prompt("Enter category name (GSoC, LFX, SIH, LIFT, Hackathons, CP):");
+                          const category = prompt("Enter category name (GSoC, LFX, SIH, LIFT, Hackathons, CP, ACM):");
                           if (category && VALID_CATEGORIES.includes(category as ValidCategory)) {
                             handleAddAchievement(category);
                           } else if (category) {
@@ -745,7 +735,7 @@ export default function AchievementsPage() {
                         <button
                           type="button"
                           onClick={() => {
-                            const category = prompt("Enter category name (GSoC, LFX, SIH, LIFT, Hackathons, CP):");
+                            const category = prompt("Enter category name (GSoC, LFX, SIH, LIFT, Hackathons, CP, ACM):");
                             if (category && VALID_CATEGORIES.includes(category as ValidCategory)) {
                               handleEditAddAchievement(category);
                             } else if (category) {

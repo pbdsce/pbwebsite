@@ -1,33 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/Firebase";
+import { useState } from "react";
+import { useStore } from "@/lib/zustand/store";
 
 export default function DocsPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.replace("/login");
-      } else {
-        setIsLoggedIn(true);
-      }
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, [router]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-black text-white">
-        <p>Checking authentication...</p>
-      </div>
-    );
-  }
+  const { isLoggedIn } = useStore();
 
   if (!isLoggedIn) {
     return (

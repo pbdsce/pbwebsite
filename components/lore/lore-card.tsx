@@ -77,7 +77,12 @@ export default function LoreCard({
             <div className="flex flex-wrap items-center gap-6 text-gray-400 mb-4">
               <div className="flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
-                <span>{Lore.date}</span>
+                <span>{new Date(Lore.date).toLocaleString(
+                  "en-IN",{
+                    month:"long",
+                    year:"numeric"
+                  }
+                )}</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-5 h-5" />
