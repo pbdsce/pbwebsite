@@ -1,21 +1,13 @@
 "use client";
-import React, { useEffect } from 'react';
-import SignIn from '../../components/Signin';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/Firebase';
+import React from 'react';
 import { useRouter } from 'next/navigation';
+import SignIn from '../../components/Signin';
+import { useStore } from '@/lib/zustand/store';
 
 export default function Home() {
+  const { isLoggedIn } = useStore();
   const router = useRouter();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        router.push('/');
-      }
-    });
-    return () => unsubscribe();
-  }, []);
+  if (isLoggedIn) router.push('/');
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen pt-20">

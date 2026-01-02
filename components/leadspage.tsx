@@ -1,14 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/Firebase";
 import { useStore } from "@/lib/zustand/store";
 import LoadingBrackets from "@/components/ui/loading-brackets";
 import { convertToWebP } from "@/utils/webpImages";
 import { apiFetch } from "@/lib/apiFetch";
 
 interface Lead {
-  id?:string;
+  id?: string;
   name: string;
   position: string;
   organization: string;
@@ -20,7 +18,7 @@ const Leads: React.FC = () => {
   const [loading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   // const [isLoggedInLoggedIn, setLoggedInLoggedIn] = useState(false);
-  const { isLoggedIn , setLoggedIn } = useStore();
+  const { isLoggedIn } = useStore();
   const [currentLeads, setCurrentLeads] = useState<Lead[]>([]);
   const [alumniLeads, setAlumniLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null); // For editing leads
@@ -41,19 +39,6 @@ const Leads: React.FC = () => {
       setIsLoading(false);
     }
   };
-  useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
-      try {
-        if (user) {
-          setLoggedIn(true);
-        } else {
-          setLoggedIn(false);
-        }
-      } catch (error) {
-        console.log("Error getting document:", error);
-      }
-    });
-  }, [isLoggedIn]);
 
   useEffect(() => {
     fetchLeads();
@@ -365,7 +350,6 @@ const LeadForm: React.FC<LeadFormProps> = ({
 }) => {
   const [lead, setLead] = useState<Lead>(
     selectedLead || {
-      
       name: "",
       position: "",
       organization: "",
