@@ -36,8 +36,9 @@ const TALKS_DATA = [
 ];
 
 export default function TalksPage() {
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeCategory, setActiveCategory] = useState<Category>("All");
   const [isInitialRender, setIsInitialRender] = useState(true);
+  const [selectedTalk, setSelectedTalk] = useState<any | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsInitialRender(false), 3000);
@@ -81,7 +82,7 @@ export default function TalksPage() {
         </header>
 
         <div className="flex flex-wrap justify-center gap-4 mb-20">
-          {["All", "Conferences", "Talks"].map((cat) => (
+          {(["All", "Conferences", "Talks"] as Category[]).map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
@@ -103,6 +104,8 @@ export default function TalksPage() {
               <motion.div
                 key={talk.id} // Unique ID prevents console error
                 layout
+                onClick={() => setSelectedTalk(talk)}
+                className="cursor-pointer"
                 initial={{ opacity: 0, scale: 0.95, y: 30 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
@@ -117,6 +120,77 @@ export default function TalksPage() {
           </AnimatePresence>
         </div>
       </div>
+      <AnimatePresence>
+        {selectedTalk && (
+          <>
+            {/* Dark Backdrop Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedTalk(null)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
+            />
+
+            {/* Side Panel Drawer */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="fixed top-0 right-0 h-full w-full sm:w-[500px] bg-zinc-950 border-l border-zinc-800 z-[101] p-8 overflow-y-auto"
+            >
+              <button
+                onClick={() => setSelectedTalk(null)}
+                className="absolute top-6 right-6 text-zinc-500 hover:text-white text-xl"
+              >
+                ✕
+              </button>
+
+              <div className="mt-12 flex flex-col h-full">
+                <p className="text-[#00C853] font-bold text-xs uppercase tracking-widest mb-2">
+                  {selectedTalk.type}
+                </p>
+                <h2 className="text-3xl font-extrabold text-white leading-tight">
+                  {selectedTalk.title}
+                </h2>
+                <div className="mt-4 text-zinc-400 font-medium">
+                  {selectedTalk.name} • {selectedTalk.conference}
+                </div>
+
+                <div className="mt-10 space-y-8 flex-grow">
+                  <div>
+                    <h4 className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest mb-2">
+                      Location
+                    </h4>
+                    <p className="text-lg text-zinc-200">
+                      {selectedTalk.location}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest mb-2">
+                      Description
+                    </h4>
+                    <p className="text-zinc-300 leading-relaxed">
+                      {selectedTalk.description}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-8 pb-4">
+                  <a
+                    href={selectedTalk.link}
+                    target="_blank"
+                    className="flex items-center justify-center w-full py-4 bg-[#00C853] text-black font-bold rounded-xl hover:shadow-[0_0_20px_rgba(0,200,83,0.4)] transition-all"
+                  >
+                    Visit Official Link
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

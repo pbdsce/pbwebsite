@@ -4,10 +4,7 @@ import React from 'react';
 // FIX: No internal useEffect or state here to avoid render-loops
 const TalkCard = ({ talk }: any) => {
   return (
-    <a 
-      href={talk.link || "#"} 
-      target="_blank" 
-      rel="noopener noreferrer"
+    <div
       className="group p-8 rounded-[2rem] bg-[#0c0c0c] border border-zinc-900 
       hover:border-green-500/50 hover:-translate-y-2 transition-all duration-500 
       flex flex-col cursor-pointer min-h-[340px] shadow-2xl block relative z-10"
@@ -20,7 +17,7 @@ const TalkCard = ({ talk }: any) => {
       <div className="mt-8 pt-6 border-t border-zinc-900 text-zinc-700 text-[10px] uppercase tracking-widest">
         {talk.conference}
       </div>
-    </a>
+    </div>
   );
 };
 
