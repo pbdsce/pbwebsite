@@ -29,7 +29,7 @@ const customJestConfig: Config = {
 
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 
-  testEnvironment: "jsdom",
+  testEnvironment: "node",
 
   testPathIgnorePatterns: [
     "<rootDir>/.next/",

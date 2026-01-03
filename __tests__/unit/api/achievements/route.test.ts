@@ -1,7 +1,3 @@
-/**
- * @jest-environment node
- */
-
 import { POST, GET, PUT, DELETE } from "@/app/(default)/api/achievements/route";
 import Achievementmodel from "@/models/Achievements";
 import connectMongoDB from "@/lib/dbConnect";
