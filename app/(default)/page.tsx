@@ -12,6 +12,7 @@ export const viewport: Viewport = {
 };
 import Hero from "@/components/hero";
 import WhatWeDo from "@/components/whatwedo";
+import Companies from "@/components/companies";
 import Domains from "@/components/domains";
 import "../css/additional-styles/landing.css";
 import Activities from "@/components/activities";
@@ -50,6 +51,7 @@ export default function Home() {
         
       </div>
       <Founder />
+      <Companies />
       <Achievements />
       <Share />
     </>
