@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React from "react";
 
 const TalkCard = ({ talk }: any) => {
   return (
@@ -13,8 +13,9 @@ const TalkCard = ({ talk }: any) => {
         <h4 className="text-2xl font-bold text-[#00C853] mb-4">{talk.title}</h4>
         <p className="text-zinc-500 text-sm line-clamp-4">{talk.description}</p>
       </div>
-      <div className="mt-8 pt-6 border-t border-zinc-900 text-zinc-700 text-[10px] uppercase tracking-widest">
-        {talk.conference}
+      <div className="mt-8 pt-6 border-t border-zinc-900 text-[10px] uppercase tracking-widest flex justify-between items-center">
+        <span className="text-zinc-400 font-bold">{talk.conference}</span>
+        <span className="text-zinc-500 font-medium">{talk.date}</span>
       </div>
     </div>
   );

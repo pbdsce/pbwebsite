@@ -15,6 +15,7 @@ const TALKS_DATA = [
     id: "talk-1",
     name: "PB Team",
     title: "Front row to open source innovation",
+    date: "1st January 2025",
     conference: "IndiaFOSS 2025",
     location: "@DSCE",
     description:
@@ -25,6 +26,7 @@ const TALKS_DATA = [
     id: "talk-2",
     name: "Ashutosh Pandey",
     title: "Innovations in Compiler Technology (IICT) Workshop",
+    date: "1st January 2025",
     conference: "IICT",
     location: "@IISc Bangalore",
     description:
@@ -95,12 +97,11 @@ export default function TalksPage() {
           ))}
         </div>
 
-        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 w-full">
           <AnimatePresence mode="popLayout">
             {filteredTalks.map((talk, idx) => (
               <motion.div
-                key={talk.id} // Unique ID prevents console error
+                key={talk.id}
                 layout
                 onClick={() => setSelectedTalk(talk)}
                 className="cursor-pointer"
@@ -152,10 +153,13 @@ export default function TalksPage() {
                 <h2 className="text-3xl font-extrabold text-white leading-tight">
                   {selectedTalk.title}
                 </h2>
-                <div className="mt-4 text-zinc-400 font-medium">
-                  {selectedTalk.name} • {selectedTalk.conference}
+                <div className="mt-4 text-zinc-400 font-medium flex items-center gap-2">
+                  <span>{selectedTalk.name}</span>
+                  <span>•</span>
+                  <span>{selectedTalk.conference}</span>
+                  <span>•</span>
+                  <span className="text-[#00C853]">{selectedTalk.date}</span>
                 </div>
-
                 <div className="mt-10 space-y-8 flex-grow">
                   <div>
                     <h4 className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest mb-2">
@@ -174,7 +178,6 @@ export default function TalksPage() {
                     </p>
                   </div>
                 </div>
-
               </div>
             </motion.div>
           </>
