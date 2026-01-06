@@ -1,0 +1,16 @@
+{
+  "feature": "Navbar",
+  "scenarios": [
+    {
+      "name": "Navbar links are visible",
+      "steps": [
+        { "action": "goto", "value": "/" },
+        { "action": "assertVisible", "value": "nav" },
+        {
+          "action": "assertVisible",
+          "value": "nav >> role=link[name=\"Achievements\"]"
+        }
+      ]
+    }
+  ]
+}

@@ -42,3 +42,17 @@ next-env.d.ts
 
 # include package-lock.json
 !/package-lock.json
+
+# Playwright artifacts
+playwright-report/
+test-results/
+screenshots/
+**/*.webm
+**/*.zip
+
+# MCP artifacts
+mcp-results.json
+
+# MCP dynamically generated tests (not committed)
+tests/e2e/generated/
+tests/e2e/healed/

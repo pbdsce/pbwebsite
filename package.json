@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "prepare": "husky",
-    "test": "jest"
+    "test": "jest",
+    "test:e2e": "playwright test",
+    "mcp": "cross-env ENABLE_MCP=true tsx mcp/runner.ts"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
@@ -56,6 +58,7 @@
   },
   "devDependencies": {
     "@netlify/plugin-nextjs": "^5.12.0",
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/forms": "^0.5.7",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -65,6 +68,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/lodash": "^4.17.16",
     "@types/nodemailer": "^6.4.17",
+    "cross-env": "^10.1.0",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.13",
     "husky": "^9.1.7",
@@ -72,6 +76,7 @@
     "jest-environment-jsdom": "^30.2.0",
     "tailwindcss": "^3.3.6",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "5.9.3"
   },
   "overrides": {
