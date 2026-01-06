@@ -13,25 +13,23 @@ const CATEGORY_DESCRIPTIONS = {
 const TALKS_DATA = [
   {
     id: "talk-1",
-    name: "Akash Singh",
-    title: "The Future of Open Source",
-    conference: "DevConf '24",
-    location: "@Keploy",
+    name: "PB Team",
+    title: "Front row to open source innovation",
+    conference: "IndiaFOSS 2025",
+    location: "@DSCE",
     description:
-      "An exploration into how student-led open source initiatives are shaping the next generation of developer tools.",
+      "Point Blank juniors had the incredible opportunity to volunteer at FOSS United’s IndiaFOSS, one of India’s largest open-source tech conferences. They observed real-time operations, interacted with open-source leaders, and gained valuable insights from mentors like Dr. Kailash Nadh and Chad Whitacre. This hands-on experience strengthened Point Blank’s vision of building impactful open-source communities and inspired juniors to imagine and organize meaningful tech events of their own.",
     type: "Talks",
-    link: "https://blog.pointblank.club/open-source-future",
   },
   {
     id: "talk-2",
     name: "Ashutosh Pandey",
     title: "Innovations in Compiler Technology (IICT) Workshop",
     conference: "IICT",
-    location: "@BMI",
+    location: "@IISc Bangalore",
     description:
-      "Hosted at IISc Bengaluru, IICT is a premier deep-tech workshop dedicated to the world of compilers and systems engineering. We bring together industry leaders and academic researchers to explore the cutting edge of high-performance computing. It is the ultimate hub for those looking to build the core software that powers modern technology.",
+      "The IICT workshop, hosted at IISc Bangalore on 28–29 September 2025, brought together researchers and practitioners in compiler technologies. Point Blank actively volunteered in executing the event - supporting coordination, assisting speakers, and ensuring smooth operations throughout the workshop. Their contribution added to the event’s success while exposing juniors to cutting-edge research and real-world tech collaboration.",
     type: "Conferences",
-    link: "https://blog.pointblank.club/scaling-community",
   },
 ];
 
@@ -97,7 +95,7 @@ export default function TalksPage() {
           ))}
         </div>
 
-        {/* TALKS GRID: Using popLayout to prevent the 500 error/Stack overflow */}
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 w-full">
           <AnimatePresence mode="popLayout">
             {filteredTalks.map((talk, idx) => (
@@ -177,15 +175,6 @@ export default function TalksPage() {
                   </div>
                 </div>
 
-                <div className="mt-8 pb-4">
-                  <a
-                    href={selectedTalk.link}
-                    target="_blank"
-                    className="flex items-center justify-center w-full py-4 bg-[#00C853] text-black font-bold rounded-xl hover:shadow-[0_0_20px_rgba(0,200,83,0.4)] transition-all"
-                  >
-                    Visit Official Link
-                  </a>
-                </div>
               </div>
             </motion.div>
           </>

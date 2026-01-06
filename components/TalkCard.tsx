@@ -1,7 +1,6 @@
 "use client";
 import React from 'react';
 
-// FIX: No internal useEffect or state here to avoid render-loops
 const TalkCard = ({ talk }: any) => {
   return (
     <div
