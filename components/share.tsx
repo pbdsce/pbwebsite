@@ -65,7 +65,7 @@ const Share: React.FC<ShareProps> = () => {
               <div className="mt-4">
                 <a
                   className="btn-sm px-4 py-2 text-l font-bold text-white bg-gradient-to-tr from-purple-400 to-pink-500 mx-3 rounded-xl inline-block"
-                  href="https://www.instagram.com/pointblank_dsce/"
+                  href="https://www.instagram.com/pointblank_club_/"
                 >
                   Follow Us
                 </a>
