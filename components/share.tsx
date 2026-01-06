@@ -44,7 +44,7 @@ const Share: React.FC<ShareProps> = () => {
       </div>
       <div className="flex flex-col gap-6 ml-6">
         <div className="w-14 h-14 rounded-full bg-emerald-400/30 border border-white/20 backdrop-blur-md flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
-          <a href="https://www.instagram.com/pointblank_dsce/"><FaInstagram  className="text-white text-3xl"/></a>
+          <a href="https://www.instagram.com/pointblank_club_/"><FaInstagram  className="text-white text-3xl"/></a>
         </div>
 
         <div className="w-14 h-14 rounded-full bg-emerald-400/30 border border-white/20 backdrop-blur-md flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
@@ -194,29 +194,7 @@ const Share: React.FC<ShareProps> = () => {
           </div>
         </div>
       </div>
-       {/* <div className="flex justify-center px-4">
-      <div className="w-full max-w-md mt-5 "> */}
-            {/* Card 7- PB Careers*/}
-            {/* <div className="bg-gradient-to-tr from-orange-600 to-orange-400 p-6 rounded-lg shadow-md text-white rounded-xl flex flex-col h-full">
-              <div className="flex justify-start mb-4">
-                <p className="text-2xl font-bold">💼 Hire us</p>
-              </div>
-              
-              <h3 className="text-lg font-bold mb-2">Have a project in mind?</h3>
-              <p className="flex-grow">
-                Let's discuss how we can bring your ideas to life and help your business succeed with our expertise.
-              </p>
-              <div className="mt-4">
-                <a
-                  className="btn-sm px-4 py-2 text-l font-bold text-white bg-gradient-to-tr from-orange-600 to-orange-400 mx-3 rounded-xl inline-block"
-                  href="https://careers.pointblank.club/"
-                >
-                  Contact Us
-                </a>
-              </div>
-            </div>
-          </div>
-          </div> */}
+       
     </section>
   );
 };
