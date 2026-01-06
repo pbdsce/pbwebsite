@@ -13,7 +13,7 @@ export const sessionOptions: SessionOptions = {
     httpOnly: true,
   },
 };
-console.log("session_secret:", process.env.SESSION_SECRET);
+
 export async function getSession(): Promise<IronSession<SessionData>> {
   return await getIronSession<SessionData>(await cookies(), sessionOptions);
 }
