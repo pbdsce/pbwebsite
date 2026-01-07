@@ -1,20 +1,18 @@
 "use client";
 
 import { useStore } from "@/lib/zustand/store";
-
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import router from "next/router";
 import Logo from "./logo";
 import MobileMenu from "./mobile-menu";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/Firebase";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGithub } from '@fortawesome/free-brands-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
 const navItems = [
-  { href: "https://github.com/pbdsce", label: "GitHub", isExternal: true, icon: faGithub},
-  // { href: "/recruitment", label: "Recruitment" },
+  { href: "https://github.com/pointblank-club", label: "GitHub", isExternal: true, icon: faGithub},
+  { href: "/recruitment", label: "Recruitment" },
   { href: "/events", label: "Events" },
   { href: "/leads", label: "Leads" },
   { href: "/lore", label: "Lore" },
@@ -26,30 +24,7 @@ const navItems = [
 export default function Header() {
   const [top, setTop] = useState(true);
   const pathname = usePathname();
-  const [loggedIn, setLoggedIn] = useState(false);
-  const { reset } = useStore();
-
-  const handleLogout = async () => {
-    
-    await auth.signOut();
-    setLoggedIn(false);
-    reset();
-    
-  }
-
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setLoggedIn(true);
-      } else {
-        setLoggedIn(false);
-      }
-    });
-    
-    // Clean up the listener when the component unmounts
-    return () => unsubscribe();
-  }, []);
+  const { isLoggedIn } = useStore();
 
   // Detect whether the user has scrolled the page down by 10px
   const scrollHandler = () => {
@@ -91,7 +66,7 @@ export default function Header() {
                 </Link>
               </li>
             ))}
-            {loggedIn && (
+            {isLoggedIn && (
               <li>
                 <Link href="/docs">
                   <p
@@ -112,8 +87,14 @@ export default function Header() {
                 </Link>
               </li> */}
               <li>
-                {loggedIn ? (
-                  <button onClick={handleLogout}>
+                {isLoggedIn ? (
+                  <button
+                    onClick={() => {
+                      useStore.getState().setLoggedIn(false);
+                      localStorage.removeItem("admin_token");
+                      router.push("/admin/logout");
+                    }}
+                  >
                     <p
                       className={`font-medium ${
                         pathname === "/logout"
