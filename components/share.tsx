@@ -37,7 +37,7 @@ const Share: React.FC<ShareProps> = () => {
               <div className="mt-4">
                 <a
                   className="btn-sm px-4 py-2 text-l font-bold bg-gradient-to-tr from-blue-600 to-blue-800 mx-3 rounded-xl inline-block"
-                  href="https://www.linkedin.com/company/point-blank-d"
+                  href="https://www.linkedin.com/company/pointblank-club"
                 >
                   Follow Us
                 </a>
