@@ -58,8 +58,7 @@ export default function ZenithBanner() {
                             </div>
                             <div className="text-center pt-1 border-t border-gray-700/50">
                                 <div className="text-xs text-gray-400 font-mono">
-                                    SYSTEM: <span style={{ color: 'rgb(212, 65, 17)' }}>POINT_BLANK_CLUB</span> |
-                                    NODE: <span style={{ color: 'rgb(212, 65, 17)' }}>DSCE</span>
+                                    SYSTEM: <span style={{ color: 'rgb(212, 65, 17)' }}>POINT_BLANK_CLUB</span>
                                 </div>
                             </div>
                         </div>
