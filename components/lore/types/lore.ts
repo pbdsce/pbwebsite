@@ -1,7 +1,7 @@
 export interface Lore {
     id: string;
     title: string;
-    date: string;
+    date: number;
     location: string;
     preview: string;
     story: string[];

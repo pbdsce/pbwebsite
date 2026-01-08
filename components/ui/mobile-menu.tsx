@@ -15,24 +15,8 @@ export default function MobileMenu() {
 
   const trigger = useRef<HTMLButtonElement>(null);
   const mobileNav = useRef<HTMLDivElement>(null);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const { reset } = useStore();
-
-  const handleLogout = async () => {
-    
-    await auth.signOut();
-    setLoggedIn(false);
-    reset();
-    
-  }
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setLoggedIn(true);
-      }
-    });
-  });
+  const { isLoggedIn } = useStore();
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -129,9 +113,16 @@ export default function MobileMenu() {
                 Contact Us
               </Link>
             </li> */}
-            {loggedIn ? (
+            {isLoggedIn ? (
               <li>
-                <button onClick={handleLogout} className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center" >
+                <button
+                  className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center"
+                  onClick={() => {
+                    useStore.getState().setLoggedIn(false);
+                    localStorage.removeItem("admin_token");
+                    router.push("/admin/logout");
+                  }}
+                >
                   Logout
                 </button>
               </li>
