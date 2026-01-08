@@ -15,7 +15,7 @@ const TALKS_DATA = [
     id: "talk-1",
     name: "PB Team",
     title: "Front row to open source innovation",
-    date: "1st January 2025",
+    date: "September 2025",
     conference: "IndiaFOSS 2025",
     location: "@DSCE",
     description:
@@ -26,7 +26,7 @@ const TALKS_DATA = [
     id: "talk-2",
     name: "Ashutosh Pandey",
     title: "Innovations in Compiler Technology (IICT) Workshop",
-    date: "1st January 2025",
+    date: "28 September 2025",
     conference: "IICT",
     location: "@IISc Bangalore",
     description:
