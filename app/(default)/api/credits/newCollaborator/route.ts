@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
   try {
     await connectMongoDB();
 
-    const repoOwner = "pbdsce";
+    const repoOwner = "pointblank-club";
     const repoName = "PB_Website";
     const branches = ["prod", "staging"];
 
