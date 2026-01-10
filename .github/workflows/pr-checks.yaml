@@ -20,17 +20,20 @@ jobs:
 
       - name: Fetch head commit
         run: |
-          git fetch ${{ github.event.pull_request.head.repo.clone_url }} ${{ github.event.pull_request.head.ref }}:${{ github.event.pull_request.head.ref }}
+          git fetch ${{ github.event.pull_request.head.repo.clone_url }} ${{ github.event.pull_request.head.ref }}
 
       - name: Calculate changed lines
         id: changed-lines
         run: |
-          git checkout ${{ github.event.pull_request.head.ref }}
-          ADDED=$(git diff --shortstat origin/${{ github.event.pull_request.base.ref }}..HEAD | grep -o '[0-9]\+ insertions' | grep -o '[0-9]\+' || true)
-          DELETED=$(git diff --shortstat origin/${{ github.event.pull_request.base.ref }}..HEAD | grep -o '[0-9]\+ deletions' | grep -o '[0-9]\+' || true)
+          DIFF_DATA=$(git diff --shortstat origin/${{ github.event.pull_request.base.ref }}..FETCH_HEAD)
+          
+          ADDED=$(echo "$DIFF_DATA" | grep -o '[0-9]\+ insertions' | grep -o '[0-9]\+' || true)
+          DELETED=$(echo "$DIFF_DATA" | grep -o '[0-9]\+ deletions' | grep -o '[0-9]\+' || true)
+          
           ADDED=${ADDED:-0}
           DELETED=${DELETED:-0}
           TOTAL_LINES=$((ADDED + DELETED))
+          
           echo "changed_lines=${TOTAL_LINES}" >> $GITHUB_OUTPUT
           echo "Lines changed: $TOTAL_LINES"
 
