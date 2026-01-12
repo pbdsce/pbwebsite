@@ -9,7 +9,7 @@ import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { useStore } from '@/lib/zustand/store';
 
 const mobileNavItems = [
-  { href: "https://github.com/pbdsce", label: "GitHub", isExternal: true, icon: faGithub },
+  { href: "https://github.com/pointblank-club", label: "GitHub", isExternal: true, icon: faGithub },
   // { href: "/recruitment", label: "Recruitment" },
   { href: "/events", label: "Events" },
   { href: "/leads", label: "Leads" },
