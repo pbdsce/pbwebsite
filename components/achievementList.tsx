@@ -46,7 +46,7 @@
       id: 7,
       name: "Soumya Pattanayak",
       username: "@ICPC",
-      body: "First team to qualify to ICPC regionals from Point Blank",
+      body: "First team to qualify to ICPC regionals from DSCE",
       img: "icpclogo.webp",
     },
     {
