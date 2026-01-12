@@ -283,7 +283,7 @@ export default function Members() {
       <div className="w-full max-w-6xl px-2">
         {loading ? (
           <div className="flex justify-center py-10">
-            <LoadingBrackets/>
+            <LoadingBrackets />
           </div>
         ) : (
           <div className="space-y-2">
@@ -293,7 +293,7 @@ export default function Members() {
                 heading={heading}
                 content={
                   <div className="flex flex-col items-center space-y-6 w-full">
-                    {heading === "First Year" && (
+                    {/* {heading === "First Year" && (
                       <div className="bg-gray-900 text-white p-4 rounded-lg shadow-lg flex items-center space-x-9 lg:w-7/12 justify-center cursor-pointer" onClick={() => window.location.href = '/recruitment'}>
                         <p className="text-xl font-bold lg:text-2xl text-center">
                           Register for Recruitment
@@ -325,7 +325,7 @@ export default function Members() {
                           }
                         `}</style>
                       </div>
-                    )}
+                    )} */}
                     <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
                       {data[heading]?.map((profile, cardIndex) => (
                         <div key={cardIndex} className="relative">
