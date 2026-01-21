@@ -6,8 +6,8 @@ Welcome to the **Point Blank** official website repository! This project serves 
 
 ## **Quick Links**  
 
-- **Previous Website**: [GitHub](https://github.com/pbdsce/landing-page) | [Live Landing Page](https://www.pointblank.club/)  
-- **Issues to Get Started**: [GitHub Issues](https://github.com/pbdsce/pbwebsite/issues)
+- **Previous Website**: [GitHub](https://github.com/pointblank-club/landing-page) | [Live Landing Page](https://www.pointblank.club/)  
+- **Issues to Get Started**: [GitHub Issues](https://github.com/pointblank-club/pbwebsite/issues)
 - **Staging Branch Deploy** : [Staging Deployment](https://staging--pbpage.netlify.app/)
 
 ---
@@ -19,7 +19,7 @@ Follow the steps below to set up the project locally:
 ### **1. Clone the Repository**  
 
 ```bash
-git clone https://github.com/pbdsce/pbwebsite.git
+git clone https://github.com/pointblank-club/pbwebsite.git
 cd pbwebsite
 ```
 
@@ -89,7 +89,7 @@ If you have Docker installed and use VS Code, you can use Dev Containers for a m
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/pbdsce/pbwebsite.git
+   git clone https://github.com/pointblank-club/pbwebsite.git
    cd pbwebsite
    ```
 
@@ -164,7 +164,7 @@ If your commit fails due to linting errors:
    git push origin feature/<feature-name>
    ```  
 
-Check the [Issues](https://github.com/pbdsce/pbwebsite/issues) page for tasks you can pick up!  
+Check the [Issues](https://github.com/pointblank-club/pbwebsite/issues) page for tasks you can pick up!  
 
 ## ✅ Automated Pull Request Checks
 
