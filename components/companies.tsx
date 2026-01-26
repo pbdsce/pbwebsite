@@ -14,12 +14,15 @@ interface CompanyLogoProps {
 
 function CompanyLogo({ src, name, sizeClass = 'w-24 h-24 sm:w-36 sm:h-36', width = 144, height = 144 }: CompanyLogoProps) {
 	const [errored, setErrored] = React.useState(false);
-	const initials = name
-		.split(' ')
-		.map((s: string) => s[0])
+	const initials = ((name || '')
+		.trim()
+		.split(/\s+/)
+		.filter(Boolean)
+		.map((part: string) => part[0] ?? '')
+		.filter(Boolean)
 		.slice(0, 2)
 		.join('')
-		.toUpperCase();
+		.toUpperCase()) || '?';
 
 	if (errored) {
 		return (
