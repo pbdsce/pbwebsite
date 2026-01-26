@@ -36,7 +36,7 @@ function CompanyLogo({ src, name, sizeClass = 'w-24 h-24 sm:w-36 sm:h-36', width
 		<Image
 			className={`${sizeClass} mx-auto object-contain`}
 			src={src}
-			alt={name}
+			alt={`${name} logo`}
 			width={width}
 			height={height}
 			onError={() => setErrored(true)}
