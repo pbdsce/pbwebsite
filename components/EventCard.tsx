@@ -1,5 +1,6 @@
 import { convertToWebP } from "@/utils/webpImages";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 interface EventCardProps {
   event: {
@@ -40,10 +41,33 @@ const EventCard: React.FC<EventCardProps> = ({
   const month = eventDate.toLocaleString("en-US", { month: "short" });
 
   return (
-    <div
-      className="relative bg-gray-800 shadow-lg rounded-2xl overflow-hidden transition duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer w-full sm:w-[48%] lg:w-[30%] mb-6"
-      onClick={() => onSelect(event)}
-    >
+    <motion.div
+  className="
+    relative
+    rounded-2xl
+    overflow-hidden
+    cursor-pointer
+    w-full sm:w-[48%] lg:w-[30%] mb-6
+
+    bg-black/40
+    backdrop-blur-md
+
+    border border-gray-700/50
+  "
+  onClick={() => onSelect(event)}
+  whileHover={{
+    scale: 1.05,
+    y: -6,
+    borderColor: "rgba(0, 154, 62, 0.9)",
+    boxShadow: "0 0 30px rgba(0, 154, 62, 0.45)",
+  }}
+  transition={{
+    type: "spring",
+    stiffness: 240,
+    damping: 22,
+  }}
+>
+
       {/* Event Image */}
       <div className="relative">
         <Image
@@ -54,7 +78,8 @@ const EventCard: React.FC<EventCardProps> = ({
           className="w-full h-48 object-cover"
         />
         {/* Event Date Badge */}
-        <div className="absolute top-4 left-4 bg-blue-600 text-white py-1 px-3 rounded-xl text-center shadow-md">
+        <div className="absolute top-4 left-4 bg-[#009A3E] text-white py-1 px-3 rounded-xl text-center shadow-md">
+
           <p className="text-lg font-bold">{day}</p>
           <p className="text-sm uppercase tracking-wide">{month}</p>
         </div>
@@ -93,8 +118,7 @@ const EventCard: React.FC<EventCardProps> = ({
           </div>
         )}
       </div>
-    </div>
-  );
+</motion.div>  );
 };
 
 export default EventCard;
