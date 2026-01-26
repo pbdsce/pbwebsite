@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import logger from "@/lib/server/logger";
 
 const MONGODB_URI = process.env.NEXT_PUBLIC_MONGODB_URI;
 
@@ -10,15 +11,24 @@ const connection: ConnectionObject = {};
 
 async function connectMongoDB(): Promise<void> {
   if (connection.isConnected) {
-    console.log("already connected to database");
+    logger.info(
+  { module: "db", state: "already_connected" },
+  "MongoDB already connected"
+);
     return;
   }
   try {
     const db = await mongoose.connect(MONGODB_URI || "");
     connection.isConnected = db.connections[0].readyState;
-    console.log("db connected successfully");
+    logger.info(
+  { module: "db", state: "connected" },
+  "MongoDB connected successfully"
+);
   } catch (error) {
-    console.log("database connection failed", error);
+    logger.error(
+  { module: "db", err: error },
+  "MongoDB connection failed"
+);
     process.exit(0);
   }
 }
