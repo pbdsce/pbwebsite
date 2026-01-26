@@ -47,14 +47,14 @@ const activityData: ActivityData[] = [
     Subtitle: "Smart India Hackathon",
     Image: ["/images/hack.webp", "/images/SIH_2024.webp", "/images/SIH.webp"],
     Description:
-      "Each year, we organize the internal round of the Smart India Hackathon. In the 2024 edition, over 300+ individuals from DSCE participated, with four teams advancing to the national level and three reaching the finals. Since 2020, nine teams from DSCE have won SIH, with six of them being PB teams. Additionally, Point Blank teams have won hackathons across the city and country, including CentuRITon, Hackverse, and HackGlobal.",
+      "Each year, we organize the internal round of the Smart India Hackathon. In the 2025 edition, over 1100+ individuals from DSCE participated, 7 teams from DSCE qualified for National Finals, 5 of which were from Point Blank. All the 5 Point Blank teams Won. Since 2020, 14 teams from DSCE have won SIH, with 11 of them being PB teams. Additionally, Point Blank teams have won hackathons across the city and country, including CentuRITon, Hackverse, and HackGlobal.",
   },
   {
     Title: "Open Source",
     Subtitle: "Google Summer of Code",
     Image: ["/images/gsocact.webp", "/images/LFX.webp", "/images/githubExtern.webp"],
     Description:
-    " Point Blank has cultivated a vibrant open-source community, with our members achieving notable success in prestigious programs like Google Summer of Code (GSOC). In the past five years, we have had 20+ successful GSOC participants, 10+ Linux Foundation Training (LiFT) scholars, 3 LFX scholars, and 8 GitHub Externs.",
+    " Point Blank has cultivated a vibrant open-source community, with our members achieving notable success in prestigious programs like Google Summer of Code (GSOC). In the past five years, we have had 20+ successful GSOC participants, 23 Linux Foundation Training (LiFT) scholars, 8 LFX scholars, and 8 GitHub Externs.",
   },
   {
     Title: "Cybersecurity",

@@ -26,7 +26,7 @@ const Share: React.FC<ShareProps> = () => {
     
     <div className="bg-gradient-to-r from-black via-[#0f2f25] to-emerald-400 p-6 rounded-xl shadow-md text-white flex h-full relative overflow-hidden">
       
-      {/* Inner soft highlight */}
+      
       <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
 
       <div id="left" className="flex flex-col">
