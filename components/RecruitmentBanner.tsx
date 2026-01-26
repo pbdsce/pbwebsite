@@ -59,8 +59,7 @@ export default function RecruitmentBanner() {
 
                             <div className="text-center pt-1 border-t border-gray-700/50">
                                 <div className="text-xs text-gray-400 font-mono">
-                                    SYSTEM: <span className="text-purple-400">POINT_BLANK_CLUB</span> | 
-                                    NODE: <span className="text-purple-400">DSCE</span>
+                                    SYSTEM: <span className="text-purple-400">POINT_BLANK_CLUB</span>
                                 </div>
                             </div>
                         </div>

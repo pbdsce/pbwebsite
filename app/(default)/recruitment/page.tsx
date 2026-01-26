@@ -1,8 +1,6 @@
 "use client";
 import RecruitmentForm from "@/components/forms/recruitmentForm";
 import "../../css/additional-styles/form.css";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/Firebase";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -10,15 +8,6 @@ import Image from "next/image";
 
 const RegisterPage = () => {
   const router = useRouter();
-
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
-  //     if (!user) {
-  //       router.push("/login");
-  //     }
-  //   });
-  //   return () => unsubscribe();
-  // }, [router]);
 
   return (
     <>

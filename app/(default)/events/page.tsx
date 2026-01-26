@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { auth } from "../../../Firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import EventForm from "../../../components/EventForm";
 import EventUpdateForm from "../../../components/EventUpdateForm";
 import EventCard from "../../../components/EventCard";
@@ -13,7 +11,7 @@ import { apiFetch } from "@/lib/apiFetch";
 
 const EventsPage = () => {
   const [showForm, setShowForm] = useState(false);
-  const { isLoggedIn, setLoggedIn } = useStore();
+  const { isLoggedIn } = useStore();
   const [isLoading, setIsLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(true);
   const [events, setEvents] = useState<
@@ -44,19 +42,8 @@ const EventsPage = () => {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setLoggedIn(!!user);
-      setAuthLoading(false);
-
-      fetchEvents();
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   const fetchEvents = async () => {
-    try{
+    try {
       setIsLoading(true);
       const resp = await fetch("/api/events");
       const data = await resp.json();
@@ -145,7 +132,7 @@ const EventsPage = () => {
         <div className="mt-2">
           {/* Future Events */}
           {futureEvents.length > 0 ? (
-            <div className="sm:flex flex-wrap justify-around gap-4 px-4">
+            <div className="sm:flex flex-wrap justify-center gap-4 px-4">
               {futureEvents.slice().reverse().map((event) => (
                 <EventCard
                   key={event.id}
@@ -167,7 +154,7 @@ const EventsPage = () => {
             Past Events
           </h2>
           {pastEvents.length > 0 ? (
-            <div className="sm:flex flex-wrap justify-around gap-4 px-4">
+            <div className="sm:flex flex-wrap justify-center gap-4 px-4">
               {pastEvents.slice().reverse().map((event) => (
                 <EventCard
                   key={event.id}
