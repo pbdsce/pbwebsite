@@ -31,7 +31,7 @@ export default function ActivityCard({
        )}
      >
        {/* IMAGE — full-width, edge-adjacent */}
-       <div className="relative w-full">
+       <div className="relative w-full mb-16 lg:mb-0">
          <div className="relative aspect-[16/9] overflow-hidden pl-10 pr-10">
            <Carousel slides={images ?? []} />
          </div>   
@@ -39,21 +39,21 @@ export default function ActivityCard({
 
 
        {/* TEXT — constrained */}
-       <div className="px-6 lg:px-20">
+       <div className="px-10 pu-10 lg:px-20">
          <div className="max-w-xl lg:ml-10">
-           <h3 className="text-6xl md:text-4xl font-semibold tracking-tight text-green-400 pr-10">
+           <h3 className="text-3xl md:text-4xl font-semibold tracking-tight text-green-400 pr-10">
              {title}
            </h3>
 
 
            {subtitle && (
-             <div className="mt-4 text-[30px] uppercase tracking-[0.55em] text-gray-500 pr-10">
+             <div className="mt-4 text-sm uppercase tracking-[0.55em] text-gray-500 pr-10">
                {subtitle}
              </div>
            )}
 
 
-           <p className="mt-6 text-base md:text-xl leading-[1.8] text-gray-500 pr-10">
+           <p className="mt-6 text-sm md:text-xl leading-[1.8] text-gray-500 pr-10">
              {description}
            </p>
          </div>

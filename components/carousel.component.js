@@ -5,10 +5,23 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/server/utils";
 
+/**
+ * @param {Object} props
+ * @param {string[]} [props.slides]
+ * @param {string} [props.className]
+ */
 
 export default function Carousel({ slides = [], className = "" }) {
  const images = Array.isArray(slides) ? slides : [];
  const [index, setIndex] = useState(0);
+
+const goToPrevious = () => {
+    setIndex((i) => (i - 1 + images.length) % images.length);
+  };
+
+const goToNext = () => {
+    setIndex((i) => (i + 1) % images.length);
+  };
 
 
  useEffect(() => {
@@ -50,6 +63,49 @@ export default function Carousel({ slides = [], className = "" }) {
            </div>
          ))}
        </div>
+              {/* LEFT ARROW */}
+        {images.length > 1 && (
+          <button
+            onClick={goToPrevious}
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 backdrop-blur rounded-full p-2 transition"
+          >
+            <svg
+              className="w-6 h-6 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+        )}
+
+        {/* RIGHT ARROW */}
+        {images.length > 1 && (
+          <button
+            onClick={goToNext}
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 backdrop-blur rounded-full p-2 transition"
+          >
+            <svg
+              className="w-6 h-6 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        )}
 
 
        {/* DOTS — TRUE CENTER */}
