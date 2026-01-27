@@ -39,7 +39,7 @@ export default function ActivityCard({
 
 
        {/* TEXT — constrained */}
-       <div className="px-10 pu-10 lg:px-20">
+       <div className="px-10 lg:px-20">
          <div className="max-w-xl lg:ml-10">
            <h3 className="text-3xl md:text-4xl font-semibold tracking-tight text-green-400 pr-10">
              {title}
