@@ -5,19 +5,9 @@ import { Transition } from '@headlessui/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { useStore } from '@/lib/zustand/store';
+import navItems from './Items';
 
-const mobileNavItems = [
-  { href: "https://github.com/pointblank-club", label: "GitHub", isExternal: true, icon: faGithub },
-  // { href: "/recruitment", label: "Recruitment" },
-  { href: "/events", label: "Events" },
-  { href: "/leads", label: "Leads" },
-  { href: "/lore", label: "Lore" },
-  { href: "/members", label: "Members" },
-  { href: "/achievements", label: "Achievements" },
-  { href: "/hustle", label: "Hustle Results" }
-];
 export default function MobileMenu() {
   const [mobileNavOpen, setMobileNavOpen] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
@@ -104,7 +94,7 @@ export default function MobileMenu() {
           leaveTo="opacity-0"
         >
           <ul className="px-5 py-2">
-            {mobileNavItems.map((item, index) => (
+            {navItems.map((item, index) => (
               <li key={item.href}>
                 <Link 
                   href={item.href} 
