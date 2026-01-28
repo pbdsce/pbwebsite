@@ -2,4 +2,4 @@ User-agent: *
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /settings
-Sitemap: /sitemap.xml
+Sitemap: https://www.pointblank.club/sitemap.xml
