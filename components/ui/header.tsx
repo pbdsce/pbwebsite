@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useStore } from "@/lib/zustand/store";
@@ -18,6 +19,7 @@ const navItems = [
   { href: "/lore", label: "Lore" },
   { href: "/members", label: "Members", specialPadding: true },
   { href: "/achievements", label: "Achievements" },
+  { href: "/talks", label: "Talks" },
   { href: "/hustle", label: "Hustle Results" },
 ];
 
