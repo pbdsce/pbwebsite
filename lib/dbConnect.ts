@@ -12,23 +12,23 @@ const connection: ConnectionObject = {};
 async function connectMongoDB(): Promise<void> {
   if (connection.isConnected) {
     logger.info(
-  { module: "db", state: "already_connected" },
-  "MongoDB already connected"
-);
+      { module: "db", action: "already_connected" },
+      "MongoDB already connected"
+    );
     return;
   }
   try {
     const db = await mongoose.connect(MONGODB_URI || "");
     connection.isConnected = db.connections[0].readyState;
     logger.info(
-  { module: "db", state: "connected" },
-  "MongoDB connected successfully"
-);
+      { module: "db", action: "connected" },
+      "MongoDB connected successfully"
+    );
   } catch (error) {
     logger.error(
-  { module: "db", err: error },
-  "MongoDB connection failed"
-);
+      { module: "db", err: error },
+      "MongoDB connection failed"
+    );
     process.exit(0);
   }
 }

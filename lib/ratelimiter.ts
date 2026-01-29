@@ -11,6 +11,6 @@ export const ratelimiter = new Ratelimit({
   limiter: Ratelimit.slidingWindow(10, '60 s'), // 10 requests/minute
 });
 logger.info(
-  { module: "ratelimiter", state: "initialized" },
+  { module: "ratelimiter", action: "initialized" },
   "Rate limiter configured"
 );

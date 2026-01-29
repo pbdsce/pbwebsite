@@ -1,5 +1,6 @@
 "use server";
 
+import logger from "./logger";
 import { createTransport } from "nodemailer";
 import { redis } from "@/lib/ratelimiter";
 import jwt from "jsonwebtoken";
@@ -10,10 +11,21 @@ export type JwtPayload = {
 };
 
 export async function sendVerificationEmail(to: string): Promise<boolean> {
+
+  logger.info(
+    { module: "auth", action: "send_verification_email" },
+    "Verification email flow started"
+  );
   const query = {
     query:
       "query Organization {\r\n  users(first: 250) {\r\n    nodes {\r\n      email\r\n    }\r\n  }\r\n}",
   };
+
+  logger.info(
+    { module: "auth", provider: "linear" },
+    "Fetching user from Linear"
+  );
+
   const response = await fetch("https://api.linear.app/graphql", {
     method: "POST",
     headers: {
@@ -24,10 +36,28 @@ export async function sendVerificationEmail(to: string): Promise<boolean> {
   });
 
   const { data } = await response.json();
-  if (!data || !data.users || !data.users.nodes) return false;
+  if (!data || !data.users || !data.users.nodes) {
+
+    logger.warn(
+      { module: "auth", provider: "linear" },
+      "Invalid response from Linear API"
+    );
+
+    return false;
+  }
+
 
   const emails = data.users.nodes.map((user: { email: string }) => user.email);
-  if (!emails.includes(to)) return false;
+  if (!emails.includes(to)) {
+
+    logger.warn(
+      { module: "auth", email: to, action: "unauthorized_admin_login_attempt" },
+      "Email not authorized for admin login"
+    );
+
+    return false;
+  }
+
 
   const token = jwt.sign(
     {
@@ -37,8 +67,18 @@ export async function sendVerificationEmail(to: string): Promise<boolean> {
     { expiresIn: "15m" }
   );
 
+  logger.info(
+    { module: "auth", action: "verification_token_generated" },
+    "Verification token generated"
+  );
+
   const verificationLink = `${process.env.NEXT_PUBLIC_DOMAIN || "http://localhost:3000"}/admin/login?token=${token}`;
   await redis.set(`admin_login_${to}`, token, { ex: 15 * 60 }); // 15 minutes expiration
+
+  logger.info(
+    { module: "auth", provider: "redis", action: "verification_token_stored" },
+    "Verification token stored in Redis"
+  );
 
   try {
     const transporter = createTransport({
@@ -56,7 +96,12 @@ export async function sendVerificationEmail(to: string): Promise<boolean> {
     });
 
     transporter.verify((error: any) => {
-      if (error) console.log("Transporter verification error:", error);
+      if (error) {
+        logger.error(
+          { module: "auth", provider: "smtp", err: error },
+          "Email transporter verification failed"
+        );
+      }
     });
 
     transporter.sendMail(
@@ -73,12 +118,34 @@ export async function sendVerificationEmail(to: string): Promise<boolean> {
         text: `Hello,\n\nClick the link below to sign in to the admin panel:\n\n${verificationLink}\n\nThis link will expire in 15 minutes.\n\nIf you did not request this, please ignore this email.\n\nBest regards,\nTeam PointBlank`,
       },
       (error: any, info: any) => {
-        if (error) console.error("Error sending email:", error);
-        return info.response.includes("received");
+        if (error) {
+          logger.error(
+            {
+              module: "auth",
+              provider: "smtp",
+              action: "verification_email_failed",
+              err: error,
+            },
+            "Failed to send verification email"
+          );
+        } else {
+          logger.info(
+            {
+              module: "auth",
+              provider: "smtp",
+              action: "verification_email_sent",
+            },
+            "Verification email sent"
+          );
+        }
       }
     );
   } catch (error) {
-    console.error("Error sending email:", error);
+    logger.error(
+      { module: "auth", err: error },
+      "Unhandled error during email sending"
+    );
+    return false;
   }
 
   return true;
@@ -110,7 +177,11 @@ export async function verifyLoginToken(
     if (error instanceof jwt.TokenExpiredError) {
       return false;
     }
-    console.error("Token verification error:", error);
+    logger.error(
+      { module: "auth", err: error },
+      "Login token verification failed"
+    );
+
     return false;
   }
 }
@@ -121,14 +192,18 @@ export async function verifyToken(token: string): Promise<JwtPayload | null> {
       token,
       process.env.SESSION_SECRET as string
     ) as JwtPayload | null;
-    console.log(user);
+
     if (!user) return null;
     return user;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       return null;
     }
-    console.error("Token verification error:", error);
+    logger.error(
+      { module: "auth", err: error },
+      "Session token verification failed"
+    );
+
     return null;
   }
 }
