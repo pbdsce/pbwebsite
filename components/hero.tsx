@@ -31,10 +31,10 @@ export default function Hero() {
                       data-aos-delay="450"
                     >
                       We are a student-run<br />
-                      <span className="bg-[#00c853] px-2  sm:px-3 sm:py-1 rounded-xl" style={{ wordBreak: 'keep-all' }}>tech-community</span> from Dayananda Sagar College of Engineering.
+                      <span className="bg-[#00c853] px-2  sm:px-3 sm:py-1 rounded-xl"style={{ wordBreak: 'keep-all' }}>tech-community</span> 
                     </p>
                   </div>
-                  <div className="flex flex-col items-center gap-3 p-1 hero-banners lg:w-[28rem]">
+                  <div className="flex flex-col items-center gap-3 p-1 transform scale-90 sm:scale-75 hero-banners">
                   {/* <RecruitmentBanner /> */}
                   {/*<SIHbanner />*/}
                   {/* <ZenithBanner /> */}
