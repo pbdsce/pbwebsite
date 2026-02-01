@@ -8,7 +8,7 @@ import router from "next/router";
 import Logo from "./logo";
 import MobileMenu from "./mobile-menu";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import navItems from "./Items";
+import navItems from "./NavItems";
 
 
 export default function Header() {

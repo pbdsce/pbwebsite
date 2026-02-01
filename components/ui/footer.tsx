@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React from 'react';
 import Logo from './logo';
-import navItems from './Items';
+import navItems from './NavItems';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { usePathname } from "next/navigation";
 
