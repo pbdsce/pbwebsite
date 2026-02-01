@@ -43,7 +43,7 @@ export default function MobileMenu() {
   return (
     <div className="flex md:hidden">
       <button
-	ref={trigger}
+        ref={trigger}
         className="hamburger ml-5"
         aria-controls="mobile-nav"
         aria-expanded={mobileNavOpen ? "true" : "false"}
@@ -96,9 +96,9 @@ export default function MobileMenu() {
           <ul className="px-5 py-2">
             {navItems.map((item, index) => (
               <li key={item.href}>
-                <Link 
-                  href={item.href} 
-                  className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center items-center" 
+                <Link
+                  href={item.href}
+                  className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center items-center"
                   onClick={() => setMobileNavOpen(false)}
                   {...(item.isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 >
