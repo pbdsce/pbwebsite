@@ -9,14 +9,15 @@ import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { useStore } from '@/lib/zustand/store';
 
 const mobileNavItems = [
-  { href: "https://github.com/pbdsce", label: "GitHub", isExternal: true, icon: faGithub },
+  { href: "https://github.com/pointblank-club", label: "GitHub", isExternal: true, icon: faGithub },
   // { href: "/recruitment", label: "Recruitment" },
   { href: "/events", label: "Events" },
   { href: "/leads", label: "Leads" },
   { href: "/lore", label: "Lore" },
   { href: "/members", label: "Members" },
   { href: "/achievements", label: "Achievements" },
-  { href: "/hustle", label: "Hustle Results" }
+  { href: "/talks", label: "Talks" },
+  { href: "/hustle", label: "Hustle Results" },
 ];
 export default function MobileMenu() {
   const [mobileNavOpen, setMobileNavOpen] = useState<boolean>(false);
@@ -53,7 +54,7 @@ export default function MobileMenu() {
   return (
     <div className="flex md:hidden">
       <button
-	ref={trigger}
+        ref={trigger}
         className="hamburger ml-5"
         aria-controls="mobile-nav"
         aria-expanded={mobileNavOpen ? "true" : "false"}
@@ -106,9 +107,9 @@ export default function MobileMenu() {
           <ul className="px-5 py-2">
             {mobileNavItems.map((item, index) => (
               <li key={item.href}>
-                <Link 
-                  href={item.href} 
-                  className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center items-center" 
+                <Link
+                  href={item.href}
+                  className="flex font-medium w-full text-gray-300 hover:text-white py-2 justify-center items-center"
                   onClick={() => setMobileNavOpen(false)}
                   {...(item.isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 >

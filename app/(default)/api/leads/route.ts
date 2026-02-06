@@ -152,15 +152,23 @@ export async function PUT(request: Request) {
     const leadData = await request.json();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
-    const user = await Leadsmodel.findOne({ id });
-    const _id = user._id;
-    
+
     if (!id) {
       return NextResponse.json(
         { error: "Lead ID is required" },
         { status: 400 }
       );
     }
+
+    const user = await Leadsmodel.findOne({ id });
+
+    if (!user) {
+      return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+    }
+
+    const _id = user._id;
+    
+    
 
     // Validate the incoming lead data
     const validationError = validateLeadData(leadData);
@@ -174,9 +182,6 @@ export async function PUT(request: Request) {
       { new: true }
     );
     
-    if (!updatedLead) {
-      return NextResponse.json({ error: "Lead not found" }, { status: 404 });
-    }
 
     return NextResponse.json(updatedLead, { status: 200 });
   } catch (error) {

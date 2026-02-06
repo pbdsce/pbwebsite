@@ -11,7 +11,7 @@ export default function Teams() {
     {
       url: '/images/founder2.webp',
       name: "Soumya Pattanayak",
-      description: "A top coder at DSCE, Soumya has worked at Amazon and Verse Innovation. He's an ACM-ICPC regionalist known for his problem-solving skills and innovative projects."
+      description: "A top coder at Point Blank, Soumya has worked at Amazon and Verse Innovation. He's an ACM-ICPC regionalist known for his problem-solving skills and innovative projects."
     },
     {
       url: '/images/founder3.webp',
