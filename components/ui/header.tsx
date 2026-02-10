@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useStore } from "@/lib/zustand/store";
@@ -11,7 +12,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
 const navItems = [
-  { href: "https://github.com/pbdsce", label: "GitHub", isExternal: true, icon: faGithub},
+  { href: "https://github.com/pointblank-club", label: "GitHub", isExternal: true, icon: faGithub},
   // { href: "/recruitment", label: "Recruitment" },
   { href: "/events", label: "Events" },
   { href: "/leads", label: "Leads" },
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/members", label: "Members", specialPadding: true },
   { href: "/alumni", label: "Alumni"},
   { href: "/achievements", label: "Achievements" },
+  { href: "/talks", label: "Talks" },
   { href: "/hustle", label: "Hustle Results" },
 ];
 

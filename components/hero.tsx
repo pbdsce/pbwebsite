@@ -7,6 +7,7 @@ import TypingAnimation from "@/components/ui/typing-animation";
 import "../app/css/additional-styles/landing.css";
 import SIHbanner from "@/components/SIHbanner";
 import RecruitmentBanner from "@/components/RecruitmentBanner";
+import ZenithBanner from "@/components/ZenithBanner";
 
 
 export default function Hero() {
@@ -33,9 +34,10 @@ export default function Hero() {
                       <span className="bg-[#00c853] px-2  sm:px-3 sm:py-1 rounded-xl" style={{ wordBreak: 'keep-all' }}>tech-community</span> from Dayananda Sagar College of Engineering.
                     </p>
                   </div>
-                  <div className="flex flex-col items-center gap-3 p-1 transform scale-90 sm:scale-75 hero-banners">
+                  <div className="flex flex-col items-center gap-3 p-1 hero-banners lg:w-[28rem]">
                   {/* <RecruitmentBanner /> */}
                   {/*<SIHbanner />*/}
+                  <ZenithBanner />
                   </div>
                 </div>
               </div>
