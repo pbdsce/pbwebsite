@@ -12,19 +12,13 @@ export type JwtPayload = {
 
 export async function sendVerificationEmail(to: string): Promise<boolean> {
 
-  logger.info(
-    { module: "auth", action: "send_verification_email" },
-    "Verification email flow started"
-  );
+
   const query = {
     query:
       "query Organization {\r\n  users(first: 250) {\r\n    nodes {\r\n      email\r\n    }\r\n  }\r\n}",
   };
 
-  logger.info(
-    { module: "auth", provider: "linear" },
-    "Fetching user from Linear"
-  );
+
 
   const response = await fetch("https://api.linear.app/graphql", {
     method: "POST",
@@ -65,11 +59,6 @@ export async function sendVerificationEmail(to: string): Promise<boolean> {
     },
     process.env.JWT_SECRET as string,
     { expiresIn: "15m" }
-  );
-
-  logger.info(
-    { module: "auth", action: "verification_token_generated" },
-    "Verification token generated"
   );
 
   const verificationLink = `${process.env.NEXT_PUBLIC_DOMAIN || "http://localhost:3000"}/admin/login?token=${token}`;

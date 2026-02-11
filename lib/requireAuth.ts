@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import verifyAuth from "@/lib/client/verifyAuth";
 import logger from "@/lib/server/logger";
 export async function requireAuth(request?: Request) {
-  logger.info(
-    { module: "auth", action: "auth_guard_invoked" },
-    "Auth guard invoked"
-  );
+  
   try {
     const user = await verifyAuth();
     if (!user?.email) {
