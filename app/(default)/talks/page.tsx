@@ -81,6 +81,23 @@ export default function TalksPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedTalk(null);
+    };
+
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  useEffect(() => {
+    if (selectedTalk) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+  }, [selectedTalk]);
+
   const filteredTalks = useMemo(() => {
     return activeCategory === "All"
       ? TALKS_DATA
@@ -166,37 +183,43 @@ export default function TalksPage() {
               onClick={() => setSelectedTalk(null)}
               className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
             />
-
-            {/* Side Panel Drawer */}
+            {/* Modal */}
             <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 h-full w-full sm:w-[500px] bg-zinc-950 border-l border-zinc-800 z-[101] p-8 overflow-y-auto"
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="fixed inset-0 z-[101] flex items-center justify-center p-6"
             >
-              <button
-                onClick={() => setSelectedTalk(null)}
-                className="absolute top-6 right-6 text-zinc-500 hover:text-white text-xl"
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 
+               rounded-2xl p-8 shadow-[0_0_60px_rgba(0,0,0,0.8)]"
               >
-                ✕
-              </button>
+                <button
+                  onClick={() => setSelectedTalk(null)}
+                  className="absolute top-5 right-5 text-zinc-500 hover:text-white text-xl"
+                >
+                  ✕
+                </button>
 
-              <div className="mt-12 flex flex-col h-full">
                 <p className="text-[#00C853] font-bold text-xs uppercase tracking-widest mb-2">
                   {selectedTalk.type}
                 </p>
+
                 <h2 className="text-3xl font-extrabold text-white leading-tight">
                   {selectedTalk.title}
                 </h2>
-                <div className="mt-4 text-zinc-400 font-medium flex items-center gap-2">
+
+                <div className="mt-4 text-zinc-400 font-medium flex flex-wrap items-center gap-2">
                   <span>{selectedTalk.name}</span>
                   <span>•</span>
                   <span>{selectedTalk.conference}</span>
                   <span>•</span>
                   <span className="text-[#00C853]">{selectedTalk.date}</span>
                 </div>
-                <div className="mt-10 space-y-8 flex-grow">
+
+                <div className="mt-10 space-y-6">
                   <div>
                     <h4 className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest mb-2">
                       Location
@@ -205,6 +228,7 @@ export default function TalksPage() {
                       {selectedTalk.location}
                     </p>
                   </div>
+
                   <div>
                     <h4 className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest mb-2">
                       Description
