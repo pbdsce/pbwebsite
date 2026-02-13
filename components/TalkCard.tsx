@@ -15,7 +15,16 @@ const TalkCard = ({ talk }: any) => {
       </div>
       <div className="mt-8 pt-6 border-t border-zinc-900 text-[10px] uppercase tracking-widest flex justify-between items-center">
         <span className="text-zinc-400 font-bold">{talk.conference}</span>
-        <span className="text-zinc-500 font-medium">{talk.date}</span>
+
+        <div className="flex items-center gap-3">
+          {talk.links?.length > 0 && (
+            <span className="text-[#00C853] font-bold">
+              {talk.links.length} Links
+            </span>
+          )}
+
+          <span className="text-zinc-500 font-medium">{talk.date}</span>
+        </div>
       </div>
     </div>
   );
