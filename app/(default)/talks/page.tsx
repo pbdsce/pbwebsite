@@ -179,7 +179,7 @@ export default function TalksPage() {
             We Speak. We Share. We Lead.
           </motion.h1>
           <motion.p
-            key={activeCategory} // Adding a key makes the text animate when it changes
+            key={activeCategory}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
@@ -244,12 +244,13 @@ export default function TalksPage() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.92 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="fixed inset-0 z-[101] flex items-center justify-center p-6"
+              className="fixed inset-0 z-[101] flex items-start md:items-center justify-center p-4 md:p-6 overflow-y-auto"
             >
               <div
                 onClick={(e) => e.stopPropagation()}
                 className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 
-               rounded-2xl p-8 shadow-[0_0_60px_rgba(0,0,0,0.8)]"
+                rounded-2xl p-6 md:p-8 shadow-[0_0_60px_rgba(0,0,0,0.8)]
+                max-h-[90vh] overflow-y-auto"
               >
                 <button
                   onClick={() => setSelectedTalk(null)}
