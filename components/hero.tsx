@@ -13,7 +13,7 @@ import ZenithBanner from "@/components/ZenithBanner";
 export default function Hero() {
   return (
     <section className="relative min-h-screen md:h-screen flex justify-center items-center hero-section">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6">
           <div className="pt-20 sm:pt-32 pb-5 md:pt-40 md:pb-5">
             <div className="pb-5 md:pb-5">
               <div className="max-w-6xl mx-auto">
@@ -31,7 +31,7 @@ export default function Hero() {
                       data-aos-delay="450"
                     >
                       We are a student-run<br />
-                      <span className="bg-[#00c853] px-2  sm:px-3 sm:py-1 rounded-xl" style={{ wordBreak: 'keep-all' }}>tech-community</span> from Dayananda Sagar College of Engineering.
+                      <span className="bg-[#00c853] px-2  sm:px-3 sm:py-1 rounded-xl" style={{ wordBreak: 'keep-all' }}>Open Source</span> Community from India.
                     </p>
                   </div>
                   <div className="flex flex-col items-center gap-3 p-1 hero-banners lg:w-[28rem]">
