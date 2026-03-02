@@ -30,8 +30,8 @@ export default function Hero() {
                       data-aos="zoom-y-out"
                       data-aos-delay="450"
                     >
-                      We are a student-run<br />
-                      <span className="bg-[#00c853] px-2  sm:px-3 sm:py-1 rounded-xl" style={{ wordBreak: 'keep-all' }}>tech-community</span> from Dayananda Sagar College of Engineering.
+                      Student run<br />
+                      <span className="bg-[#00c853] px-2  sm:px-3 sm:py-1 rounded-xl" style={{ wordBreak: 'keep-all' }}>Open Source</span> Community from India.
                     </p>
                   </div>
                   <div className="flex flex-col items-center gap-3 p-1 hero-banners lg:w-[28rem]">
