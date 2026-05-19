@@ -22,16 +22,20 @@ export default function OssOrganizationPreviewCard({
   const remainingContributors = organization.contributors.slice(2);
 
   return (
-    <div className="w-full rounded-[16px] bg-[#1c1c1c] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.22)] sm:rounded-[20px] sm:p-5">
-      <div className="flex flex-col gap-4">
+    <div className="flex h-[220px] w-full flex-col rounded-[16px] bg-[#1c1c1c] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.22)] sm:rounded-[20px] sm:p-5">
+      <div className="flex h-full flex-col gap-4">
         <div className="flex min-w-0 items-start gap-3">
-          {organization.avatarUrl && (
-            <span
-              aria-hidden="true"
-              className="size-9 shrink-0 rounded-lg bg-cover bg-center"
-              style={{ backgroundImage: `url(${organization.avatarUrl})` }}
-            />
-          )}
+          <span
+            aria-hidden="true"
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#2a2a2a] bg-cover bg-center text-xs font-medium uppercase text-zinc-400"
+            style={
+              organization.avatarUrl
+                ? { backgroundImage: `url(${organization.avatarUrl})` }
+                : undefined
+            }
+          >
+            {!organization.avatarUrl && organization.name.charAt(0)}
+          </span>
           <div className="min-w-0">
             <span className="block break-words font-medium text-base text-white sm:text-lg">
               {organization.name}
@@ -53,7 +57,7 @@ export default function OssOrganizationPreviewCard({
           </p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="mt-auto flex flex-wrap items-center gap-1.5">
           {SHOW_ORGANIZATION_TAGS && (
             <Pill
               className="font-medium uppercase tracking-[0.18em]"

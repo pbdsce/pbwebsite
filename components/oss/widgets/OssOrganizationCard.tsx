@@ -23,13 +23,17 @@ export default function OssOrganizationCard({
     <div className="flex flex-col rounded-[16px] bg-[#1c1c1c] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.22)] sm:rounded-[20px] sm:p-5 md:p-6">
       <div className="mb-4 flex flex-col gap-3 sm:mb-6">
         <div className="flex min-w-0 items-start gap-3">
-          {organization.avatarUrl && (
-            <span
-              aria-hidden="true"
-              className="size-10 shrink-0 rounded-lg bg-cover bg-center"
-              style={{ backgroundImage: `url(${organization.avatarUrl})` }}
-            />
-          )}
+          <span
+            aria-hidden="true"
+            className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#2a2a2a] bg-cover bg-center text-sm font-medium uppercase text-zinc-400"
+            style={
+              organization.avatarUrl
+                ? { backgroundImage: `url(${organization.avatarUrl})` }
+                : undefined
+            }
+          >
+            {!organization.avatarUrl && organization.name.charAt(0)}
+          </span>
           <div className="min-w-0">
             <h3 className="break-words text-lg font-medium text-white sm:text-xl">
               {organization.name}

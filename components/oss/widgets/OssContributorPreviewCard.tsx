@@ -33,8 +33,8 @@ export default function OssContributorPreviewCard({
   const remainingCount = remainingOrganizations.length;
 
   return (
-    <div className="w-full rounded-[16px] bg-[#1c1c1c] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.22)] sm:rounded-[20px] sm:p-5">
-      <div className="flex flex-col gap-4">
+    <div className="flex h-[220px] w-full flex-col rounded-[16px] bg-[#1c1c1c] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.22)] sm:rounded-[20px] sm:p-5">
+      <div className="flex h-full flex-col gap-4">
         <div className="flex min-w-0 items-start gap-3 text-left">
           {contributor.avatarUrl && (
             <span
@@ -72,7 +72,7 @@ export default function OssContributorPreviewCard({
           </p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="mt-auto flex flex-wrap items-center gap-1.5">
           {sortedOrganizations.length === 0 ? (
             <Pill
               className="font-medium uppercase tracking-[0.14em]"

@@ -71,6 +71,14 @@ import { ensureOrgTagCache } from "@/lib/data/orgs";
 const VALID_TAGS      = new Set<OrgTag>(["gsoc", "lfx", "both", "none"]);
 const VALID_VIEWS     = new Set(["orgs", "stats", "contributors", "prs", "user"]);
 const VALID_PLATFORMS = new Set(["github", "gitlab"]);
+const GITLAB_ORIGIN = "https://gitlab.com";
+
+function normalizeExternalUrl(url?: string | null) {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("/")) return `${GITLAB_ORIGIN}${url}`;
+  return url;
+}
 
 export async function GET(req: NextRequest) {
     await ensureOrgTagCache();
@@ -192,11 +200,11 @@ export async function GET(req: NextRequest) {
           url: c.url,
           repo: c.repoFullName,
           mergedAt: c.mergedAt,
-          orgAvatar: c.orgAvatarUrl ?? "",
-          orgAvatarUrl: c.orgAvatarUrl ?? "",
-          orgUrl: c.orgHtmlUrl ?? "",
-          orgHtmlUrl: c.orgHtmlUrl ?? "",
-          userAvatarUrl: c.userAvatarUrl ?? "",
+          orgAvatar: normalizeExternalUrl(c.orgAvatarUrl),
+          orgAvatarUrl: normalizeExternalUrl(c.orgAvatarUrl),
+          orgUrl: normalizeExternalUrl(c.orgHtmlUrl),
+          orgHtmlUrl: normalizeExternalUrl(c.orgHtmlUrl),
+          userAvatarUrl: normalizeExternalUrl(c.userAvatarUrl),
         });
       }
 

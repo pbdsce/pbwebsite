@@ -4,6 +4,7 @@ import type { RawContribution } from "./types";
 
 const GITLAB_BASE  = "https://gitlab.com/api/v4";
 const GITLAB_TOKEN = process.env.GITLAB_TOKEN;
+const GITLAB_ORIGIN = "https://gitlab.com";
 
 export function gitlabHeaders(): HeadersInit {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -34,18 +35,56 @@ async function gitlabPaginate<T>(path: string, params: Record<string, string> = 
   return results;
 }
 
-interface GitLabUser     { id: number; username: string; }
+interface GitLabUser {
+  id: number;
+  username: string;
+  avatar_url?: string | null;
+  web_url?: string;
+}
 interface GitLabProject  {
   id: number;
   path_with_namespace: string;
-  namespace: { kind: "group" | "user"; path: string; avatar_url: string | null; web_url: string; };
+  namespace: {
+    id?: number;
+    kind: "group" | "user";
+    path: string;
+    full_path?: string;
+    avatar_url: string | null;
+    web_url: string;
+  };
   star_count: number;
   visibility: string;
   forked_from_project?: { id: number };
 }
 interface GitLabMR {
   title: string; web_url: string; merged_at: string | null;
-  author: { id: number; username: string };
+  author: { id: number; username: string; avatar_url?: string | null };
+}
+
+interface GitLabGroup {
+  avatar_url?: string | null;
+  web_url?: string;
+  full_path?: string;
+}
+
+const gitLabUserCache = new Map<number, GitLabUser | null>();
+const gitLabGroupCache = new Map<string, GitLabGroup | null>();
+
+async function fetchGitLabJson<T>(path: string): Promise<T | null> {
+  try {
+    const res = await fetch(`${GITLAB_BASE}${path}`, { headers: gitlabHeaders() });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+function normalizeGitLabUrl(url?: string | null): string {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("/")) return `${GITLAB_ORIGIN}${url}`;
+  return `${GITLAB_ORIGIN}/${url}`;
 }
 
 export async function resolveGitLabUserId(username: string): Promise<number | null> {
@@ -57,6 +96,55 @@ export async function resolveGitLabUserId(username: string): Promise<number | nu
     const users: GitLabUser[] = await res.json();
     return users.find((u) => u.username.toLowerCase() === username.toLowerCase())?.id ?? null;
   } catch { return null; }
+}
+
+async function getGitLabUser(userId: number): Promise<GitLabUser | null> {
+  if (gitLabUserCache.has(userId)) return gitLabUserCache.get(userId)!;
+  const user = await fetchGitLabJson<GitLabUser>(`/users/${userId}`);
+  gitLabUserCache.set(userId, user);
+  return user;
+}
+
+async function getGitLabGroup(
+  namespace: GitLabProject["namespace"],
+): Promise<GitLabGroup | null> {
+  const groupPath = namespace.full_path ?? namespace.path;
+  const cacheKey = namespace.id ? String(namespace.id) : groupPath;
+  if (gitLabGroupCache.has(cacheKey)) return gitLabGroupCache.get(cacheKey)!;
+
+  const group = namespace.id
+    ? await fetchGitLabJson<GitLabGroup>(`/groups/${namespace.id}`)
+    : await fetchGitLabJson<GitLabGroup>(`/groups/${encodeURIComponent(groupPath)}`);
+
+  gitLabGroupCache.set(cacheKey, group);
+  return group;
+}
+
+async function getNearestGitLabGroupAvatar(
+  namespace: GitLabProject["namespace"],
+): Promise<string> {
+  const namespaceAvatar = normalizeGitLabUrl(namespace.avatar_url);
+  if (namespaceAvatar) return namespaceAvatar;
+
+  const group = await getGitLabGroup(namespace);
+  const groupAvatar = normalizeGitLabUrl(group?.avatar_url);
+  if (groupAvatar) return groupAvatar;
+
+  const fullPath = group?.full_path ?? namespace.full_path;
+  if (!fullPath?.includes("/")) return "";
+
+  const pathParts = fullPath.split("/").filter(Boolean);
+  while (pathParts.length > 1) {
+    pathParts.pop();
+    const parentPath = pathParts.join("/");
+    const parentGroup = await fetchGitLabJson<GitLabGroup>(
+      `/groups/${encodeURIComponent(parentPath)}`,
+    );
+    const parentAvatar = normalizeGitLabUrl(parentGroup?.avatar_url);
+    if (parentAvatar) return parentAvatar;
+  }
+
+  return "";
 }
 
 function isValidGitLabRepo(project: GitLabProject, username: string, customOrgLinks: string[]): boolean {
@@ -93,6 +181,8 @@ export async function fetchGitLabMergedMRs(options: GitLabFetchOptions): Promise
 
   const results: RawContribution[] = [];
   const seenUrls = new Set<string>();
+  const gitLabUser = await getGitLabUser(gitlabUserId);
+  const fallbackUserAvatarUrl = normalizeGitLabUrl(gitLabUser?.avatar_url);
 
   let contributedProjects: GitLabProject[] = [];
   try {
@@ -107,6 +197,10 @@ export async function fetchGitLabMergedMRs(options: GitLabFetchOptions): Promise
 
   for (const project of contributedProjects) {
     if (!isValidGitLabRepo(project, username, customOrgLinks)) continue;
+
+    const group = await getGitLabGroup(project.namespace);
+    const orgAvatarUrl = await getNearestGitLabGroupAvatar(project.namespace);
+    const orgHtmlUrl = normalizeGitLabUrl(group?.web_url ?? project.namespace.web_url);
 
     const params: Record<string, string> = {
       author_id: String(gitlabUserId), state: "merged", scope: "all",
@@ -129,9 +223,10 @@ export async function fetchGitLabMergedMRs(options: GitLabFetchOptions): Promise
           memberName, username, platform: "gitlab",
           repoFullName: project.path_with_namespace,
           orgLogin:     project.namespace.path,
-          orgAvatarUrl: project.namespace.avatar_url ?? "",
-          orgHtmlUrl:   project.namespace.web_url,
+          orgAvatarUrl,
+          orgHtmlUrl,
           title:        mr.title,
+          userAvatarUrl: normalizeGitLabUrl(mr.author.avatar_url) || fallbackUserAvatarUrl,
           url:          mr.web_url,
           mergedAt:     mergedDate,
         });

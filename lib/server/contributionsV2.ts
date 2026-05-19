@@ -19,6 +19,15 @@ import {
 } from "./scrapers/gitlab";
 import type { RawContribution } from "./scrapers/types";
 
+const GITLAB_ORIGIN = "https://gitlab.com";
+
+function normalizeExternalUrl(url?: string | null): string {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("/")) return `${GITLAB_ORIGIN}${url}`;
+  return url;
+}
+
 function splitOrgLinks(links: string[]): {
   github: string[];
   gitlab: string[];
@@ -70,8 +79,8 @@ async function saveContributions(
       platform: org.platform,
       lastFetched: new Date(),
     };
-    if (org.avatarUrl) update.avatarUrl = org.avatarUrl;
-    if (org.htmlUrl) update.htmlUrl = org.htmlUrl;
+    if (org.avatarUrl) update.avatarUrl = normalizeExternalUrl(org.avatarUrl);
+    if (org.htmlUrl) update.htmlUrl = normalizeExternalUrl(org.htmlUrl);
  
     await Org.findOneAndUpdate(
       { login: org.login.toLowerCase(), platform: org.platform },
@@ -92,15 +101,15 @@ async function saveContributions(
       mergedAt:     c.mergedAt,
       tag:          getOrgTagSync(c.orgLogin),
       scrapedAt:    new Date(),
-      orgAvatarUrl: c.orgAvatarUrl ?? "",
-      orgHtmlUrl:   c.orgHtmlUrl   ?? "",
+      orgAvatarUrl: normalizeExternalUrl(c.orgAvatarUrl),
+      orgHtmlUrl:   normalizeExternalUrl(c.orgHtmlUrl),
     };
     if (c.desc != null && c.desc !== "") {
       setFields.desc = c.desc;
     }
 
     if (c.userAvatarUrl) {
-      setFields.userAvatarUrl = c.userAvatarUrl;
+      setFields.userAvatarUrl = normalizeExternalUrl(c.userAvatarUrl);
     }
  
     await Contribution.findOneAndUpdate(
@@ -285,14 +294,14 @@ export async function getOrgBreakdown(tagFilter?: string) {
       ...orgFields,
       descriptions,
       description: descriptions.find((desc: string) => desc?.trim()) ?? "",
-      orgAvatar:
+      orgAvatar: normalizeExternalUrl(
         orgFields.orgAvatar
-        ?? contributionOrgAvatars.find((url: string) => url?.trim())
-        ?? "",
-      orgUrl:
+        ?? contributionOrgAvatars.find((url: string) => url?.trim()),
+      ),
+      orgUrl: normalizeExternalUrl(
         orgFields.orgUrl
-        ?? contributionOrgUrls.find((url: string) => url?.trim())
-        ?? "",
+        ?? contributionOrgUrls.find((url: string) => url?.trim()),
+      ),
       tag: getOrgTagSync(org.orgLogin),
     };
   });
@@ -341,7 +350,7 @@ export async function getContributorStats(username?: string) {
         orgs: 1,
         platforms: 1,
         totalOrgs: { $size: "$orgs" },
-        userAvatarUrl: 1,
+      userAvatarUrl: 1,
         descriptions: 1,
       },
     },
@@ -350,6 +359,7 @@ export async function getContributorStats(username?: string) {
  
   return result.map((user: any) => ({
     ...user,
+    userAvatarUrl: normalizeExternalUrl(user.userAvatarUrl),
     description: user.descriptions?.find((desc: string) => desc?.trim()) ?? "",
     tags: user.orgs.map((org: string) => getOrgTagSync(org)),
   }));
@@ -399,11 +409,11 @@ export async function getMemberPRs(options: {
       url: contribution.url,
       mergedAt: contribution.mergedAt,
       tag: contribution.tag,
-      orgAvatar: contribution.orgAvatarUrl ?? "",
-      orgAvatarUrl: contribution.orgAvatarUrl ?? "",
-      orgUrl: contribution.orgHtmlUrl ?? "",
-      orgHtmlUrl: contribution.orgHtmlUrl ?? "",
-      userAvatarUrl: contribution.userAvatarUrl ?? "",
+      orgAvatar: normalizeExternalUrl(contribution.orgAvatarUrl),
+      orgAvatarUrl: normalizeExternalUrl(contribution.orgAvatarUrl),
+      orgUrl: normalizeExternalUrl(contribution.orgHtmlUrl),
+      orgHtmlUrl: normalizeExternalUrl(contribution.orgHtmlUrl),
+      userAvatarUrl: normalizeExternalUrl(contribution.userAvatarUrl),
     })),
     pagination: {
       page,
