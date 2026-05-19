@@ -5,7 +5,7 @@ import type { RawContribution } from "./types";
 const GITLAB_BASE  = "https://gitlab.com/api/v4";
 const GITLAB_TOKEN = process.env.GITLAB_TOKEN;
 
-function gitlabHeaders(): HeadersInit {
+export function gitlabHeaders(): HeadersInit {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (GITLAB_TOKEN) headers["PRIVATE-TOKEN"] = GITLAB_TOKEN;
   return headers;

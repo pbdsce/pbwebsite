@@ -187,9 +187,16 @@ export async function GET(req: NextRequest) {
 
         orgMap.get(key).prs.push({
           title: c.title,
+          description: c.desc ?? "",
+          desc: c.desc ?? "",
           url: c.url,
           repo: c.repoFullName,
           mergedAt: c.mergedAt,
+          orgAvatar: c.orgAvatarUrl ?? "",
+          orgAvatarUrl: c.orgAvatarUrl ?? "",
+          orgUrl: c.orgHtmlUrl ?? "",
+          orgHtmlUrl: c.orgHtmlUrl ?? "",
+          userAvatarUrl: c.userAvatarUrl ?? "",
         });
       }
 

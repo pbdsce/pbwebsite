@@ -8,7 +8,6 @@ import {
   type ContributionsContributorRow,
   type ContributionsOrganizationRow,
   type ContributionsStatsResponse,
-  type NormalizedOssContributor,
   type NormalizedOssData,
   type NormalizedOssOrganization,
 } from "@/lib/oss";

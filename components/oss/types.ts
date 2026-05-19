@@ -22,6 +22,8 @@ export interface OrgEntry {
   platforms: ContributionPlatform[];
   orgAvatar?: string;
   orgUrl?: string;
+  description?: string;
+  descriptions?: string[];
   tag: ContributionTag;
 }
 
@@ -39,6 +41,9 @@ export interface ContributorEntry {
   totalOrgs: number;
   orgs: string[];
   platforms: ContributionPlatform[];
+  userAvatarUrl?: string;
+  description?: string;
+  descriptions?: string[];
   tags: ContributionTag[];
 }
 
@@ -55,6 +60,8 @@ export interface OssOrganization {
   url?: string;
   platform?: ContributionPlatform;
   description?: string;
+  avatarUrl?: string;
+  descriptions?: string[];
   tag: ContributionTag;
   prCount: number;
   commitCount: number;
@@ -69,6 +76,7 @@ export interface OssContributorRef {
   login: string;
   url?: string;
   platform?: ContributionPlatform;
+  avatarUrl?: string;
 }
 
 export interface OssContributor {
@@ -78,6 +86,8 @@ export interface OssContributor {
   bio?: string;
   url?: string;
   platform?: ContributionPlatform;
+  avatarUrl?: string;
+  descriptions?: string[];
   prCount: number;
   totalContributions: number;
   /** Slim org references attached to this contributor */

@@ -7,6 +7,8 @@ export interface RawContribution {
     orgAvatarUrl: string;
     orgHtmlUrl:   string;
     title:        string;
+    desc?:        string;         
+    userAvatarUrl?: string;
     url:          string;
     mergedAt:     Date;
   }

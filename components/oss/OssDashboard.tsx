@@ -39,6 +39,9 @@ interface DashboardData {
   contributors: ContributorView[];
 }
 
+const EMPTY_ORGANIZATIONS: OrganizationView[] = [];
+const EMPTY_CONTRIBUTORS: ContributorView[] = [];
+
 function getPreferredPlatform(
   platforms: Array<"github" | "gitlab">,
 ): "github" | "gitlab" | undefined {
@@ -74,6 +77,8 @@ async function fetchDashboardData(endpoint: string): Promise<DashboardData> {
     url: org.orgUrl,
     platform: getPreferredPlatform(org.platforms),
     description: undefined,
+    avatarUrl: org.orgAvatar,
+    descriptions: org.descriptions ?? [],
     tag: org.tag,
     prCount: org.totalMergedPRs,
     // API doesn't expose commits per-org; default to 0
@@ -84,6 +89,8 @@ async function fetchDashboardData(endpoint: string): Promise<DashboardData> {
       name: loginToName.get(login) ?? login,
       login,
       platform: getPreferredPlatform(org.platforms),
+      avatarUrl: contributorsJson.data.find((c) => c.username === login)
+        ?.userAvatarUrl,
     })),
   }));
 
@@ -97,6 +104,7 @@ async function fetchDashboardData(endpoint: string): Promise<DashboardData> {
         prCount: o.prCount,
         url: o.url,
         platform: o.platform,
+        avatarUrl: o.avatarUrl,
       },
     ]),
   );
@@ -111,6 +119,8 @@ async function fetchDashboardData(endpoint: string): Promise<DashboardData> {
       ? `https://${getPreferredPlatform(c.platforms) === "gitlab" ? "gitlab.com" : "github.com"}/${c.username}`
       : undefined,
     platform: getPreferredPlatform(c.platforms),
+    avatarUrl: c.userAvatarUrl,
+    descriptions: c.descriptions ?? [],
     prCount: c.totalMergedPRs,
     totalContributions: c.totalMergedPRs,
     organizations: c.orgs.map((orgLogin) =>
@@ -169,8 +179,10 @@ export default function OssDashboard({ endpoint }: { endpoint: string }) {
 
   const query = searchQuery.trim().toLowerCase();
 
-  const organizations: OrganizationView[] = dashboardData?.organizations ?? [];
-  const contributors: ContributorView[] = dashboardData?.contributors ?? [];
+  const organizations: OrganizationView[] =
+    dashboardData?.organizations ?? EMPTY_ORGANIZATIONS;
+  const contributors: ContributorView[] =
+    dashboardData?.contributors ?? EMPTY_CONTRIBUTORS;
 
   const filteredAndSortedOrganizations = useMemo(() => {
     const results = organizations.filter((organization) => {

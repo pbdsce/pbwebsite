@@ -13,8 +13,8 @@ export interface IOrg extends Document {
 const OrgSchema = new Schema<IOrg>(
   {
     login: { type: String, required: true, lowercase: true, trim: true },
-    avatarUrl: { type: String, required: true },
-    htmlUrl: { type: String, required: true },
+    avatarUrl: { type: String, default: "" },
+    htmlUrl: { type: String, default: "" },
     platform: { type: String, enum: ["github", "gitlab"], default: "github" },
     lastFetched: { type: Date, default: Date.now },
   },

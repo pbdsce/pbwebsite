@@ -15,6 +15,10 @@ export interface IContribution extends Document {
   scrapedAt: Date;
   createdAt: Date;
   updatedAt: Date;
+  desc: string;           // was missing from interface
+  orgAvatarUrl: string;   // new
+  orgHtmlUrl: string;     // new
+  userAvatarUrl: string;
 }
 
 const ContributionSchema = new Schema<IContribution>(
@@ -25,6 +29,10 @@ const ContributionSchema = new Schema<IContribution>(
     repoFullName: { type: String, required: true },
     orgLogin: { type: String, required: true, index: true },
     title: { type: String, required: true },
+    desc:  { type: String, default: "" },
+    orgAvatarUrl: { type: String, default: "" },
+    orgHtmlUrl:   { type: String, default: "" }, 
+    userAvatarUrl: { type: String, default: "" },
     url: { type: String, required: true },
     mergedAt: { type: Date, required: true },
     tag: {

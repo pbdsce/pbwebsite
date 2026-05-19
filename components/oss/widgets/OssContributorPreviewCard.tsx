@@ -35,10 +35,18 @@ export default function OssContributorPreviewCard({
   return (
     <div className="w-full rounded-[16px] bg-[#1c1c1c] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.22)] sm:rounded-[20px] sm:p-5">
       <div className="flex flex-col gap-4">
-        <div className="min-w-0 text-left">
-          <span className="block break-words font-medium text-base leading-tight text-white sm:text-lg">
-            {contributor.name}
-          </span>
+        <div className="flex min-w-0 items-start gap-3 text-left">
+          {contributor.avatarUrl && (
+            <span
+              aria-hidden="true"
+              className="size-9 shrink-0 rounded-full bg-cover bg-center"
+              style={{ backgroundImage: `url(${contributor.avatarUrl})` }}
+            />
+          )}
+          <div className="min-w-0">
+            <span className="block break-words font-medium text-base leading-tight text-white sm:text-lg">
+              {contributor.name}
+            </span>
           {contributorUrl ? (
             <a
               href={contributorUrl}
@@ -62,6 +70,7 @@ export default function OssContributorPreviewCard({
               contributor.prCount,
             )}
           </p>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
           {sortedOrganizations.length === 0 ? (

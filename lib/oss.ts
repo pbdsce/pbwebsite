@@ -13,6 +13,8 @@ export interface OssOrganization {
   name: string;
   url?: string;
   description?: string;
+  avatarUrl?: string;
+  descriptions?: string[];
   prCount: number;
   commitCount: number;
   totalContributions: number;
@@ -28,6 +30,8 @@ export interface OssContributor {
   handle?: string;
   url?: string;
   bio?: string;
+  avatarUrl?: string;
+  descriptions?: string[];
   prCount: number;
   commitCount: number;
   totalContributions: number;
@@ -59,6 +63,8 @@ export interface ContributionsOrganizationRow {
   orgLogin: string;
   orgAvatar?: string;
   orgUrl?: string;
+  description?: string;
+  descriptions?: string[];
   totalMergedPRs: number;
   totalCommits: number;
   totalContributions: number;
@@ -69,6 +75,9 @@ export interface ContributionsOrganizationRow {
 
 export interface ContributionsContributorRow {
   username: string;
+  userAvatarUrl?: string;
+  description?: string;
+  descriptions?: string[];
   totalMergedPRs: number;
   totalCommits: number;
   totalContributions: number;
@@ -145,6 +154,9 @@ export function normalizeContributionsData(
       id,
       name: username,
       login: username,
+      bio: contributor.description,
+      avatarUrl: contributor.userAvatarUrl,
+      descriptions: contributor.descriptions ?? [],
       prCount: contributor.totalMergedPRs ?? 0,
       commitCount: contributor.totalCommits ?? 0,
       totalContributions: contributor.totalContributions ?? 0,
@@ -171,6 +183,9 @@ export function normalizeContributionsData(
       id,
       name: orgLogin,
       url: organization.orgUrl?.trim(),
+      description: organization.description,
+      avatarUrl: organization.orgAvatar,
+      descriptions: organization.descriptions ?? [],
       prCount: organization.totalMergedPRs ?? 0,
       commitCount: organization.totalCommits ?? 0,
       totalContributions: organization.totalContributions ?? 0,

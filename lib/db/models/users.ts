@@ -8,6 +8,7 @@ export interface User extends Document {
   customOrgLinks?: string[];
   createdAt: Date;
   updatedAt: Date;
+  avatarUrl?: string;
 }
 
 const UserSchema = new Schema<User>(
@@ -17,6 +18,7 @@ const UserSchema = new Schema<User>(
     gitlabUsername:  { type: String, default: null, index: true, sparse: true, unique: true },
     gitlabId:        { type: Number, default: null },
     customOrgLinks:  { type: [String], default: [] },
+    avatarUrl: { type: String, default: null },
   },
   { timestamps: true }
 );
