@@ -72,6 +72,13 @@ const VALID_TAGS      = new Set<OrgTag>(["gsoc", "lfx", "both", "none"]);
 const VALID_VIEWS     = new Set(["orgs", "stats", "contributors", "prs", "user"]);
 const VALID_PLATFORMS = new Set(["github", "gitlab"]);
 const GITLAB_ORIGIN = "https://gitlab.com";
+const POINT_BLANK_ORG_PATTERNS = [
+  /^point[-_\s]?blank$/i,
+  /^point[-_\s]?blank[-_\s]?club$/i,
+];
+const POINT_BLANK_ORG_EXCLUSION = {
+  $nor: POINT_BLANK_ORG_PATTERNS.map((pattern) => ({ orgLogin: pattern })),
+};
 
 function normalizeExternalUrl(url?: string | null) {
   if (!url) return "";
@@ -170,7 +177,7 @@ export async function GET(req: NextRequest) {
       await connectDB();
 
       const contributions = await Contribution.find(
-        { memberName: name },
+        { memberName: name, ...POINT_BLANK_ORG_EXCLUSION },
         { __v: 0 }
       ).lean();
 

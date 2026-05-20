@@ -20,12 +20,24 @@ import {
 import type { RawContribution } from "./scrapers/types";
 
 const GITLAB_ORIGIN = "https://gitlab.com";
+const POINT_BLANK_ORG_PATTERNS = [
+  /^point[-_\s]?blank$/i,
+  /^point[-_\s]?blank[-_\s]?club$/i,
+];
+const POINT_BLANK_ORG_EXCLUSION = {
+  $nor: POINT_BLANK_ORG_PATTERNS.map((pattern) => ({ orgLogin: pattern })),
+};
 
 function normalizeExternalUrl(url?: string | null): string {
   if (!url) return "";
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
   if (url.startsWith("/")) return `${GITLAB_ORIGIN}${url}`;
   return url;
+}
+
+function isPointBlankOrg(orgLogin?: string | null): boolean {
+  if (!orgLogin) return false;
+  return POINT_BLANK_ORG_PATTERNS.some((pattern) => pattern.test(orgLogin));
 }
 
 function splitOrgLinks(links: string[]): {
@@ -49,7 +61,11 @@ function splitOrgLinks(links: string[]): {
 async function saveContributions(
   contributions: RawContribution[]
 ): Promise<void> {
-  if (contributions.length === 0) return;
+  const eligibleContributions = contributions.filter(
+    (contribution) => !isPointBlankOrg(contribution.orgLogin),
+  );
+
+  if (eligibleContributions.length === 0) return;
  
   const orgsMap = new Map<
     string,
@@ -61,7 +77,7 @@ async function saveContributions(
     }
   >();
  
-  for (const c of contributions) {
+  for (const c of eligibleContributions) {
     const key = `${c.orgLogin.toLowerCase()}:${c.platform}`;
     if (!orgsMap.has(key)) {
       orgsMap.set(key, {
@@ -89,7 +105,7 @@ async function saveContributions(
     );
   }
  
-  for (const c of contributions) {
+  for (const c of eligibleContributions) {
     const setFields: Record<string, any> = {
       memberName:   c.memberName,
       username:     c.username,
@@ -120,7 +136,7 @@ async function saveContributions(
   }
  
   console.log(
-    `[DB] Saved ${contributions.length} contributions across ${orgsMap.size} orgs`
+    `[DB] Saved ${eligibleContributions.length} contributions across ${orgsMap.size} orgs`
   );
 }
 
@@ -241,6 +257,7 @@ export async function getOrgBreakdown(tagFilter?: string) {
   await connectDB();
 
   const result = await Contribution.aggregate([
+    { $match: POINT_BLANK_ORG_EXCLUSION },
     {
       $group: {
         _id: "$orgLogin",
@@ -320,7 +337,7 @@ export async function getContributorStats(username?: string) {
   if (username) matchStage.username = username;
  
   const result = await Contribution.aggregate([
-    { $match: matchStage },
+    { $match: { ...matchStage, ...POINT_BLANK_ORG_EXCLUSION } },
     {
       $group: {
         _id: "$memberName",
@@ -381,6 +398,7 @@ export async function getMemberPRs(options: {
   const skip = (page - 1) * limit;
 
   const query: Record<string, any> = {};
+  Object.assign(query, POINT_BLANK_ORG_EXCLUSION);
   if (options.memberName) query.memberName = options.memberName;
   if (options.username) query.username = options.username;
   if (options.orgLogin) query.orgLogin = options.orgLogin;
@@ -426,6 +444,7 @@ export async function getMemberPRs(options: {
 
   export async function getGlobalStats() {
     const stats = await Contribution.aggregate([
+      { $match: POINT_BLANK_ORG_EXCLUSION },
       {
         $group: {
           _id: null,
