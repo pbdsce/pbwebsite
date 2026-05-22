@@ -220,6 +220,11 @@ export default function Navbar() {
       name: "Hustle Results",
       href: "/hustle",
     },
+    {
+      name: "GitHub",
+      href: "https://github.com/pointblank-club",
+      ext: true,
+    },
   ];
 
   React.useEffect(() => {
