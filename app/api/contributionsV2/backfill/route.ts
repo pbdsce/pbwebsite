@@ -7,7 +7,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Run async, don't await — same pattern as your scrape route
   backfillDescriptions()
     .then(r => console.log("[Backfill] Done:", r))
     .catch(err => console.error("[Backfill] Error:", err));

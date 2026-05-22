@@ -88,8 +88,9 @@ function normalizeExternalUrl(url?: string | null) {
 }
 
 export async function GET(req: NextRequest) {
-    await ensureOrgTagCache();
   try {
+    await ensureOrgTagCache();
+
     const { searchParams } = new URL(req.url);
     const view = searchParams.get("view");
 
