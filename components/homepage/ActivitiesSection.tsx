@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { useState, useEffect } from "react";
 import FadeIn from "@/components/FadeIn";
 import hustleImg from "@/public/images/hustle.webp";
 import chroniclesImg from "@/public/images/chronicles.webp";
@@ -64,6 +63,15 @@ export default function ActivitiesSection() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 400);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <section id="activities" className="text-white px-4 sm:px-10 lg:px-20">
       <FadeIn className="text-center my-20">
@@ -81,7 +89,20 @@ export default function ActivitiesSection() {
                 <div className="self-stretch h-[277px] overflow-hidden rounded-t-[30px] rounded-b-[12px] shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
                   <Image src={img} alt={title} className="w-full h-full object-cover" draggable={false} />
                 </div>
+        {activities.map(({ title, tag, img, description }, i) => {
+          const displayTag = isMobile && tag === "PB Chronicles" ? "Chronicles" :
+                             isMobile && tag === "Smart India Hackathon" ? "SIH" :
+                             tag;
+          return (
+            <FadeIn key={i} delay={(i % 3) * 0.1} className="h-full">
+              <div className="inline-flex w-full h-full flex-col justify-start items-center gap-10 p-6 bg-[#1C1C1C] rounded-t-[54px] rounded-b-[16px] [outline:1px_solid_#262626] [outline-offset:-1px] transition-all duration-300">
+                <div className="self-stretch h-[277px] overflow-hidden rounded-t-[30px] rounded-b-[12px] shadow-[0_4px_4px_rgba(0,0,0,0.25)]">
+                  <Image src={img} alt={title} className="w-full h-full object-cover" draggable={false} />
+                </div>
 
+                <div className="self-stretch px-6 flex flex-col items-center gap-6">
+                  <div className="self-stretch flex items-start justify-between gap-3">
+                    <h3 className="text-white text-[20px] leading-[30px] font-lexend font-[400] break-words">{title}</h3>
                 <div className="self-stretch px-6 flex flex-col items-center gap-6">
                   <div className="self-stretch flex items-start justify-between gap-3">
                     <h3 className="text-white text-[20px] leading-[30px] font-lexend font-[400] break-words">{title}</h3>
@@ -93,6 +114,12 @@ export default function ActivitiesSection() {
                     </div>
                   </div>
 
+                  <p className="self-stretch text-[#B3B3B3] text-[16px] leading-[24px] font-lexend font-[300] break-words">{description}</p>
+                </div>
+              </div>
+            </FadeIn>
+          );
+        })}
                   <p className="self-stretch text-[#B3B3B3] text-[16px] leading-[24px] font-lexend font-[300] break-words">{description}</p>
                 </div>
               </div>
