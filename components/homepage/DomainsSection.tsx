@@ -9,16 +9,24 @@ import opensourceIcon from "@/public/images/icons/opensource.webp";
 import reactIcon from "@/public/images/icons/react.webp";
 import acmIcon from "@/public/images/icons/acm-icpc.webp";
 import flutterIcon from "@/public/images/icons/flutter.webp";
+import androidIcon from "@/public/images/icons/android.webp";
+import systemsIcon from "@/public/images/icons/systems.webp";
+import hackathonIcon from "@/public/images/icons/hackathon.webp";
+import cybersecurityIcon from "@/public/images/icons/Cybersecurity.webp";
 
 const domains = [
   { name: "DevOps", icon: devopsIcon },
-  { name: "IOT-ML", icon: iotIcon },
+  { name: "IOT-Hardware", icon: iotIcon },
   { name: "Kaggle", icon: kaggleIcon },
   { name: "ML-Research", icon: aimlIcon },
-  { name: "Open Source Hackathon", icon: opensourceIcon },
-  { name: "React Development", icon: reactIcon },
-  { name: "ACM - ICPC", icon: acmIcon },
-  { name: "Flutter Development", icon: flutterIcon },
+  { name: "Open Source", icon: opensourceIcon },
+  { name: "Web Development", icon: reactIcon },
+  { name: "Competitive Programming", icon: acmIcon },
+  { name: "App Development", icon: flutterIcon },
+  { name: "AOSP", icon: androidIcon },
+  { name: "Systems Engineering", icon: systemsIcon },
+  { name: "Hackathon", icon: hackathonIcon },
+  { name: "cybersecurity", icon: cybersecurityIcon },
 ];
 
 export default function DomainsSection() {
