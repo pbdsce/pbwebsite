@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getOrgTagSync } from "@/lib/data/orgs";
+import { normalizeExternalUrl } from "@/lib/server/contributionUtils";
 import type { RawContribution } from "./types";
 
 const GITLAB_BASE  = "https://gitlab.com/api/v4";
 const GITLAB_TOKEN = process.env.GITLAB_TOKEN;
-const GITLAB_ORIGIN = "https://gitlab.com";
 
 export function gitlabHeaders(): HeadersInit {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -80,13 +80,6 @@ async function fetchGitLabJson<T>(path: string): Promise<T | null> {
   }
 }
 
-function normalizeGitLabUrl(url?: string | null): string {
-  if (!url) return "";
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  if (url.startsWith("/")) return `${GITLAB_ORIGIN}${url}`;
-  return `${GITLAB_ORIGIN}/${url}`;
-}
-
 export async function resolveGitLabUserId(username: string): Promise<number | null> {
   try {
     const url = new URL(`${GITLAB_BASE}/users`);
@@ -108,7 +101,10 @@ async function getGitLabUser(userId: number): Promise<GitLabUser | null> {
 async function getGitLabGroup(
   namespace: GitLabProject["namespace"],
 ): Promise<GitLabGroup | null> {
-  const groupPath = namespace.full_path ?? namespace.path;
+  const groupPath =
+    namespace.full_path
+    ?? namespace.web_url?.replace(/^https:\/\/gitlab\.com\/groups\//, "")
+    ?? namespace.path;
   const cacheKey = namespace.id ? String(namespace.id) : groupPath;
   if (gitLabGroupCache.has(cacheKey)) return gitLabGroupCache.get(cacheKey)!;
 
@@ -117,30 +113,42 @@ async function getGitLabGroup(
     : await fetchGitLabJson<GitLabGroup>(`/groups/${encodeURIComponent(groupPath)}`);
 
   gitLabGroupCache.set(cacheKey, group);
+  if (group?.full_path) gitLabGroupCache.set(group.full_path, group);
+  return group;
+}
+
+async function getGitLabGroupByPath(groupPath: string): Promise<GitLabGroup | null> {
+  if (gitLabGroupCache.has(groupPath)) return gitLabGroupCache.get(groupPath)!;
+
+  const group = await fetchGitLabJson<GitLabGroup>(
+    `/groups/${encodeURIComponent(groupPath)}`,
+  );
+  gitLabGroupCache.set(groupPath, group);
   return group;
 }
 
 async function getNearestGitLabGroupAvatar(
   namespace: GitLabProject["namespace"],
 ): Promise<string> {
-  const namespaceAvatar = normalizeGitLabUrl(namespace.avatar_url);
+  const namespaceAvatar = normalizeExternalUrl(namespace.avatar_url);
   if (namespaceAvatar) return namespaceAvatar;
 
   const group = await getGitLabGroup(namespace);
-  const groupAvatar = normalizeGitLabUrl(group?.avatar_url);
+  const groupAvatar = normalizeExternalUrl(group?.avatar_url);
   if (groupAvatar) return groupAvatar;
 
-  const fullPath = group?.full_path ?? namespace.full_path;
+  const fullPath =
+    group?.full_path
+    ?? namespace.full_path
+    ?? namespace.web_url?.replace(/^https:\/\/gitlab\.com\/groups\//, "");
   if (!fullPath?.includes("/")) return "";
 
   const pathParts = fullPath.split("/").filter(Boolean);
   while (pathParts.length > 1) {
     pathParts.pop();
     const parentPath = pathParts.join("/");
-    const parentGroup = await fetchGitLabJson<GitLabGroup>(
-      `/groups/${encodeURIComponent(parentPath)}`,
-    );
-    const parentAvatar = normalizeGitLabUrl(parentGroup?.avatar_url);
+    const parentGroup = await getGitLabGroupByPath(parentPath);
+    const parentAvatar = normalizeExternalUrl(parentGroup?.avatar_url);
     if (parentAvatar) return parentAvatar;
   }
 
@@ -182,7 +190,7 @@ export async function fetchGitLabMergedMRs(options: GitLabFetchOptions): Promise
   const results: RawContribution[] = [];
   const seenUrls = new Set<string>();
   const gitLabUser = await getGitLabUser(gitlabUserId);
-  const fallbackUserAvatarUrl = normalizeGitLabUrl(gitLabUser?.avatar_url);
+  const fallbackUserAvatarUrl = normalizeExternalUrl(gitLabUser?.avatar_url);
 
   let contributedProjects: GitLabProject[] = [];
   try {
@@ -200,7 +208,7 @@ export async function fetchGitLabMergedMRs(options: GitLabFetchOptions): Promise
 
     const group = await getGitLabGroup(project.namespace);
     const orgAvatarUrl = await getNearestGitLabGroupAvatar(project.namespace);
-    const orgHtmlUrl = normalizeGitLabUrl(group?.web_url ?? project.namespace.web_url);
+    const orgHtmlUrl = normalizeExternalUrl(group?.web_url ?? project.namespace.web_url);
 
     const params: Record<string, string> = {
       author_id: String(gitlabUserId), state: "merged", scope: "all",
@@ -226,7 +234,7 @@ export async function fetchGitLabMergedMRs(options: GitLabFetchOptions): Promise
           orgAvatarUrl,
           orgHtmlUrl,
           title:        mr.title,
-          userAvatarUrl: normalizeGitLabUrl(mr.author.avatar_url) || fallbackUserAvatarUrl,
+          userAvatarUrl: normalizeExternalUrl(mr.author.avatar_url) || fallbackUserAvatarUrl,
           url:          mr.web_url,
           mergedAt:     mergedDate,
         });

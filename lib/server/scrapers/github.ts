@@ -296,7 +296,8 @@ try {
           orgAvatarUrl,
           orgHtmlUrl,
           title:    pr.title,
-          desc:     pr.body as string,
+          desc:     pr.body ?? "",
+          userAvatarUrl: pr.user?.avatar_url ?? "",
           url:      pr.html_url,
           mergedAt: new Date(mergedAt),
         });
@@ -406,7 +407,8 @@ export async function fetchGitHubMergedPRs(options: GitHubFetchOptions): Promise
             orgAvatarUrl: eff.owner.avatar_url,
             orgHtmlUrl:   `https://github.com/${eff.owner.login}`,
             title:        pr.title,
-            desc:         pr.body as string,
+            desc:         pr.body ?? "",
+            userAvatarUrl: pr.user?.avatar_url ?? "",
             url:          pr.html_url,
             mergedAt:     new Date(mergedAt),
           });

@@ -67,25 +67,14 @@ import connectDB from "@/lib/db/connection";
 import Contribution from "@/lib/db/models/contributionsV2";
 import type { OrgTag } from "@/lib/data/orgs";
 import { ensureOrgTagCache } from "@/lib/data/orgs";
+import {
+  normalizeExternalUrl,
+  POINT_BLANK_ORG_EXCLUSION,
+} from "@/lib/server/contributionUtils";
 
 const VALID_TAGS      = new Set<OrgTag>(["gsoc", "lfx", "both", "none"]);
 const VALID_VIEWS     = new Set(["orgs", "stats", "contributors", "prs", "user"]);
 const VALID_PLATFORMS = new Set(["github", "gitlab"]);
-const GITLAB_ORIGIN = "https://gitlab.com";
-const POINT_BLANK_ORG_PATTERNS = [
-  /^point[-_\s]?blank$/i,
-  /^point[-_\s]?blank[-_\s]?club$/i,
-];
-const POINT_BLANK_ORG_EXCLUSION = {
-  $nor: POINT_BLANK_ORG_PATTERNS.map((pattern) => ({ orgLogin: pattern })),
-};
-
-function normalizeExternalUrl(url?: string | null) {
-  if (!url) return "";
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  if (url.startsWith("/")) return `${GITLAB_ORIGIN}${url}`;
-  return url;
-}
 
 export async function GET(req: NextRequest) {
   try {

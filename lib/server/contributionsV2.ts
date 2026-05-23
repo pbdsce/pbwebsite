@@ -18,27 +18,12 @@ import {
   gitlabHeaders,   
 } from "./scrapers/gitlab";
 import type { RawContribution } from "./scrapers/types";
-
-const GITLAB_ORIGIN = "https://gitlab.com";
-const POINT_BLANK_ORG_PATTERNS = [
-  /^point[-_\s]?blank$/i,
-  /^point[-_\s]?blank[-_\s]?club$/i,
-];
-const POINT_BLANK_ORG_EXCLUSION = {
-  $nor: POINT_BLANK_ORG_PATTERNS.map((pattern) => ({ orgLogin: pattern })),
-};
-
-function normalizeExternalUrl(url?: string | null): string {
-  if (!url) return "";
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  if (url.startsWith("/")) return `${GITLAB_ORIGIN}${url}`;
-  return url;
-}
-
-function isPointBlankOrg(orgLogin?: string | null): boolean {
-  if (!orgLogin) return false;
-  return POINT_BLANK_ORG_PATTERNS.some((pattern) => pattern.test(orgLogin));
-}
+import {
+  isPointBlankOrg,
+  nonEmptyStrings,
+  normalizeExternalUrl,
+  POINT_BLANK_ORG_EXCLUSION,
+} from "@/lib/server/contributionUtils";
 
 function splitOrgLinks(links: string[]): {
   github: string[];
@@ -120,17 +105,22 @@ async function saveContributions(
       orgAvatarUrl: normalizeExternalUrl(c.orgAvatarUrl),
       orgHtmlUrl:   normalizeExternalUrl(c.orgHtmlUrl),
     };
-    if (c.desc != null && c.desc !== "") {
-      setFields.desc = c.desc;
+    const setOnInsert: Record<string, any> = {
+      desc: "",
+      userAvatarUrl: "",
+    };
+
+    if (c.desc !== undefined) {
+      setFields.desc = c.desc ?? "";
     }
 
-    if (c.userAvatarUrl) {
+    if (c.userAvatarUrl !== undefined) {
       setFields.userAvatarUrl = normalizeExternalUrl(c.userAvatarUrl);
     }
  
     await Contribution.findOneAndUpdate(
       { username: c.username, url: c.url },
-      { $set: setFields },
+      { $set: setFields, $setOnInsert: setOnInsert },
       { upsert: true }
     );
   }
@@ -305,12 +295,12 @@ export async function getOrgBreakdown(tagFilter?: string) {
       contributionOrgUrls = [],
       ...orgFields
     } = org;
-    const descriptions = orgFields.descriptions ?? [];
+    const descriptions = nonEmptyStrings(orgFields.descriptions ?? []);
 
     return {
       ...orgFields,
       descriptions,
-      description: descriptions.find((desc: string) => desc?.trim()) ?? "",
+      description: descriptions[0] ?? "",
       orgAvatar: normalizeExternalUrl(
         orgFields.orgAvatar
         ?? contributionOrgAvatars.find((url: string) => url?.trim()),
@@ -367,19 +357,24 @@ export async function getContributorStats(username?: string) {
         orgs: 1,
         platforms: 1,
         totalOrgs: { $size: "$orgs" },
-      userAvatarUrl: 1,
+        userAvatarUrl: 1,
         descriptions: 1,
       },
     },
     { $sort: { totalMergedPRs: -1 } },
   ]);
  
-  return result.map((user: any) => ({
-    ...user,
-    userAvatarUrl: normalizeExternalUrl(user.userAvatarUrl),
-    description: user.descriptions?.find((desc: string) => desc?.trim()) ?? "",
-    tags: user.orgs.map((org: string) => getOrgTagSync(org)),
-  }));
+  return result.map((user: any) => {
+    const descriptions = nonEmptyStrings(user.descriptions ?? []);
+
+    return {
+      ...user,
+      userAvatarUrl: normalizeExternalUrl(user.userAvatarUrl),
+      descriptions,
+      description: descriptions[0] ?? "",
+      tags: user.orgs.map((org: string) => getOrgTagSync(org)),
+    };
+  });
 }
 
 export async function getMemberPRs(options: {
@@ -443,6 +438,7 @@ export async function getMemberPRs(options: {
 }
 
   export async function getGlobalStats() {
+    await connectDB();
     const stats = await Contribution.aggregate([
       { $match: POINT_BLANK_ORG_EXCLUSION },
       {

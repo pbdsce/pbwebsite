@@ -69,6 +69,9 @@ async function fetchDashboardData(endpoint: string): Promise<DashboardData> {
   const loginToName = new Map<string, string>(
     contributorsJson.data.map((c) => [c.username, c.memberName]),
   );
+  const loginToAvatarUrl = new Map<string, string | undefined>(
+    contributorsJson.data.map((c) => [c.username, c.userAvatarUrl]),
+  );
 
   // Normalize organizations
   const organizations: OrganizationView[] = orgsJson.data.map((org) => ({
@@ -89,8 +92,7 @@ async function fetchDashboardData(endpoint: string): Promise<DashboardData> {
       name: loginToName.get(login) ?? login,
       login,
       platform: getPreferredPlatform(org.platforms),
-      avatarUrl: contributorsJson.data.find((c) => c.username === login)
-        ?.userAvatarUrl,
+      avatarUrl: loginToAvatarUrl.get(login),
     })),
   }));
 

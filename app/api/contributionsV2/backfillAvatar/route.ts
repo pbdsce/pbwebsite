@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { backfillOrgAndUserAvatars } from "@/lib/server/contributionsV2";
 
-// POST /api/admin/backfill-avatars?key=<SCRAPE_SECRET>
+// POST /api/contributionsV2/backfillAvatar?key=<SCRAPE_SECRET>
 // Fills orgAvatarUrl, orgHtmlUrl, and userAvatarUrl on existing contributions
 export async function POST(req: NextRequest) {
   const key = req.nextUrl.searchParams.get("key");
