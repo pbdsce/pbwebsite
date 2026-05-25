@@ -352,6 +352,7 @@ export default function Members(props: { members: Member[] }) {
                             onDelete={() => setDeleteTarget(profile)}
                             isFlipped={flippedId === profile._id}
                             onFlip={() => handleFlip(profile._id)}
+                            isAlumni={heading === "Alumni"}
                           />
                         ))}
                     </div>
