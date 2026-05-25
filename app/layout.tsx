@@ -4,6 +4,7 @@ import Navbar from "@/components/ui/Navbar";
 import AuthInitializer from "@/components/AuthInitializer";
 import { Lexend } from "next/font/google";
 import { GoogleTagManager } from "@next/third-parties/google";
+import { Analytics } from "@hellyeah/x-ray/next";
 
 import Footer from "@/components/ui/Footer";
 import { cookies } from "next/headers";
@@ -42,6 +43,11 @@ export default async function RootLayout({
       )}
 
       <body className={`bg-pbpages ${lexand.className}`}>
+        <Analytics
+          websiteId={process.env.NEXT_PUBLIC_HELLYEAH_TRACKER_ID as string}
+          env={process.env.NEXT_PUBLIC_HELLYEAH_TRACKER_ENV}
+          domains="www.pointblank.club"
+        />
         <AuthInitializer
           authenticated={!!user}
           email={user?.email ?? null}

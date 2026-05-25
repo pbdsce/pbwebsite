@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import FadeIn from "@/components/FadeIn";
 import { Share2, NotebookText } from "lucide-react";
 import { Bulb, GitHub, HireUs, YouTube } from "@/components/Icons";
+import { track } from "@hellyeah/x-ray";
 
 const DASHED_H =
   "bg-[repeating-linear-gradient(to_right,#262626_0px,#262626_8px,transparent_8px,transparent_20px)]";
@@ -24,6 +27,7 @@ function ConnectCard({
   description,
   rounded,
   delay = 0,
+  trackTarget,
 }: {
   href: string;
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
@@ -31,6 +35,7 @@ function ConnectCard({
   description: string;
   rounded: string;
   delay?: number;
+  trackTarget?: string;
 }) {
   return (
     <FadeIn delay={delay} className="flex-1 flex flex-col min-w-0">
@@ -38,6 +43,15 @@ function ConnectCard({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={
+          trackTarget
+            ? () =>
+                track("outbound_link_clicked", {
+                  target: trackTarget,
+                  surface: "homepage_stay_connected",
+                })
+            : undefined
+        }
         className={`relative z-10 flex flex-col items-center p-6 lg:p-10 gap-6 flex-1 cursor-pointer ${CARD_HOVER} ${CARD_BG} ${rounded}`}
       >
         <div className="flex items-center gap-3.5 w-full">
@@ -97,6 +111,7 @@ export default function StayConnectedSection() {
               title="Hire Us"
               description="Let's discuss how we can bring your ideas to life and help your business succeed with our expertise."
               rounded="rounded-tl-[40px] rounded-tr-[14px] rounded-br-[40px] rounded-bl-[14px]"
+              trackTarget="careers"
             />
 
             <div className={`lg:hidden h-px w-full my-4 ${DASHED_H}`} />
@@ -111,6 +126,7 @@ export default function StayConnectedSection() {
               description="Follow us across all our social platforms to stay updated with events, releases and community highlights."
               rounded="rounded-[14px]"
               delay={0.1}
+              trackTarget="linktree"
             />
 
             <div className={`lg:hidden h-px w-full my-4 ${DASHED_H}`} />
@@ -125,6 +141,7 @@ export default function StayConnectedSection() {
               description="Explore stories and experiences shared by our members on their tech journey and community adventures."
               rounded="rounded-tl-[14px] rounded-tr-[40px] rounded-br-[14px] rounded-bl-[40px]"
               delay={0.2}
+              trackTarget="blog"
             />
           </div>
 
@@ -153,6 +170,7 @@ export default function StayConnectedSection() {
               description="We upload event recaps, fun activities and vibes of mixtapes on YouTube. Check it out now!"
               rounded="rounded-[14px]"
               delay={0.2}
+              trackTarget="youtube"
             />
 
             <div className={`lg:hidden h-px w-full my-4 ${DASHED_H}`} />
@@ -167,6 +185,7 @@ export default function StayConnectedSection() {
               description="Meet the amazing contributors who have helped shape this project with their dedication and hard work."
               rounded="rounded-tl-[40px] rounded-tr-[14px] rounded-br-[40px] rounded-bl-[14px]"
               delay={0.3}
+              trackTarget="github"
             />
           </div>
         </div>
