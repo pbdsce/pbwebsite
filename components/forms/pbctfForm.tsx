@@ -42,10 +42,15 @@ const PBCTFForm: React.FC = () => {
   } = useForm<FormData>();
 
   const getRecaptcha = async () => {
+    if (!window.grecaptcha?.enterprise) return;
+  
     window.grecaptcha.enterprise.ready(async () => {
-      const Rtoken = await window.grecaptcha.enterprise.execute(
-        process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
-      );
+      const Rtoken =
+        await window.grecaptcha.enterprise.execute(
+          process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!,
+          { action: "submit" }
+        );
+  
       setToken(Rtoken);
     });
   };

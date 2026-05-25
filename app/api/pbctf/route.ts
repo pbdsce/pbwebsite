@@ -5,6 +5,21 @@ import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
+
+type ParticipantInput = {
+    name: string;
+    email: string;
+    age: string;
+    phone: string;
+    gender: string;
+    experienceLevel: string;
+    previousCTF: string;
+    ctfNames?: string;
+    affiliation: string;
+    affiliationName: string;
+    howDidYouHear?: string;
+  };
+
 /**
  * @swagger
  * /api/registrations:
@@ -614,7 +629,7 @@ async function addRegistration(request: Request) {
       );
     }
 
-    const transformParticipant = (p: unknown) => {
+    const transformParticipant = (p: ParticipantInput) => {
       if (!p) return undefined;
 
       return {
