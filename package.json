@@ -10,6 +10,10 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "react-hot-toast": "^2.4.1",
+    "react-hook-form": "^7.53.0",
+    "@upstash/ratelimit": "^2.0.5",
+    "@upstash/redis": "^1.35.1",
     "@hellyeah/x-ray": "^1.0.0",
     "@mendable/firecrawl-js": "^4.21.0",
     "@next/third-parties": "^16.2.4",

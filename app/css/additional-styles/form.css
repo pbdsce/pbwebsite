@@ -1,0 +1,72 @@
+.form-container {
+    width: min(600px, 100%);
+    background: transparent;
+  }
+  
+  .form-container select {
+    background-color: black;
+  }
+  
+  .form-container select option {
+    color: white;
+    outline: none;
+    width: min(200px, 100%);
+    height: fit-content;
+  }
+  
+  .form-container button {
+    border-radius: 0.5rem;
+  }
+  
+  .container {
+    width: 100%;
+    background: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .container .title {
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: fit-content;
+  }
+  
+  .container .title h1 {
+    color: #fff;
+    -webkit-animation: mainFadeIn 2s forwards;
+    -o-animation: mainFadeIn 2s forwards;
+    animation: mainFadeIn 2s forwards;
+    animation-delay: 1s;
+    opacity: 0;
+    display: flex;
+    align-items: baseline;
+    position: relative;
+  }
+  
+  @keyframes mainBlock {
+    0% {
+      width: 0%;
+      left: 0;
+    }
+    50% {
+      width: 100%;
+      left: 0;
+    }
+    100% {
+      width: 0;
+      left: 100%;
+    }
+  }
+  
+  @keyframes mainFadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  
