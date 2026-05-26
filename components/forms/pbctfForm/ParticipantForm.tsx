@@ -19,6 +19,13 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
 }) => {
   const watchPreviousCTF = watch(`participant${participantNumber}.previousCTF`);
   const watchEmail = watch(`participant${participantNumber}.email`);
+  const participant1Email = watch("participant1.email");
+  const normalizedEmail = watchEmail?.trim().toLowerCase();
+  const normalizedParticipant1Email = participant1Email?.trim().toLowerCase();
+  const isDuplicateTeamEmail =
+    participantNumber === 2 &&
+    Boolean(normalizedEmail) &&
+    normalizedEmail === normalizedParticipant1Email;
   
   // Separate loading states
   const [isSendingOTP, setIsSendingOTP] = useState(false);
@@ -84,6 +91,10 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
     }
     if (!validateEmail(watchEmail)) {
       setOtpError('Please enter a valid email address');
+      return;
+    }
+    if (isDuplicateTeamEmail) {
+      setOtpError("Team member email cannot be the same as team leader email");
       return;
     }
     setIsSendingOTP(true);

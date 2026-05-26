@@ -291,7 +291,7 @@ const PBCTFForm: React.FC = () => {
       if (
         data.participationType === "duo" &&
         data.participant2 &&
-        data.participant1.email === data.participant2.email
+        data.participant1.email.trim().toLowerCase() === data.participant2.email.trim().toLowerCase()
       ) {
         setEmailError("Email addresses for Participant 1 and Participant 2 cannot be the same");
         setIsSubmitting(false);
