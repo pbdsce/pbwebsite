@@ -1,14 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const PBCTF_RULES_CONTENT = `PBCTF 4.0 – Official Rule Book
+const PBCTF_RULES_CONTENT = `PBCTF 5.0 – Official Rule Book
 Organized by Point Blank
-Dayananda Sagar College of Engineering
 
 📅 Event Details
-• Date: August 2nd, 2025
+• Date: TBD
 • Time: 9:00 AM – 5:00 PM (8 hours)
-• Venue: Computer Science & Engineering Block, Dayananda Sagar College of Engineering
-• Address: Shavige Malleshwara Hills, Kumaraswamy Layout, Bengaluru – 560078
+• Venue: TBD
+• Address: TBD
 • Format: Jeopardy-style Capture The Flag (CTF)
 • Team Size: Solo or Duo (maximum 2 participants per team)
 • Eligibility: Open to all participants
@@ -16,7 +15,7 @@ Dayananda Sagar College of Engineering
 • Prizes: Cash prizes for top 3 teams/individuals (details to be announced)
 
 🏆 Competition Format
-PBCTF 4.0 is a Jeopardy-style Capture The Flag competition where participants solve cybersecurity challenges across various categories to earn points. Challenges increase in difficulty and point value, with flags being validated automatically upon submission.
+PBCTF 5.0 is a Jeopardy-style Capture The Flag competition where participants solve cybersecurity challenges across various categories to earn points. Challenges increase in difficulty and point value, with flags being validated automatically upon submission.
 
 👥 Registration & Eligibility
 • Open to all participants regardless of experience level
@@ -41,7 +40,7 @@ Team Formation & Participation
 3. Team members must register together and compete under one team name
 
 Challenge Guidelines
-4. All challenges hosted on the official PBCTF CTFd platform
+4. All challenges hosted on the official PBCTF CTF platform
 5. Flags are auto-validated upon submission
 6. Points are awarded instantly for correct submissions
 7. Final scores calculated as cumulative points from all solved challenges
@@ -142,7 +141,7 @@ Tips for Success
 
 Good luck to all participants! May the best team win!
 
-Organized by Point Blank, Dayananda Sagar College of Engineering
+Organized by Point Blank.
 For the latest updates, join our WhatsApp support group`;
 
 interface RulesModalProps {
