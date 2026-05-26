@@ -244,6 +244,17 @@ const PBCTFForm: React.FC = () => {
     }
   };
 
+  const getRecaptchaErrorMessage = (error?: string, message?: string) => {
+    if (error === "EXPIRED") {
+      return "reCAPTCHA expired. Please click Complete Registration again.";
+    }
+
+    if (error?.toLowerCase().includes("invalid")) {
+      return "reCAPTCHA verification failed. Please refresh the page and try again.";
+    }
+
+    return message || error || "reCAPTCHA validation failed. Please try again.";
+  };
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     if (isSubmitting) return;
@@ -284,7 +295,7 @@ const PBCTFForm: React.FC = () => {
       const res = response1Text ? JSON.parse(response1Text) : {};
 
       if (!response1.ok || res.error) {
-        toast.error(res.message || res.error || "reCAPTCHA validation failed.");
+        toast.error(getRecaptchaErrorMessage(res.error, res.message));
         return;
       }
 
