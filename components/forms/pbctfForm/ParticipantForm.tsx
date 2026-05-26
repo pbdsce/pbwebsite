@@ -90,7 +90,7 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
     setOtpError('');
     setOtpSuccess('');
     try {
-      const response = await fetch('/api/registration/pbctf/?action=sendOTP', {
+      const response = await fetch('/api/pbctf/?action=sendOTP', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -128,7 +128,7 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
     setOtpError('');
     setOtpSuccess('');
     try {
-      const response = await fetch('/api/registration/pbctf/?action=verifyOTP', {
+      const response = await fetch('/api/pbctf/?action=verifyOTP', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -283,47 +283,95 @@ export async function POST(request: Request) {
  *                   example: "reCAPTCHA token not found! Try again"
  */
 async function validateRecaptcha(request: Request) {
-  const formData = await request.json();
-  const { recaptcha_token } = formData;
+  try {
+    const formData = await request.json();
+    const { recaptcha_token } = formData;
 
-  const recaptchaToken = recaptcha_token;
+    if (!recaptcha_token) {
+      return NextResponse.json(
+        {
+          message: "reCAPTCHA token not found! Try again",
+          error: "reCAPTCHA token not found!",
+        },
+        { status: 400 }
+      );
+    }
 
-  const details = {
-    event: {
-      token: recaptchaToken,
-      siteKey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
-    },
-  };
+    if (
+      !process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ||
+      !process.env.RECAPTCHA_PROJECT ||
+      !process.env.RECAPTCHA_API_KEY
+    ) {
+      return NextResponse.json(
+        {
+          message: "reCAPTCHA is not configured on the server.",
+          error: "Missing reCAPTCHA environment variables",
+        },
+        { status: 500 }
+      );
+    }
 
-  if (!recaptchaToken) {
-    return NextResponse.json(
-      {
-        message: "reCAPTCHA token not found! Try again",
-        error: "reCAPTCHA token not found!",
+    const details = {
+      event: {
+        token: recaptcha_token,
+        siteKey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
       },
+    };
+
+    const recaptchaResponse = await fetch(
+      `https://recaptchaenterprise.googleapis.com/v1/projects/${process.env.RECAPTCHA_PROJECT}/assessments?key=${process.env.RECAPTCHA_API_KEY}`,
       {
-        status: 500,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(details),
       }
     );
-  }
 
-  const recaptchaResponse = await fetch(
-    `https://recaptchaenterprise.googleapis.com/v1/projects/${process.env.RECAPTCHA_PROJECT}/assessments?key=${process.env.RECAPTCHA_API_KEY}`,
-    {
-      method: "POST",
-      body: JSON.stringify(details),
+    const recaptchaResult = await recaptchaResponse.json();
+    if (!recaptchaResponse.ok) {
+      console.error("reCAPTCHA API error:", recaptchaResult);
+      return NextResponse.json(
+        {
+          message: "reCAPTCHA validation failed.",
+          error: recaptchaResult.error?.message || "Google reCAPTCHA API error",
+        },
+        { status: 500 }
+      );
     }
-  );
 
-  const recaptchaResult = await recaptchaResponse.json();
-  if (recaptchaResult.riskAnalysis.score < 0.7) {
-    return NextResponse.json({
-      message: "reCAPTCHA validation failed",
-      error: recaptchaResult["error-codes"],
-    });
+    if (!recaptchaResult.tokenProperties?.valid) {
+      return NextResponse.json(
+        {
+          message: "reCAPTCHA token is invalid.",
+          error: recaptchaResult.tokenProperties?.invalidReason || "Invalid token",
+        },
+        { status: 400 }
+      );
+    }
+
+    if ((recaptchaResult.riskAnalysis?.score ?? 0) < 0.7) {
+      return NextResponse.json(
+        {
+          message: "reCAPTCHA validation failed.",
+          error: "Low reCAPTCHA score",
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json({ message: "Recaptcha validated!" });
+  } catch (error) {
+    console.error("Error validating reCAPTCHA:", error);
+    return NextResponse.json(
+      {
+        message: "reCAPTCHA validation failed.",
+        error: "Internal Server Error",
+      },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json({ message: "Recaptcha validated!" });
 }
 
 /**
@@ -421,7 +469,7 @@ async function sendOTP(request: Request) {
       )
     ]);
     const transporter = nodemailer.createTransport({
-      host: 'server.hosting3.acm.org',
+      host: process.env.MAIL_SMTP,
       port: 465,
       secure: true,
       auth: {
@@ -450,6 +498,7 @@ async function sendOTP(request: Request) {
     );
 
   } catch (error: unknown) {
+    console.error("Error sending PBCTF OTP:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

@@ -219,7 +219,7 @@ const PBCTFForm: React.FC = () => {
   const checkEmailUniqueness = async (email: string): Promise<boolean> => {
     if (!email) return false;
     try {
-      const resp = await fetch(`/api/registration/pbctf?identifier=${email}`);
+      const resp = await fetch(`/api/pbctf?identifier=${email}`);
       const data = await resp.json();
       return Boolean(data.isUnique);
     } catch (error) {
@@ -231,7 +231,7 @@ const PBCTFForm: React.FC = () => {
   const checkPhoneUniqueness = async (phone: string): Promise<boolean> => {
     if (!phone) return false;
     try {
-      const resp = await fetch(`/api/registration/pbctf?identifier=${phone}`);
+      const resp = await fetch(`/api/pbctf?identifier=${phone}`);
       const data = await resp.json();
       return Boolean(data.isUnique);
     } catch (error) {
@@ -260,77 +260,89 @@ const PBCTFForm: React.FC = () => {
       }
 
       const recaptcha_token = token;
-      if (recaptcha_token) {
-        const response1 = await fetch(
-          "/api/registration/pbctf?action=validateRecaptcha",
-          {
-            method: "POST",
-            body: JSON.stringify({ recaptcha_token }),
-          }
-        );
-
-        const res = await response1.json();
-
-        if (!response1.ok || res.error) {
-          toast.error(res.message);
-          return;
-        }
-
-        if (
-          data.participationType === "duo" &&
-          data.participant2 &&
-          data.participant1.email === data.participant2.email
-        ) {
-          setEmailError("Email addresses for Participant 1 and Participant 2 cannot be the same");
-          setIsSubmitting(false);
-          return;
-        }
-
-        const isUnique1 = await checkEmailUniqueness(data.participant1.email);
-        if (!isUnique1) {
-          setEmailError("Email for Participant 1 already exists");
-          setIsSubmitting(false);
-          return;
-        }
-        const isPhoneUnique1 = await checkPhoneUniqueness(data.participant1.phone);
-        if (!isPhoneUnique1) {
-          setEmailError("Phone number for Participant 1 already exists");
-          setIsSubmitting(false);
-          return;
-        }
-
-        if (data.participationType === "duo" && data.participant2) {
-          const isUnique2 = await checkEmailUniqueness(data.participant2.email);
-          if (!isUnique2) {
-            setEmailError("Email for Participant 2 already exists");
-            setIsSubmitting(false);
-            return;
-          }
-          const isPhoneUnique2 = await checkPhoneUniqueness(data.participant2.phone);
-          if (!isPhoneUnique2) {
-            setEmailError("Phone number for Participant 2 already exists");
-            setIsSubmitting(false);
-            return;
-          }
-        }
-
-        const response2 = await fetch(
-          "/api/registration/pbctf?action=addRegistration",
-          {
-            method: "POST",
-            body: JSON.stringify(data),
-          }
-        );
-
-        const result = await response2.json();
-        if (!response2.ok) {
-          toast.error(result.error || "Failed to submit registration.");
-          return;
-        }
-        setSuccess(true);
+      if (!recaptcha_token) {
+        toast.error("reCAPTCHA is not ready yet. Please wait a moment and try again.");
+        return;
       }
+
+      const response1 = await fetch(
+        "/api/pbctf?action=validateRecaptcha",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ recaptcha_token }),
+        }
+      );
+
+      const response1Text = await response1.text();
+      const res = response1Text ? JSON.parse(response1Text) : {};
+
+      if (!response1.ok || res.error) {
+        toast.error(res.message || res.error || "reCAPTCHA validation failed.");
+        return;
+      }
+
+      if (
+        data.participationType === "duo" &&
+        data.participant2 &&
+        data.participant1.email === data.participant2.email
+      ) {
+        setEmailError("Email addresses for Participant 1 and Participant 2 cannot be the same");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const isUnique1 = await checkEmailUniqueness(data.participant1.email);
+      if (!isUnique1) {
+        setEmailError("Email for Participant 1 already exists");
+        setIsSubmitting(false);
+        return;
+      }
+      const isPhoneUnique1 = await checkPhoneUniqueness(data.participant1.phone);
+      if (!isPhoneUnique1) {
+        setEmailError("Phone number for Participant 1 already exists");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (data.participationType === "duo" && data.participant2) {
+        const isUnique2 = await checkEmailUniqueness(data.participant2.email);
+        if (!isUnique2) {
+          setEmailError("Email for Participant 2 already exists");
+          setIsSubmitting(false);
+          return;
+        }
+        const isPhoneUnique2 = await checkPhoneUniqueness(data.participant2.phone);
+        if (!isPhoneUnique2) {
+          setEmailError("Phone number for Participant 2 already exists");
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      const response2 = await fetch(
+        "/api/pbctf?action=addRegistration",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      const response2Text = await response2.text();
+      const result = response2Text ? JSON.parse(response2Text) : {};
+      if (!response2.ok) {
+        toast.error(result.error || "Failed to submit registration.");
+        return;
+      }
+      setSuccess(true);
     } catch (error) {
       console.error("Error submitting form:", error);
+      toast.error("Something went wrong while submitting. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
