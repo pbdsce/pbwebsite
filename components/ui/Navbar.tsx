@@ -224,6 +224,10 @@ export default function Navbar() {
       name: "Hustle Results",
       href: "/hustle",
     },
+    {
+      name: "PBCTF 5.0",
+      href: "/pbctf",
+    }
   ];
 
   React.useEffect(() => {
