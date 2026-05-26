@@ -9,7 +9,6 @@ import nodemailer from "nodemailer";
 type ParticipantInput = {
     name: string;
     email: string;
-    age: string;
     phone: string;
     gender: string;
     experienceLevel: string;
@@ -434,9 +433,9 @@ async function sendOTP(request: Request) {
     await transporter.sendMail({
       from: `"CTF Registration" <${process.env.MAIL_USER}>`,
       to: email,
-      subject: `[PBCTF 4.0] Email Verification OTP: ${otp}`,
+      subject: `[PBCTF 5.0] Email Verification OTP: ${otp}`,
       text: `
-      Your OTP for PBCTF 4.0 is:
+      Your OTP for PBCTF 5.0 is:
 
       >>> ${otp} <
 
@@ -635,7 +634,6 @@ async function addRegistration(request: Request) {
       return {
         name: p.name,
         email: p.email,
-        age: parseInt(p.age),
         phone: p.phone,
         gender: p.gender,
         background: {

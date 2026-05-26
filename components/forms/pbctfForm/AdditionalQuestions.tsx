@@ -18,6 +18,7 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
   const [showHintMessage, setShowHintMessage] = useState(false);
 
   const hearAboutOptions = [
+    "Previously Participated",
     "Twitter/X",
     "LinkedIn", 
     "University/Work",

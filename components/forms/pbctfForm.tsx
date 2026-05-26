@@ -75,7 +75,6 @@ const PBCTFForm: React.FC = () => {
   const participant1Name = watch("participant1.name");
   const participant1Email = watch("participant1.email");
   const participant1Phone = watch("participant1.phone");
-  const participant1Age = watch("participant1.age");
   const participant1Gender = watch("participant1.gender");
   const participant1ExperienceLevel = watch("participant1.experienceLevel");
   const participant1Affiliation = watch("participant1.affiliation");
@@ -86,7 +85,6 @@ const PBCTFForm: React.FC = () => {
   const participant2Name = watch("participant2.name");
   const participant2Email = watch("participant2.email");
   const participant2Phone = watch("participant2.phone");
-  const participant2Age = watch("participant2.age");
   const participant2Gender = watch("participant2.gender");
   const participant2ExperienceLevel = watch("participant2.experienceLevel");
   const participant2Affiliation = watch("participant2.affiliation");
@@ -132,7 +130,7 @@ const PBCTFForm: React.FC = () => {
 
     // Step 1: Participant 1 details complete
     const participant1Complete = participant1Name && participant1Email && participant1Phone && 
-        participant1Age && participant1Gender && participant1ExperienceLevel && 
+        participant1Gender && participant1ExperienceLevel && 
         participant1Affiliation && participant1AffiliationName && participant1PreviousCTF &&
         (participant1PreviousCTF === "No" || participant1CTFNames) && participant1EmailVerified;
     
@@ -142,8 +140,7 @@ const PBCTFForm: React.FC = () => {
 
     // Step 2: Participant 2 details complete (only for duo)
     if (participationType === "duo") {
-      const participant2Complete = participant2Name && participant2Email && participant2Phone && 
-          participant2Age && participant2Gender && participant2ExperienceLevel && 
+      const participant2Complete = participant2Name && participant2Email && participant2Phone && participant2Gender && participant2ExperienceLevel && 
           participant2Affiliation && participant2AffiliationName && participant2PreviousCTF &&
           (participant2PreviousCTF === "No" || participant2CTFNames) && participant2EmailVerified;
       
@@ -197,10 +194,10 @@ const PBCTFForm: React.FC = () => {
     });
   }, [
     participationType,
-    participant1Name, participant1Email, participant1Phone, participant1Age, participant1Gender,
+    participant1Name, participant1Email, participant1Phone, participant1Gender,
     participant1ExperienceLevel, participant1Affiliation, participant1AffiliationName, 
     participant1PreviousCTF, participant1CTFNames, participant1EmailVerified,
-    participant2Name, participant2Email, participant2Phone, participant2Age, participant2Gender,
+    participant2Name, participant2Email, participant2Phone, participant2Gender,
     participant2ExperienceLevel, participant2Affiliation, participant2AffiliationName, 
     participant2PreviousCTF, participant2CTFNames, participant2EmailVerified,
     howDidYouHear, secretFlag,

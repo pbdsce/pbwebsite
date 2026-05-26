@@ -303,26 +303,6 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
           </div>
 
           <div>
-            <input
-              {...register(`participant${participantNumber}.age` as const, {
-                required: "Age is required",
-                min: { value: 16, message: "Minimum age is 16" },
-                max: { value: 100, message: "Maximum age is 100" },
-              })}
-              placeholder="Age"
-              type="number"
-              min="16"
-              max="100"
-              className="w-full bg-gray-900/50 border border-green-400/30 rounded px-4 py-3 text-green-300 font-mono text-sm focus:border-green-400 focus:outline-none transition-colors placeholder-gray-500"
-            />
-            {errors[`participant${participantNumber}`]?.age && (
-              <p className="mt-1 text-xs text-red-400 font-mono">
-                {errors[`participant${participantNumber}`]?.age?.message}
-              </p>
-            )}
-          </div>
-
-          <div>
             <select
               {...register(`participant${participantNumber}.gender` as const, {
                 required: "Gender is required",
