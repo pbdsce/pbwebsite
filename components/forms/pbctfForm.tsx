@@ -26,7 +26,6 @@ const PBCTFForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   
-  const [token, setToken] = useState<string>();
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set([0]));
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [participant1EmailVerified, setParticipant1EmailVerified] = useState<boolean>(false);
@@ -41,17 +40,23 @@ const PBCTFForm: React.FC = () => {
     resetField,
   } = useForm<FormData>();
 
-  const getRecaptcha = async () => {
-    if (!window.grecaptcha?.enterprise) return;
-  
-    window.grecaptcha.enterprise.ready(async () => {
-      const Rtoken =
-        await window.grecaptcha.enterprise.execute(
-          process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!,
-          { action: "submit" }
-        );
-  
-      setToken(Rtoken);
+  const executeRecaptcha = async () => {
+    const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+    if (!siteKey || !window.grecaptcha?.enterprise) return null;
+
+    return new Promise<string | null>((resolve) => {
+      window.grecaptcha.enterprise.ready(async () => {
+        try {
+          const recaptchaToken = await window.grecaptcha.enterprise.execute(
+            siteKey,
+            { action: "submit" }
+          );
+          resolve(recaptchaToken);
+        } catch (error) {
+          console.error("Error executing reCAPTCHA:", error);
+          resolve(null);
+        }
+      });
     });
   };
 
@@ -60,7 +65,6 @@ const PBCTFForm: React.FC = () => {
     script.src = `https://www.google.com/recaptcha/enterprise.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`;
     script.async = true;
     script.defer = true;
-    script.onload = getRecaptcha;
     document.head.appendChild(script);
 
     return () => {
@@ -259,7 +263,7 @@ const PBCTFForm: React.FC = () => {
         return;
       }
 
-      const recaptcha_token = token;
+      const recaptcha_token = await executeRecaptcha();
       if (!recaptcha_token) {
         toast.error("reCAPTCHA is not ready yet. Please wait a moment and try again.");
         return;
