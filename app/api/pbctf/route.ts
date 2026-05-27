@@ -95,10 +95,7 @@ export async function GET(request: Request) {
 
     if (identifier && emailRegex.test(identifier)) {
       const existing = await CtfRegsModel.findOne({
-        $or: [
-          { "participant1.email": identifier },
-          { "participant2.email": identifier },
-        ],
+        "participant1.email": identifier
       });
       if (existing) {
         return NextResponse.json(
@@ -229,6 +226,8 @@ export async function POST(request: Request) {
       return validateFlag(request);
     } else if (action === "addRegistration") {
       return addRegistration(request);
+    } else if ( action === "sendLoginOTP") {
+      return sendLoginOTP(request);
     } else {
       return NextResponse.json(
         { error: "Invalid action specified" },
@@ -824,6 +823,99 @@ async function addRegistration(request: Request) {
     console.error("Error adding registration:", error);
     return NextResponse.json(
       { error: "Failed to add registration.", details: error },
+      { status: 500 }
+    );
+  }
+}
+
+async function sendLoginOTP(request: Request) {
+  try {
+    await connectDB();
+
+    const { email } =
+      await request.json();
+
+    if (!email) {
+      return NextResponse.json(
+        {error: "Email required",},
+        { status: 400 }
+      );
+    }
+
+    const existingReg =
+      await CtfRegsModel.findOne({
+        "participant1.email": email,
+      });
+
+    if (!existingReg) {
+      return NextResponse.json(
+        {
+          error:
+            "User not registered",
+        },
+        { status: 404 }
+      );
+    }
+
+    const otp = Math.floor(
+      100000 +
+        Math.random() * 900000
+    ).toString();
+
+    const otpExpiresAt =
+      new Date(
+        Date.now() +
+          10 * 60 * 1000
+      );
+
+    await TempCTFUserModel.findOneAndUpdate(
+      { email },
+      {
+        otp,
+        otpExpiresAt,
+      },
+      { upsert: true }
+    );
+
+    const transporter =
+      nodemailer.createTransport({
+        host: process.env.MAIL_SMTP,
+        port: 465,
+        secure: true,
+        auth: {
+          user:
+            process.env.MAIL_USER,
+          pass:
+            process.env.MAIL_PASS,
+        },
+      });
+
+    await transporter.sendMail({
+      from: `"PBCTF Login" <${process.env.MAIL_USER}>`,
+      to: email,
+      subject:
+        "[PBCTF] Login OTP",
+      text: `
+Your PBCTF login OTP is:
+
+${otp}
+
+Valid for 10 minutes.
+      `,
+    });
+
+    return NextResponse.json({
+      message:
+        "OTP sent successfully",
+    });
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      {
+        error:
+          "Internal Server Error",
+      },
       { status: 500 }
     );
   }

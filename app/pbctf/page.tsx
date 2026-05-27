@@ -1,6 +1,7 @@
 "use client";
 import PBCTFForm from "@/components/forms/pbctfForm";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const PBCTFRegisterPage = () => {
   return (
@@ -72,6 +73,17 @@ const PBCTFRegisterPage = () => {
         >
           <div className="border-b border-green-400/20 px-6 py-3">
             <h2 className="text-green-300 font-semibold">Registration Terminal</h2>
+          </div>
+
+          <div className="mt-6 text-center">
+            <p className="text-gray-400 font-mono text-sm">
+              Already registered?
+            </p>
+
+            <Link
+              href="/pbctf/login" className="text-green-400 hover:text-green-300 underline font-mono">
+                Login
+            </Link>
           </div>
           <div className="p-6">
             <PBCTFForm />
