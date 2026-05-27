@@ -1,16 +1,19 @@
 import Hustle from "@/components/hustle/Hustle";
-import { type Latest, type Leaderboard } from "@/lib/db/models/hustle";
+import { type Latest, type Leaderboard, LatestModel, LeaderboardModel } from "@/lib/db/models/hustle";
+import connectDB from "@/lib/db/connection";
 
 export const metadata = {
   title: "PB Hustle",
 };
 
 export default async function HustlePage() {
-  const req = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN}/api/hustle`);
-  const res = await req.json();
+  await connectDB();
 
-  const latest: Latest | null = res.data?.latest ?? null;
-  const leaderboard: Leaderboard | null = res.data?.leaderboard ?? null;
+  const latestDoc = await LatestModel.findOne({ name: "latest" }).lean();
+  const leaderboardDoc = await LeaderboardModel.findOne({ name: "leaderboard" }).lean();
+
+  const latest: Latest | null = latestDoc ? JSON.parse(JSON.stringify(latestDoc)) : null;
+  const leaderboard: Leaderboard | null = leaderboardDoc ? JSON.parse(JSON.stringify(leaderboardDoc)) : null;
 
   return (
     <section className="w-full h-full" id="hustle">

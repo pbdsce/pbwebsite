@@ -33,7 +33,7 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("session");
-  const user = sessionCookie ? await verifyAuth(sessionCookie.value) : null;
+  const user = sessionCookie ? (await verifyAuth(sessionCookie.value)) || null : null;
 
   return (
     <html lang="en_IN">

@@ -1,18 +1,16 @@
 import Talks from "@/components/talks/Talks";
-import { type Talk } from "@/lib/db/models/talks";
-import { serializeId } from "@/lib/utils";
+import { getAllTalks } from "@/lib/server/talks";
+import connectDB from "@/lib/db/connection";
 
 export const metadata = {
   title: "Talks",
 };
 
 export default async function TalksPage() {
-  const req = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN}/api/talks`);
-  const res = await req.json();
+  await connectDB();
+  const allTalks = await getAllTalks();
 
-  const talks = res.talks.map((talk: Talk & { _id: { toString(): string } }) =>
-    serializeId(talk),
-  );
+  const talks = JSON.parse(JSON.stringify(allTalks));
 
   return (
     <section className="w-full h-full" id="talks">

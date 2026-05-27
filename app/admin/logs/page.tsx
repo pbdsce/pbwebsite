@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import LogsViewer from "@/components/LogsViewer";
 import verifyAuth from "@/lib/verifyAuth";
+import { getLogs } from "@/lib/server/logs";
+import connectDB from "@/lib/db/connection";
 
 export const metadata = {
   title: "Activity Logs - Point Blank Admin",
@@ -15,18 +17,8 @@ export default async function AdminLogsPage() {
     redirect("/admin");
   }
 
-  const req = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN}/api/logs`, {
-    headers: {
-      Authorization: `Bearer ${sessionCookie.value}`,
-    },
-  });
-
-  if (!req.ok) {
-    console.error("Failed to fetch logs:", req.statusText);
-    return <div className="text-red-500">Failed to load logs.</div>;
-  }
-
-  const { logs } = await req.json();
+  await connectDB();
+  const logs = await getLogs();
 
   return <LogsViewer initialLogs={logs} />;
 }
