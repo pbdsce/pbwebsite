@@ -171,14 +171,10 @@ const LoginForm = () => {
         }}
         className="w-full max-w-md bg-gray-900/40 border border-green-400/20 rounded-lg p-8"
       >
-        <h1 className="text-3xl text-center text-green-300 mb-2">
+        <h1 className="text-3xl text-center text-green-300 mb-6">
           PBCTF Login
         </h1>
-
-        <p className="text-center text-gray-400 mb-8">
-          Login
-        </p>
-
+      
         <div className="space-y-4">
           <input
             type="email"

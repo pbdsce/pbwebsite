@@ -99,7 +99,10 @@ export async function GET(request: Request) {
 
     if (identifier && emailRegex.test(identifier)) {
       const existing = await CtfRegsModel.findOne({
-        "participant1.email": identifier
+        $or: [
+        { "participant1.email": identifier },
+        { "participant2.email": identifier },
+      ],
       });
       if (existing) {
         return NextResponse.json(
@@ -879,7 +882,10 @@ async function sendLoginOTP(request: Request) {
 
     const existingReg =
       await CtfRegsModel.findOne({
-        "participant1.email": email,
+        $or: [
+          {"participant1.email": email},
+          {"participant2.email": email},
+        ],
       });
 
     if (!existingReg) {
