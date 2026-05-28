@@ -401,7 +401,11 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
               {...register(`participant${participantNumber}.affiliationName` as const, {
                 required: "Affiliation name is required",
               })}
-              placeholder="College Name / Company Name / Organization"
+              placeholder={
+                typeof window !== "undefined" && window.innerWidth < 640
+                  ? "College / Company"
+                  : "College Name / Company Name / Organization"
+              }
               className="w-full bg-gray-900/50 border border-green-400/30 rounded px-4 py-3 text-green-300 font-mono text-sm focus:border-green-400 focus:outline-none transition-colors placeholder-gray-500"
             />
             {errors[`participant${participantNumber}`]?.affiliationName && (

@@ -106,7 +106,11 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
           </label>
           <input
             type="text"
-            placeholder="paste the flag here..."
+            placeholder={
+              typeof window !== "undefined" && window.innerWidth < 640
+                ? "Enter flag..."
+                : "paste the flag here..."
+            }
             {...register("secretFlag", { 
               required: "Secret flag is required to complete registration",
               validate: (value) => 
