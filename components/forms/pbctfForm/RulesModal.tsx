@@ -20,12 +20,12 @@ PBCTF 5.0 is a Jeopardy-style Capture The Flag competition where participants so
 👥 Registration & Eligibility
 • Open to all participants regardless of experience level
 • Participants can compete individually or form teams of up to 2 members
-• All participants must carry valid college ID cards for verification
+• All participants must carry a Government ID for verification
 
 💻 Technical Requirements
 What You Need to Bring:
 • Laptop: Participants must bring their own laptops with necessary tools installed
-• College ID: Mandatory for verification and entry
+• Government ID: Mandatory for verification and entry
 • Power Adapters: Ensure your devices stay charged throughout the event
 
 Venue Provisions:

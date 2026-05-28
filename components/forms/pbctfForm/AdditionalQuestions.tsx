@@ -43,7 +43,7 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
                 type="checkbox"
                 value={option}
                 {...register("howDidYouHear")}
-                className="w-4 h-4 text-green-400 bg-gray-900 border-green-400/50 rounded focus:ring-green-400 focus:ring-2 focus:ring-offset-0"
+                className="appearance-none w-4 h-4 rounded-full border-2 border-green-400/70 bg-gray-900 checked:bg-green-400 checked:border-green-400 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-green-400/50appearance-none w-4 h-4 rounded-full accent-green-400 bg-gray-900 border-green-400/50 rounded focus:ring-green-400 focus:ring-2 focus:ring-offset-0"
               />
               <span className="group-hover:text-green-200 transition-colors">
                 {option}
@@ -68,7 +68,6 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
       {/* Secret Flag Challenge */}
       <div className="bg-gray-900/30 border border-green-400/20 rounded-lg p-6 space-y-4">
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-2xl">🔍</span>
           <h3 className="text-green-300 font-mono text-lg">
             &quot;Prove You&apos;re Not a Bot (or a Noob)!&quot;
           </h3>

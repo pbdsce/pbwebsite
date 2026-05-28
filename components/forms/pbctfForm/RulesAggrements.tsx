@@ -43,10 +43,11 @@ const RulesAgreements: React.FC<RulesAgreementsProps> = ({
               {...register("agreeRules", { required: "You must agree to the CTF Rules & Code of Conduct" })}
               disabled={!hasReadRules}
               className={`
-                mt-1 w-4 h-4 rounded focus:ring-green-400 focus:ring-2
-                ${hasReadRules 
-                  ? 'text-green-400 bg-gray-900/50 border-green-400/30 cursor-pointer' 
-                  : 'text-gray-600 bg-gray-700/50 border-gray-600 cursor-not-allowed'
+                appearance-none mt-1 w-4 h-4 rounded-full border-2 focus:ring-2 focus:ring-green-400/50 transition-colors
+                ${
+                  hasReadRules
+                    ? 'border-green-400/70 bg-gray-900 checked:bg-green-400 checked:border-green-400 cursor-pointer'
+                    : 'border-green-400/30 bg-gray-900/50 opacity-60 cursor-not-allowed'
                 }
               `}
             />
@@ -83,7 +84,7 @@ const RulesAgreements: React.FC<RulesAgreementsProps> = ({
             <input
               type="checkbox"
               {...register("consentLeaderboard", { required: "You must consent to leaderboard listing" })}
-              className="mt-1 w-4 h-4 text-green-400 bg-gray-900/50 border-green-400/30 rounded focus:ring-green-400 focus:ring-2"
+              className="appearance-none mt-1 w-4 h-4 rounded-full border-2 border-green-400/70 bg-gray-900 checked:bg-green-400 checked:border-green-400 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-green-400/50mt-1 w-4 h-4 text-green-400 bg-gray-900/50 border-green-400/30 rounded focus:ring-green-400 focus:ring-2"
             />
             <span className="text-green-300 font-mono text-sm group-hover:text-green-200 transition-colors">
               I consent to my name/team being listed on the leaderboard
@@ -99,7 +100,7 @@ const RulesAgreements: React.FC<RulesAgreementsProps> = ({
             <input
               type="checkbox"
               {...register("allowContact", { required: "You must allow organizers to contact you" })}
-              className="mt-1 w-4 h-4 text-green-400 bg-gray-900/50 border-green-400/30 rounded focus:ring-green-400 focus:ring-2"
+              className="appearance-none mt-1 w-4 h-4 rounded-full border-2 border-green-400/70 bg-gray-900 checked:bg-green-400 checked:border-green-400 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-green-400/50"
             />
             <span className="text-green-300 font-mono text-sm group-hover:text-green-200 transition-colors">
               I allow organizers to contact me for event updates
