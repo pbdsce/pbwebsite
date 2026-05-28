@@ -44,6 +44,9 @@ importers:
       '@upstash/redis':
         specifier: ^1.35.1
         version: 1.38.0
+      bcryptjs:
+        specifier: ^3.0.3
+        version: 3.0.3
       canvas-confetti:
         specifier: ^1.9.4
         version: 1.9.4
@@ -2071,6 +2074,10 @@ packages:
   baseline-browser-mapping@2.10.25:
     resolution: {integrity: sha512-QO/VHsXCQdnzADMfmkeOPvHdIAkoB7i0/rGjINPJEetLx75hNttVWGQ/jycHUDP9zZ9rupbm60WRxcwViB0MiA==}
     engines: {node: '>=6.0.0'}
+    hasBin: true
+
+  bcryptjs@3.0.3:
+    resolution: {integrity: sha512-GlF5wPWnSa/X5LKM1o0wz0suXIINz1iHRLvTS+sLyi7XPbe5ycmYI3DlZqVGZZtDgl4DmasFg7gOB3JYbphV5g==}
     hasBin: true
 
   before-after-hook@4.0.0:
@@ -6599,6 +6606,8 @@ snapshots:
   base64-js@1.5.1: {}
 
   baseline-browser-mapping@2.10.25: {}
+
+  bcryptjs@3.0.3: {}
 
   before-after-hook@4.0.0: {}
 

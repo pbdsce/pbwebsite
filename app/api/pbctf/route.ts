@@ -4,6 +4,10 @@ import CtfRegsModel, { TempCTFUserModel } from "@/lib/db/models/CTFRegs";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import bcrypt from "bcryptjs";
+import generateAccessToken from "@/lib/pbctf/generateAccessToken";
+import generateRefreshToken from "@/lib/pbctf/generateRefreshToken";
+import PBCTFRefreshToken from "@/lib/db/models/CTFRefreshToken";
 
 
 type ParticipantInput = {
@@ -681,10 +685,41 @@ async function verifyOTP(request: Request) {
         { status: 400 }
       );
     }
-    return NextResponse.json(
-      { message: "OTP verified successfully!" },
-      { status: 200 }
-    );
+    const accessToken = generateAccessToken(email);
+    const refreshToken = generateRefreshToken();
+    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+    await PBCTFRefreshToken.create({
+      email,
+      tokenHash: refreshTokenHash,
+      expiresAt: new Date(Date.now()+7*24*60*60*1000),
+    });
+    const response = NextResponse.json({
+      success: true,
+      message: "OTP verified successfully"
+    },
+    {
+      status: 200,
+    }
+  );
+  response.cookies.set(
+    "pbctf_access", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 60 * 10,
+    }
+  );
+  response.cookies.set(
+    "pbctf_refresh", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60,
+    }
+  );
+  return response;
   } catch (error) {
     return NextResponse.json(
       { error: "Internal Server Error" },

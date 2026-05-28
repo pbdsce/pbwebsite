@@ -146,7 +146,7 @@ const LoginForm = () => {
         "Login successful"
       );
 
-      router.push("/pbctf/dashboard");
+      window.location.href = "/pbctf/dashboard";
     } catch (error) {
       console.error(error);
 
