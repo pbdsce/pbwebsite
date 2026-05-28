@@ -56,11 +56,11 @@ const backgroundSchema = new Schema({
 
 const participantSchema = new Schema<Participant>({
   name: { type: String, required: true },
-  email: { type: String, required: true },
+  email: { type: String, required: true, index: true },
   //age: { type: Number, required: true },
   gender: { type: String, enum: ["Male", "Female", "Other", "Prefer not to say"], required: true },
   background: { type: backgroundSchema, required: true },
-  phone: { type: String, required: true },
+  phone: { type: String, required: true, index: true },
 });
 
 const registrationSchema = new Schema<Registration>({
