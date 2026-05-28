@@ -161,6 +161,7 @@ const RulesModal: React.FC<RulesModalProps> = ({
     const hasScrolledToBottom = hasBeenFullyRead || localScrolledToBottom;
     const [scrollProgress, setScrollProgress] = useState(0);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const touchStartYRef = useRef<number | null>(null);
 
 //   useEffect(() => {
 //     if (hasBeenFullyRead) {
@@ -186,6 +187,61 @@ const RulesModal: React.FC<RulesModalProps> = ({
 
     prevIsOpen.current = isOpen;
     }, [isOpen, hasBeenFullyRead]);
+
+    useEffect(() => {
+      if (!isOpen) return;
+
+      const scrollY = window.scrollY;
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalBodyPosition = document.body.style.position;
+      const originalBodyTop = document.body.style.top;
+      const originalBodyWidth = document.body.style.width;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.documentElement.style.overflow = 'hidden';
+
+      return () => {
+        document.body.style.overflow = originalBodyOverflow;
+        document.body.style.position = originalBodyPosition;
+        document.body.style.top = originalBodyTop;
+        document.body.style.width = originalBodyWidth;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+        window.scrollTo(0, scrollY);
+      };
+    }, [isOpen]);
+
+  const scrollRulesContent = (deltaY: number) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    container.scrollTop += deltaY;
+  };
+
+  const handleModalWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    scrollRulesContent(event.deltaY);
+  };
+
+  const handleModalTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    touchStartYRef.current = event.touches[0]?.clientY ?? null;
+  };
+
+  const handleModalTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
+    const touchStartY = touchStartYRef.current;
+    const currentY = event.touches[0]?.clientY;
+
+    if (touchStartY === null || currentY === undefined) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    scrollRulesContent(touchStartY - currentY);
+    touchStartYRef.current = currentY;
+  };
 
   const handleScroll = () => {
     const container = scrollContainerRef.current;
@@ -220,12 +276,17 @@ const RulesModal: React.FC<RulesModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden overscroll-none">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
       
       {/* Modal */}
-      <div className="relative bg-gray-900 border border-green-400/30 rounded-lg w-full max-w-4xl h-[80vh] mx-4 flex flex-col">
+      <div
+        className="relative bg-gray-900 border border-green-400/30 rounded-lg w-full max-w-4xl h-[80vh] mx-4 flex flex-col overflow-hidden"
+        onWheel={handleModalWheel}
+        onTouchStart={handleModalTouchStart}
+        onTouchMove={handleModalTouchMove}
+      >
         {/* Header */}
         <div className="p-6 border-b border-green-400/20">
           <div className="flex items-center justify-between">
@@ -255,7 +316,7 @@ const RulesModal: React.FC<RulesModalProps> = ({
         <div 
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex-1 p-6 overflow-y-auto custom-scrollbar"
+          className="flex-1 p-6 overflow-y-auto overscroll-contain custom-scrollbar"
         >
           <div className="text-gray-300 font-mono text-sm leading-relaxed whitespace-pre-wrap">
             {PBCTF_RULES_CONTENT}
