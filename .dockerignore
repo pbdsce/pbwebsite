@@ -1,0 +1,11 @@
+Dockerfile
+.dockerignore
+node_modules
+.env
+.env.*
+npm-debug.log
+README.md
+.next
+.git
+.github
+.husky

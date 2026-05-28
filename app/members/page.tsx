@@ -1,15 +1,15 @@
 import Members from "@/components/members/Members";
-import { type Members as MemberType } from "@/lib/db/models/members";
-import { serializeId } from "@/lib/utils";
+import { getAllMembers } from "@/lib/server/members";
+import connectDB from "@/lib/db/connection";
 
 export const metadata = {
   title: "Members",
 };
 export default async function Events() {
-  const req = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN}/api/members`);
-  const res = await req.json();
+  await connectDB();
+  const allMembers = await getAllMembers();
 
-  const members = res.members.map((member: MemberType) => serializeId(member));
+  const members = JSON.parse(JSON.stringify(allMembers));
 
   return (
     <section className="w-full h-full" id="members">

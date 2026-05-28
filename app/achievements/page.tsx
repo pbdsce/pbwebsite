@@ -1,5 +1,6 @@
 import Achievements from "@/components/achievements/Achievements";
-import { serializeId } from "@/lib/utils";
+import { getAllAchievements } from "@/lib/server/achievements";
+import connectDB from "@/lib/db/connection";
 
 export const metadata = {
   title: "Achievements",
@@ -7,13 +8,10 @@ export const metadata = {
 };
 
 export default async function AchievementsPage() {
-  const req = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN}/api/achievements`);
-  const res = await req.json();
+  await connectDB();
+  const achievements = await getAllAchievements();
 
-  const docs = (res.achievements ?? []).map(
-    (doc: { _id: { toString(): string }; [key: string]: unknown }) =>
-      serializeId(doc),
-  );
+  const docs = JSON.parse(JSON.stringify(achievements));
 
   return <Achievements initialDocs={docs} />;
 }

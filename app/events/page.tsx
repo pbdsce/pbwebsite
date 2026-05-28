@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import Events from "@/components/events/Events";
 import ReviewMarquee from "@/components/events/ReviewMarquee";
+import { getAllEvents } from "@/lib/server/events";
+import connectDB from "@/lib/db/connection";
 
 export const metadata: Metadata = {
   title: "Events",
 };
 
 export default async function EventsPage() {
-  const req = await fetch(`${process.env.NEXT_PUBLIC_DOMAIN}/api/events`);
-  const { events } = await req.json();
+  await connectDB();
+  const rawEvents = await getAllEvents();
+  const events = JSON.parse(JSON.stringify(rawEvents));
 
   return (
     <>

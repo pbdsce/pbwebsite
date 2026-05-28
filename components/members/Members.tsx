@@ -203,7 +203,7 @@ export default function Members(props: { members: Member[] }) {
 
       if (editMember) {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_DOMAIN}/api/members`,
+          "/api/members",
           {
             method: "PUT",
             headers: {
@@ -222,7 +222,7 @@ export default function Members(props: { members: Member[] }) {
         }
       } else {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_DOMAIN}/api/members`,
+          "/api/members",
           {
             method: "POST",
             headers: {
@@ -248,7 +248,7 @@ export default function Members(props: { members: Member[] }) {
     setDeleting(true);
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_DOMAIN}/api/members?id=${deleteTarget._id}`,
+        `/api/members?id=${deleteTarget._id}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },

@@ -8,10 +8,7 @@ export async function GET(request: NextRequest) {
 
   if (!token) {
     return NextResponse.redirect(
-      new URL(
-        `${process.env.NEXT_PUBLIC_DOMAIN}/admin?error=missing_token`,
-        request.url,
-      ),
+      new URL("/admin?error=missing_token", request.url),
     );
   }
 
@@ -19,15 +16,12 @@ export async function GET(request: NextRequest) {
 
   if (!sessionToken || typeof sessionToken !== "string") {
     return NextResponse.redirect(
-      new URL(
-        `${process.env.NEXT_PUBLIC_DOMAIN}/admin?error=invalid_token`,
-        request.url,
-      ),
+      new URL("/admin?error=invalid_token", request.url),
     );
   }
 
   const response = NextResponse.redirect(
-    new URL(`${process.env.NEXT_PUBLIC_DOMAIN}/admin`, request.url),
+    new URL("/admin", request.url),
   );
   response.cookies.set("session", sessionToken, {
     httpOnly: true,
