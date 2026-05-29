@@ -29,8 +29,8 @@ export async function POST() {
 
   const oldLeader = registration.participant1;
   const newLeader = registration.participant2;
-  oldLeader.role = "MEMBER";
-  newLeader.role = "LEADER";
+  oldLeader.role = "Member";
+  newLeader.role = "Leader";
   registration.participant1 = newLeader;
   registration.participant2 = oldLeader;
 

@@ -2,6 +2,7 @@ import getCurrentUser from "@/lib/pbctf/getCurrentUser";
 import { redirect } from "next/navigation";
 import ChangeTeamName from "@/components/forms/pbctfForm/ChangeTeamName";
 import TransferLeadership from "@/components/forms/pbctfForm/TransferLeadership";
+import LeaveTeam from "@/components/forms/pbctfForm/LeaveTeam";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -52,6 +53,7 @@ export default async function DashboardPage() {
             </div>
           </div>
         )}
+        <div className="mt-4"><LeaveTeam/></div>
       </div>
     </div>
   );
