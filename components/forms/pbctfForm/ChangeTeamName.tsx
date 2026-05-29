@@ -2,29 +2,35 @@
 import { useState } from "react";
 
 export default function ChangeTeamName() {
+
   const [teamName, setTeamName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showInput, setShowInput] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent ) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      setLoading(true);
-      const response = await fetch("/api/pbctf/team/change-name", {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",},
-            body: JSON.stringify({teamName,}),
+     setLoading(true);
+    const response = await fetch("/api/pbctf/team/change-name", {
+      method: "PATCH",
+        headers: {"Content-Type": "application/json",},
+          body: JSON.stringify({ teamName,}),
           }
         );
 
       const data = await response.json();
 
-      if (!response.ok) { alert(data.error);
+      if (!response.ok) {
+        alert(data.error);
         return;
       }
 
-      alert("Team name updated!");
+      alert(
+        "Team name updated!"
+      );
+
       window.location.reload();
+
     } 
     catch (error) {
       console.error(error);
@@ -35,20 +41,48 @@ export default function ChangeTeamName() {
     }
   }
 
-  return(
-    <form onSubmit={handleSubmit} className="flex gap-2">
-    <input
-      type="text"
-      placeholder="New Team Name"
-      value={teamName}
-      onChange={(e) => setTeamName(e.target.value)}
-        className="bg-black border border-green-400 px-3 py-2 rounded"
-      />
-      <button disabled={loading} className="bg-green-600 px-4 py-2 rounded text-white">
-        {
-          loading ? "Updating" : "Change Team Name"
-        }
-      </button>
-    </form>
+  return (
+    <div>
+      {!showInput ? (
+        <button
+          onClick={() =>
+            setShowInput(true)
+          }
+          className="bg-green-600 px-4 py-2 rounded text-white">
+          Change Team Name
+        </button>
+      ) : (
+        <form
+          onSubmit={handleSubmit}
+          className="flex gap-2">
+          <input
+            type="text"
+            placeholder="New Team Name"
+            value={teamName}
+            onChange={(e) =>
+              setTeamName(
+                e.target.value
+              )
+            }
+            className="bg-black border border-green-400 px-3 py-2 rounded"/>
+          <button
+            disabled={loading}
+            className="bg-green-600 px-4 py-2 rounded text-white">
+            {
+              loading ? "Updating" : "Save"
+            }
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              setShowInput(false)
+            }
+            className="bg-gray-700 px-4 py-2 rounded text-white">
+            Cancel
+          </button>
+        </form>
+      )}
+    </div>
   );
 }

@@ -384,7 +384,7 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
                 ? "Affiliation"
                 : "Select Affiliation"}
               </option>
-              <option value="" className="bg-gray-900">Select Affiliation</option>
+              {/* <option value="" className="bg-gray-900">Select Affiliation</option> */}
               <option value="Student" className="bg-gray-900">Student</option>
               <option value="Professional" className="bg-gray-900">Professional</option>
               <option value="Hobbyist" className="bg-gray-900">Hobbyist</option>
