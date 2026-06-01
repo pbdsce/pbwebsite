@@ -9,7 +9,6 @@ import generateAccessToken from "@/lib/pbctf/generateAccessToken";
 import generateRefreshToken from "@/lib/pbctf/generateRefreshToken";
 import PBCTFRefreshToken from "@/lib/db/models/CTFRefreshToken";
 
-
 type ParticipantInput = {
     name: string;
     email: string;

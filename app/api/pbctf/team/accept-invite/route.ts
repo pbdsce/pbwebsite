@@ -30,9 +30,15 @@ export async function POST(
     }
 
     const invite =
-      await TeamInvite.findOne({
-        token,
-      });
+    await TeamInvite.findOne({
+      token,
+
+      status: "pending",
+
+      expiresAt: {
+        $gt: new Date(),
+      },
+    });
 
     if (!invite) {
 
@@ -140,7 +146,14 @@ export async function POST(
     );
 
     // DELETE USED INVITE
-    await invite.deleteOne();
+    await TeamInvite.updateOne(
+    {
+      _id: invite._id,
+    },
+    {
+      status: "accepted",
+    }
+  );
 
     return NextResponse.json({
       success: true,

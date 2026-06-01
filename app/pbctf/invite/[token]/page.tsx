@@ -5,32 +5,26 @@ import AcceptInviteForm from "@/components/forms/pbctfForm/AcceptInviteForm";
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     token: string;
-  };
+  }>;
 }
 
 export default async function InvitePage({
   params,
 }: PageProps) {
 
-  const token = params.token;
+  const { token } = await params;
 
-  let invite = null;
+  await connectDB();
 
-  try {
-
-    await connectDB();
-
-    invite = await TeamInvite
-      .findOne({ token })
-      .lean();
-
-  } catch (err) {
-
-    console.error("INVITE PAGE ERROR:", err);
-
-  }
+  const invite = await TeamInvite.findOne({
+    token,
+    status: "pending",
+    expiresAt: {
+      $gt: new Date(),
+    },
+  }).lean();
 
   if (!invite) {
     return (
@@ -41,11 +35,8 @@ export default async function InvitePage({
   }
 
   return (
-
     <div className="min-h-screen bg-black text-green-400 p-8">
-
       <div className="max-w-4xl mx-auto">
-
         <h1 className="text-4xl mb-4">
           Accept PBCTF Invite
         </h1>
@@ -58,10 +49,7 @@ export default async function InvitePage({
           token={token}
           invitedEmail={String(invite.email)}
         />
-
       </div>
-
     </div>
-
   );
 }

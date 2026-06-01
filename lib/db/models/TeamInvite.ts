@@ -6,9 +6,7 @@ const TeamInviteSchema =
       teamId: {
         type:
           mongoose.Schema.Types.ObjectId,
-
         ref: "ctfregs",
-
         required: true,
       },
 
@@ -21,6 +19,15 @@ const TeamInviteSchema =
         type: String,
         required: true,
         unique: true,
+      },
+      status: {
+        type: String,
+        enum: [
+          "pending",
+          "accepted",
+          "revoked",
+        ],
+        default: "pending",
       },
 
       expiresAt: {

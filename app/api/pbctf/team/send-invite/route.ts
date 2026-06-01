@@ -93,33 +93,35 @@ if (existingUser) {
       }
     );
   }
-  const existingInvite =
-  await TeamInvite.findOne({
-    email,
-  });
-  if (existingInvite) {
-    return NextResponse.json(
-      {
-        error:
-          "Invite already sent to this email",
-      },
-      {
-        status: 400,
-      }
-    );
-  }
   
   const token =
     crypto.randomBytes(32)
     .toString("hex");
 
-  await TeamInvite.create({
-    teamId:
-      registration._id,
-      email,
-      token,
-      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
-  });
+  await TeamInvite.updateMany(
+  {
+    email,
+    teamId: registration._id,
+    status: "pending",
+  },
+  {
+    status: "revoked",
+  }
+);
+
+await TeamInvite.create({
+  teamId: registration._id,
+
+  email,
+
+  token,
+
+  status: "pending",
+
+  expiresAt: new Date(
+    Date.now() + 1000 * 60 * 60 * 24
+  ),
+});
 
   const inviteLink =
     `${process.env.NEXT_PUBLIC_BASE_URL}/pbctf/invite/${token}`;
