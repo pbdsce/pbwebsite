@@ -1,7 +1,5 @@
 "use client";
-
 import { useState } from "react";
-
 export default function SendInviteForm() {
 
   const [email, setEmail] = useState("");
@@ -17,20 +15,18 @@ export default function SendInviteForm() {
     e.preventDefault();
 
     try {
-
+      setError("");
+      setMessage("");
       setLoading(true);
-
       const response =
         await fetch(
           "/api/pbctf/team/send-invite",
           {
             method: "POST",
-
             headers: {
               "Content-Type":
                 "application/json",
             },
-
             body: JSON.stringify({
               email,
             }),
@@ -39,11 +35,8 @@ export default function SendInviteForm() {
 
       const data =
         await response.json();
-
       if (!response.ok) {
-
         setError(data.error);
-
         return;
       }
 
@@ -54,35 +47,24 @@ export default function SendInviteForm() {
       setEmail("");
 
     } catch (error) {
-
-      console.error(error);
-
       setError(
         "Something went wrong"
       );
 
     } finally {
-
       setLoading(false);
-
     }
   }
 
   return (
-
   <div className="w-full">
-
     {!showForm ? (
-
       <button
         onClick={() =>
           setShowForm(true)
         }
-        className="w-full bg-green-600 hover:bg-green-500 px-4 py-3 rounded-lg text-white font-semibold transition"
-      >
-
+        className="w-full bg-green-600 hover:bg-green-500 px-4 py-3 rounded-lg text-white font-semibold transition">
         Add Member
-
       </button>
 
     ) : (

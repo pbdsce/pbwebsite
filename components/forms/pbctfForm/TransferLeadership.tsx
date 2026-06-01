@@ -11,6 +11,8 @@ export default function TransferLeadership() {
 
     if (!confirmed) { return;}
     try {
+      setError("");
+      setMessage("");
       setLoading(true);
       const response = await fetch("/api/pbctf/team/transfer-leadership",
           {

@@ -97,6 +97,17 @@ if (existingUser) {
   await TeamInvite.findOne({
     email,
   });
+  if (existingInvite) {
+    return NextResponse.json(
+      {
+        error:
+          "Invite already sent to this email",
+      },
+      {
+        status: 400,
+      }
+    );
+  }
   
   const token =
     crypto.randomBytes(32)

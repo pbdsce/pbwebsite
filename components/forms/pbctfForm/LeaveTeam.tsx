@@ -13,6 +13,8 @@ export default function LeaveTeam() {
       return;
     }
     try {
+      setError("");
+      setMessage("");
       setLoading(true);
       const response =
         await fetch("/api/pbctf/team/leave",

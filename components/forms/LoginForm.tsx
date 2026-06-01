@@ -87,9 +87,7 @@ const LoginForm = () => {
       }
 
       setOtpSent(true);
-
       setResendTimer(120);
-
       setOtpSuccess(
         "OTP sent successfully"
       );

@@ -15,8 +15,9 @@ export default function AcceptInviteForm({
   invitedEmail,
 }: Props) {
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const {
     register,
@@ -34,7 +35,8 @@ export default function AcceptInviteForm({
   async function handleAcceptInvite() {
 
     try {
-
+      setError("");
+      setMessage("");
       setLoading(true);
 
       const participant =
@@ -104,12 +106,12 @@ export default function AcceptInviteForm({
 
       if (!response.ok) {
 
-        alert(data.error);
+        setError(data.error);
 
         return;
       }
 
-      alert(
+      setMessage(
         "Successfully joined team!"
       );
 
@@ -120,7 +122,7 @@ export default function AcceptInviteForm({
 
       console.error(error);
 
-      alert(
+      setError(
         "Something went wrong"
       );
 

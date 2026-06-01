@@ -20,7 +20,8 @@ export default function RemoveMemberButton() {
     }
 
     try {
-
+      setError("");
+      setMessage("");
       setLoading(true);
 
       const response =

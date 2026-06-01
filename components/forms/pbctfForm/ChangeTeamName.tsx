@@ -12,6 +12,8 @@ export default function ChangeTeamName() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
+     setError("");
+     setMessage("");
      setLoading(true);
     const response = await fetch("/api/pbctf/team/change-name", {
       method: "PATCH",
