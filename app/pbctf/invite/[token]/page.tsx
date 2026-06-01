@@ -14,7 +14,7 @@ export default async function InvitePage({
   params,
 }: PageProps) {
 
-  const { token } = params;
+  const token = params.token;
 
   let invite = null;
 
@@ -22,9 +22,9 @@ export default async function InvitePage({
 
     await connectDB();
 
-    invite = await TeamInvite.findOne({
-      token,
-    });
+    invite = await TeamInvite
+      .findOne({ token })
+      .lean();
 
   } catch (err) {
 
@@ -51,12 +51,12 @@ export default async function InvitePage({
         </h1>
 
         <p className="mb-8 text-gray-400">
-          Invited as: {invite.email}
+          Invited as: {String(invite.email)}
         </p>
 
         <AcceptInviteForm
           token={token}
-          invitedEmail={invite.email}
+          invitedEmail={String(invite.email)}
         />
 
       </div>
