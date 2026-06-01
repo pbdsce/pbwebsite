@@ -1,8 +1,10 @@
 import connectDB from "@/lib/db/connection";
 import TeamInvite from "@/lib/db/models/TeamInvite";
 import AcceptInviteForm from "@/components/forms/pbctfForm/AcceptInviteForm";
+
 export const dynamic = "force-dynamic";
- interface PageProps {
+
+interface PageProps {
   params: {
     token: string;
   };
@@ -12,23 +14,28 @@ export default async function InvitePage({
   params,
 }: PageProps) {
 
-  await connectDB();
+  const { token } = params;
 
-  const { token } =
-     params;
+  let invite = null;
 
-  const invite =
-    await TeamInvite.findOne({
+  try {
+
+    await connectDB();
+
+    invite = await TeamInvite.findOne({
       token,
     });
 
-  if (!invite) {
+  } catch (err) {
 
+    console.error("INVITE PAGE ERROR:", err);
+
+  }
+
+  if (!invite) {
     return (
       <div className="min-h-screen bg-black text-red-500 flex items-center justify-center">
-
         Invalid or expired invite
-
       </div>
     );
   }
@@ -44,11 +51,7 @@ export default async function InvitePage({
         </h1>
 
         <p className="mb-8 text-gray-400">
-
-          Invited as:
-          {" "}
-          {invite.email}
-
+          Invited as: {invite.email}
         </p>
 
         <AcceptInviteForm
@@ -59,5 +62,6 @@ export default async function InvitePage({
       </div>
 
     </div>
+
   );
 }
