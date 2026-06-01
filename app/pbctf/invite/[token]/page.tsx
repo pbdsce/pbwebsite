@@ -1,13 +1,11 @@
 import connectDB from "@/lib/db/connection";
-
 import TeamInvite from "@/lib/db/models/TeamInvite";
-
 import AcceptInviteForm from "@/components/forms/pbctfForm/AcceptInviteForm";
-
-interface PageProps {
-  params: Promise<{
+export const dynamic = "force-dynamic";
+ interface PageProps {
+  params: {
     token: string;
-  }>;
+  };
 }
 
 export default async function InvitePage({
@@ -17,7 +15,7 @@ export default async function InvitePage({
   await connectDB();
 
   const { token } =
-    await params;
+     params;
 
   const invite =
     await TeamInvite.findOne({
