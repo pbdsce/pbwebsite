@@ -49,7 +49,7 @@ export default async function DashboardPage() {
           <div className="border border-green-400/20 rounded-lg p-6">
             <h2 className="text-2xl mb-4">Team Management</h2>
             <div className="flex flex-col gap-4">
-                <ChangeTeamName />
+                <ChangeTeamName currentTeamName={registration.teamName} />
             {registration.participant2 && (<TransferLeadership />)}
             {!registration.participant2 && (<SendInviteForm />)}
             {registration.participant2 && (<RemoveMemberButton />)}

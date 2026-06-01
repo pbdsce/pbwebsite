@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 
-export default function ChangeTeamName() {
-
+export default function ChangeTeamName({
+  currentTeamName,}: { currentTeamName: string}) {
   const [teamName, setTeamName] = useState("");
   const [loading, setLoading] = useState(false);
   const [showInput, setShowInput] = useState(false);
@@ -71,9 +71,7 @@ export default function ChangeTeamName() {
         }
         className="w-full bg-green-600 hover:bg-green-500 px-4 py-3 rounded-lg text-white font-semibold transition"
       >
-
         Change Team Name
-
       </button>
 
     ) : (
@@ -85,7 +83,7 @@ export default function ChangeTeamName() {
 
         <input
           type="text"
-          placeholder="New Team Name"
+          placeholder={currentTeamName}
           value={teamName}
           onChange={(e) =>
             setTeamName(
