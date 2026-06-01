@@ -4,8 +4,9 @@ import { useState } from "react";
 
 export default function RemoveMemberButton() {
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   async function handleRemove() {
 
@@ -35,22 +36,24 @@ export default function RemoveMemberButton() {
 
       if (!response.ok) {
 
-        alert(data.error);
+        setError(data.error);
 
         return;
       }
 
-      alert(
+      setMessage(
         "Member removed successfully"
       );
 
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
 
     } catch (error) {
 
       console.error(error);
 
-      alert(
+      setError(
         "Something went wrong"
       );
 
@@ -63,10 +66,23 @@ export default function RemoveMemberButton() {
 
   return (
 
+  <div className="w-full">
+
+    {message && (
+    <p className="text-green-400 text-sm font-mono mt-2">
+      {message}
+    </p>
+  )}
+    {error && (
+    <p className="text-red-400 text-sm font-mono mt-2">
+      {error}
+    </p>
+  )}
+
     <button
       onClick={handleRemove}
       disabled={loading}
-      className="bg-green-600 px-4 py-2 rounded text-white"
+      className="w-full bg-green-600 hover:bg-green-500 px-4 py-3 rounded-lg text-white font-semibold transition"
     >
 
       {
@@ -76,5 +92,7 @@ export default function RemoveMemberButton() {
       }
 
     </button>
-  );
+
+  </div>
+);
 }

@@ -3,6 +3,8 @@ import { useState } from "react";
 
 export default function LeaveTeam() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   async function handleLeave() {
     const confirmed = confirm("Are you sure you want to leave the team?");
@@ -22,31 +24,54 @@ export default function LeaveTeam() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error);
+        setError(data.error);
         return;
       }
 
-      alert("You left the team");
+      setMessage("You left the team");
 
-      window.location.href =
-        "/pbctf/login";
+     setTimeout(() => {
+        window.location.href =
+          "/pbctf/login";
+      }, 1500);
     } 
     catch (error) {
-      console.error(error);
-      alert("Something went wrong");
+      setError("Something went wrong");
     } 
     finally {
       setLoading(false);
     }
   }
   return (
+
+  <div className="w-full">
+
+    {message && (
+    <p className="text-green-400 text-sm font-mono mt-2">
+      {message}
+    </p>
+  )}
+
+    {error && (
+    <p className="text-red-400 text-sm font-mono mt-2">
+      {error}
+    </p>
+  )}
+
     <button
       onClick={handleLeave}
       disabled={loading}
-      className="bg-red-700 px-4 py-2 rounded text-white">
+      className="w-full bg-red-600 hover:bg-red-500 px-4 py-3 rounded-lg text-white font-semibold transition"
+    >
+
       {
-        loading ? "Leaving" : "Leave Team"
+        loading
+          ? "Leaving"
+          : "Leave Team"
       }
+
     </button>
-  );
+
+  </div>
+);
 }

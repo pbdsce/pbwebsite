@@ -4,6 +4,7 @@ import getCurrentUser from "@/lib/pbctf/getCurrentUser";
 import TeamInvite from "@/lib/db/models/TeamInvite";
 import connectDB from "@/lib/db/connection";
 import nodemailer from "nodemailer";
+import CtfRegsModel from "@/lib/db/models/CTFRegs";
 
 export async function POST(
   request: Request
@@ -39,11 +40,11 @@ export async function POST(
     );
   }
 
-  const registration =
-    user.registration;
+  const registration = user.registration;
+  const body = await request.json();
+  const { email } = body;
 
   if (registration.participant2) {
-
     return NextResponse.json(
       {
         error:
@@ -55,13 +56,33 @@ export async function POST(
     );
   }
 
-  const body =
-    await request.json();
+  const existingUser =
+  await CtfRegsModel.findOne({
+    $or: [
+      {
+        "participant1.email":
+          email,
+      },
+      {
+        "participant2.email":
+          email,
+      },
+    ],
+  });
 
-  const { email } = body;
+if (existingUser) {
+  return NextResponse.json(
+    {
+      error:
+        "This email is already registered",
+    },
+    {
+      status: 400,
+    }
+  );
+}
 
   if (!email) {
-
     return NextResponse.json(
       {
         error:
@@ -72,7 +93,11 @@ export async function POST(
       }
     );
   }
-
+  const existingInvite =
+  await TeamInvite.findOne({
+    email,
+  });
+  
   const token =
     crypto.randomBytes(32)
     .toString("hex");
@@ -80,16 +105,9 @@ export async function POST(
   await TeamInvite.create({
     teamId:
       registration._id,
-
-    email,
-
-    token,
-
-    expiresAt:
-      new Date(
-        Date.now() +
-        1000 * 60 * 60 * 24
-      ),
+      email,
+      token,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
   });
 
   const inviteLink =
@@ -116,41 +134,30 @@ const transporter =
 await transporter.sendMail({
   from:
     `"PBCTF Team Invite" <${process.env.MAIL_USER}>`,
-
   to: email,
-
   subject:
     "[PBCTF 5.0] Team Invitation",
-
   html: `
     <div style="font-family: sans-serif;">
-
       <h2>
         PBCTF Team Invitation
       </h2>
-
       <p>
         You have been invited to join a PBCTF team.
       </p>
-
       <p>
         Click below to accept the invite:
       </p>
-
       <a href="${inviteLink}">
         Accept Invite
       </a>
-
       <p>
         This invite expires in 24 hours.
       </p>
-
       <br />
-
       <p>
         - PointBlank
       </p>
-
     </div>
   `,
 });

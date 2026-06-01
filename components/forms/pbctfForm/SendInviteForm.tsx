@@ -4,14 +4,11 @@ import { useState } from "react";
 
 export default function SendInviteForm() {
 
-  const [email, setEmail] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [showForm, setShowForm] =
-   useState(false);
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   async function handleSendInvite(
     e: React.FormEvent
@@ -45,12 +42,12 @@ export default function SendInviteForm() {
 
       if (!response.ok) {
 
-        alert(data.error);
+        setError(data.error);
 
         return;
       }
 
-      alert(
+      setMessage(
         "Invite sent successfully!"
       );
 
@@ -60,7 +57,7 @@ export default function SendInviteForm() {
 
       console.error(error);
 
-      alert(
+      setError(
         "Something went wrong"
       );
 
@@ -73,7 +70,7 @@ export default function SendInviteForm() {
 
   return (
 
-  <div>
+  <div className="w-full">
 
     {!showForm ? (
 
@@ -81,7 +78,7 @@ export default function SendInviteForm() {
         onClick={() =>
           setShowForm(true)
         }
-        className="bg-blue-600 px-4 py-2 rounded text-white"
+        className="w-full bg-green-600 hover:bg-green-500 px-4 py-3 rounded-lg text-white font-semibold transition"
       >
 
         Add Member
@@ -90,37 +87,53 @@ export default function SendInviteForm() {
 
     ) : (
 
-      <form
-        onSubmit={handleSendInvite}
-        className="flex gap-2"
-      >
+      <div className="flex flex-col gap-2">
 
-        <input
-          type="email"
-          placeholder="Invite member email"
-          value={email}
-          onChange={(e) =>
-            setEmail(
-              e.target.value
-            )
-          }
-          className="bg-black border border-green-400 px-3 py-2 rounded"
-        />
-
-        <button
-          disabled={loading}
-          className="bg-blue-600 px-4 py-2 rounded text-white"
+        <form
+          onSubmit={handleSendInvite}
+          className="flex gap-3"
         >
 
-          {
-            loading
-              ? "Sending..."
-              : "Send Invite"
-          }
+          <input
+            type="email"
+            placeholder="Invite member email"
+            value={email}
+            onChange={(e) =>
+              setEmail(
+                e.target.value
+              )
+            }
+            className="flex-1 bg-black border border-green-400 px-4 py-3 rounded-lg text-white"
+          />
 
-        </button>
+          <button
+            disabled={loading}
+            className="bg-blue-600 hover:bg-blue-500 px-4 py-3 rounded-lg text-white font-semibold transition"
+          >
 
-      </form>
+            {
+              loading
+                ? "Sending..."
+                : "Send Invite"
+            }
+
+          </button>
+
+        </form>
+
+        {message && (
+          <p className="text-green-400 text-sm font-mono">
+            {message}
+          </p>
+        )}
+
+        {error && (
+          <p className="text-red-400 text-sm font-mono">
+            {error}
+          </p>
+        )}
+
+      </div>
 
     )}
 

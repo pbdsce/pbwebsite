@@ -3,12 +3,13 @@ import { useState } from "react";
 
 export default function TransferLeadership() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   async function handleTransfer() {
     const confirmed = confirm("Are you sure you want to transfer leadership?");
 
     if (!confirmed) { return;}
-
     try {
       setLoading(true);
       const response = await fetch("/api/pbctf/team/transfer-leadership",
@@ -19,15 +20,15 @@ export default function TransferLeadership() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error);
+        setError(data.error);
         return;
       }
-      alert("Leadership transferred!");
+      setMessage("Leadership transferred!");
       window.location.reload();
     } 
     catch (error) {
       console.error(error);
-      alert("Something went wrong");
+      setError("Something went wrong");
     } 
     finally {
       setLoading(false);
@@ -35,13 +36,32 @@ export default function TransferLeadership() {
   }
 
   return (
+  <div className="w-full">
+    
+    {message && (
+    <p className="text-green-400 text-sm font-mono mt-2">
+      {message}
+    </p>
+  )}
+
+    {error && (
+    <p className="text-red-400 text-sm font-mono mt-2">
+      {error}
+    </p>
+  )}
+
     <button
       onClick={handleTransfer}
       disabled={loading}
-      className="bg-green-600 px-4 py-2 rounded text-white">
+      className="w-full bg-green-600 hover:bg-green-500 px-4 py-3 rounded-lg text-white font-semibold transition"
+    >
       {
-        loading ? "Transferring" : "Transfer Leadership"
+        loading
+          ? "Transferring"
+          : "Transfer Leadership"
       }
     </button>
-  );
+
+  </div>
+);
 }

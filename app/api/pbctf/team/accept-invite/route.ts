@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
-
 import connectDB from "@/lib/db/connection";
-
 import TeamInvite from "@/lib/db/models/TeamInvite";
-
 import CtfRegsModel from "@/lib/db/models/CTFRegs";
 
 export async function POST(
@@ -13,10 +10,7 @@ export async function POST(
   try {
 
     await connectDB();
-
-    const body =
-      await request.json();
-
+    const body = await request.json();
     const {
       token,
       participant,
@@ -62,8 +56,7 @@ export async function POST(
 
       return NextResponse.json(
         {
-          error:
-            "Team not found",
+          error: "Team not found",
         },
         {
           status: 404,
@@ -78,8 +71,7 @@ export async function POST(
 
       return NextResponse.json(
         {
-          error:
-            "Team already full",
+          error: "Team already full",
         },
         {
           status: 400,
@@ -89,14 +81,12 @@ export async function POST(
 
     // VERIFY INVITED EMAIL
     if (
-      participant.email !==
-      invite.email
+      participant.email !== invite.email
     ) {
 
       return NextResponse.json(
         {
-          error:
-            "Invite email mismatch",
+          error: "Invite email mismatch",
         },
         {
           status: 400,
