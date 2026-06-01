@@ -38,7 +38,7 @@ export default function TransferLeadership() {
     <button
       onClick={handleTransfer}
       disabled={loading}
-      className="bg-yellow-600 px-4 py-2 rounded text-white">
+      className="bg-green-600 px-4 py-2 rounded text-white">
       {
         loading ? "Transferring" : "Transfer Leadership"
       }

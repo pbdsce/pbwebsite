@@ -66,7 +66,7 @@ export default function RemoveMemberButton() {
     <button
       onClick={handleRemove}
       disabled={loading}
-      className="bg-red-600 px-4 py-2 rounded text-white"
+      className="bg-green-600 px-4 py-2 rounded text-white"
     >
 
       {

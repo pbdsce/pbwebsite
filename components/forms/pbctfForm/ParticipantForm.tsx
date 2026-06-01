@@ -438,10 +438,6 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
             )}
           </div>
 
-          disabled={
-  participantNumber === 2
-}
-
           {watchPreviousCTF === "Yes" && (
             <div className="md:col-span-2">
               <textarea
