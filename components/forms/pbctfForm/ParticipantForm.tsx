@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UseFormRegister, FieldErrors, UseFormWatch } from 'react-hook-form';
+import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import { FormData } from './types';
 
 interface ParticipantFormProps {
@@ -8,6 +8,7 @@ interface ParticipantFormProps {
   errors: FieldErrors<FormData>;
   watch: UseFormWatch<FormData>;
   onEmailVerificationChange?: (isVerified: boolean) => void;
+  setValue?: UseFormSetValue<FormData>;
 }
 
 const ParticipantForm: React.FC<ParticipantFormProps> = ({ 
@@ -436,6 +437,10 @@ const ParticipantForm: React.FC<ParticipantFormProps> = ({
               </p>
             )}
           </div>
+
+          disabled={
+  participantNumber === 2
+}
 
           {watchPreviousCTF === "Yes" && (
             <div className="md:col-span-2">

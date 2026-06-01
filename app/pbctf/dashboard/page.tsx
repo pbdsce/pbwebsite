@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import ChangeTeamName from "@/components/forms/pbctfForm/ChangeTeamName";
 import TransferLeadership from "@/components/forms/pbctfForm/TransferLeadership";
 import LeaveTeam from "@/components/forms/pbctfForm/LeaveTeam";
+import SendInviteForm from "@/components/forms/pbctfForm/SendInviteForm";
+import RemoveMemberButton from "@/components/forms/pbctfForm/RemoveMemberButton";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -49,7 +51,8 @@ export default async function DashboardPage() {
             <div className="flex gap-4 flex-wrap">
                 <ChangeTeamName />
             {registration.participant2 && (<TransferLeadership />)}
-            {registration.participant2 && (<button className="bg-red-600 px-4 py-2 rounded text-white">Remove Member</button>)}
+            {!registration.participant2 && (<SendInviteForm />)}
+            {registration.participant2 && (<RemoveMemberButton />)}
             </div>
           </div>
         )}

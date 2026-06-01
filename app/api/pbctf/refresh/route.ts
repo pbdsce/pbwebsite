@@ -5,11 +5,10 @@ import connectDb from "@/lib/db/connection";
 import PBCTFRefreshToken from "@/lib/db/models/CTFRefreshToken";
 import generateAccessToken from "@/lib/pbctf/generateAccessToken";
 import generateRefreshToken from "@/lib/pbctf/generateRefreshToken";
-import connectDB from "@/lib/db/connection";
 
 export async function POST() {
   try {
-    await connectDB();
+    await connectDb();
     const cookieStore = await cookies();
     const refreshToken = cookieStore.get("pbctf_refresh")?.value;
 

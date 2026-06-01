@@ -27,7 +27,7 @@ interface TempCTFUser {
 export interface Registration extends Document {
   teamName?: string;
   participant1: Participant;
-  participant2?: Participant;
+  participant2?: Participant | null;
   participationType: "solo" | "duo";
 }
 
