@@ -12,4 +12,4 @@ jobs:
     steps:
       - name: Trigger scraper
         run: |
-          curl -f -X POST "${{ secrets.SCRAPE_URL }}?key=${{ secrets.SCRAPE_SECRET }}&incremental=true"
+          curl -fsS -X POST "${{ secrets.SCRAPE_URL }}?key=${{ secrets.SCRAPE_SECRET }}&incremental=true"

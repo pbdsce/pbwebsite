@@ -105,17 +105,18 @@ async function saveContributions(
       orgAvatarUrl: normalizeExternalUrl(c.orgAvatarUrl),
       orgHtmlUrl:   normalizeExternalUrl(c.orgHtmlUrl),
     };
-    const setOnInsert: Record<string, any> = {
-      desc: "",
-      userAvatarUrl: "",
-    };
+    const setOnInsert: Record<string, any> = {};
 
     if (c.desc !== undefined) {
       setFields.desc = c.desc ?? "";
+    } else {
+      setOnInsert.desc = "";
     }
 
     if (c.userAvatarUrl !== undefined) {
       setFields.userAvatarUrl = normalizeExternalUrl(c.userAvatarUrl);
+    } else {
+      setOnInsert.userAvatarUrl = "";
     }
  
     await Contribution.findOneAndUpdate(
