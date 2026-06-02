@@ -5,13 +5,13 @@ export default function LeaveTeam() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false);
 
   async function handleLeave() {
-    const confirmed = confirm("Are you sure you want to leave the team?");
+    setShowConfirm(true);
+  }
 
-    if (!confirmed) {
-      return;
-    }
+    async function confirmLeave() {
     try {
       setError("");
       setMessage("");
@@ -42,12 +42,11 @@ export default function LeaveTeam() {
     } 
     finally {
       setLoading(false);
+      setShowConfirm(false);
     }
   }
   return (
-
   <div className="w-full">
-
     {message && (
     <p className="text-green-400 text-sm font-mono mt-2">
       {message}
@@ -60,10 +59,30 @@ export default function LeaveTeam() {
     </p>
   )}
 
+  {showConfirm && (
+    <div className="mb-4 border border-red-500 bg-black/60 rounded-lg p-4">
+      <p className="text-red-300 font-mono text-sm">
+        Are you sure you want to leave the team?
+      </p>
+      <div className="flex gap-3 mt-4">
+        <button onClick={confirmLeave}
+        disabled={loading}
+        className="bg-red-500 hover:bg-red-500 px-4 py-2 rounded-lg text-white font-semibold transition">
+          Yes, Leave
+        </button>
+        <button onClick={()=> setShowConfirm(false)}
+        disabled={loading}
+        className="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-white font-semibold transition border border-zinc-600">
+          Cancel
+        </button>
+      </div>
+    </div>
+  )}
+
     <button
       onClick={handleLeave}
       disabled={loading}
-      className="w-full bg-red-600 hover:bg-red-500 px-4 py-3 rounded-lg text-white font-semibold transition"
+      className="w-full bg-red-500 hover:bg-red-500 px-4 py-3 rounded-lg text-white font-semibold transition"
     >
 
       {

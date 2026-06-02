@@ -5,11 +5,13 @@ export default function TransferLeadership() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false);
 
   async function handleTransfer() {
-    const confirmed = confirm("Are you sure you want to transfer leadership?");
+    setShowConfirm(true);
+  }
 
-    if (!confirmed) { return;}
+    async function confirmTransfer() {
     try {
       setError("");
       setMessage("");
@@ -29,8 +31,8 @@ export default function TransferLeadership() {
       window.location.reload();
     } 
     catch (error) {
-      console.error(error);
       setError("Something went wrong");
+      setShowConfirm(false);
     } 
     finally {
       setLoading(false);
@@ -39,7 +41,6 @@ export default function TransferLeadership() {
 
   return (
   <div className="w-full">
-    
     {message && (
     <p className="text-green-400 text-sm font-mono mt-2">
       {message}
@@ -51,6 +52,27 @@ export default function TransferLeadership() {
       {error}
     </p>
   )}
+
+  {showConfirm && (
+    <div className="mb-4 border border-green-600 bg-black/60 rounded-lg p-4">
+      <p className="text-green-300 font-mono text-sm">
+        Are you sure you want to transfer the leadership?
+      </p>
+      <div className="flex gap-3 mt-4">
+        <button onClick={confirmTransfer}
+        disabled={loading}
+        className="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg text-white font-semibold transition">
+          Yes, Transfer
+        </button>
+        <button onClick={()=> setShowConfirm(false)}
+        disabled={loading}
+        className="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-white font-semibold transition border border-zinc-600">
+          Cancel
+        </button>
+      </div>
+    </div>
+  )}
+
 
     <button
       onClick={handleTransfer}
