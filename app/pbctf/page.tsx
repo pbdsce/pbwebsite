@@ -71,20 +71,28 @@ const PBCTFRegisterPage = () => {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="bg-gray-900/30 border border-green-400/20 rounded-lg"
         >
-          <div className="border-b border-green-400/20 px-6 py-3">
-            <h2 className="text-green-300 font-semibold">Registration Terminal</h2>
-          </div>
+         <div className="border-b border-green-400/20 px-6 py-3 flex justify-between items-center">
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-400 font-mono text-sm">
-              Already registered?
-            </p>
+  <h2 className="text-green-300 font-semibold">
+    Registration Terminal
+  </h2>
 
-            <Link
-              href="/pbctf/login" className="text-green-400 hover:text-green-300 underline font-mono">
-                Login
-            </Link>
-          </div>
+  <div className="flex items-center gap-2 font-mono text-sm">
+    
+    <p className="text-gray-400">
+      Already registered?
+    </p>
+
+    <Link
+      href="/pbctf/login"
+      className="text-green-300 hover:text-green-400 underline"
+    >
+      Login
+    </Link>
+
+  </div>
+
+</div>
           <div className="p-6">
             <PBCTFForm />
           </div>
