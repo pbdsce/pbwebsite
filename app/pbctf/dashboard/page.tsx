@@ -5,6 +5,7 @@ import TransferLeadership from "@/components/forms/pbctfForm/TransferLeadership"
 import LeaveTeam from "@/components/forms/pbctfForm/LeaveTeam";
 import SendInviteForm from "@/components/forms/pbctfForm/SendInviteForm";
 import RemoveMemberButton from "@/components/forms/pbctfForm/RemoveMemberButton";
+import LogoutButton from "@/components/forms/pbctfForm/Logout";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -17,17 +18,19 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-black text-green-400 px-4 py-8">
       <div className="max-w-4xl mx-auto space-y-8 w-full">
-        <div>
-          <h1 className="text-2xl md:text-4xl font-mono break-words">
-            Welcome to PBCTF Dashboard
-          </h1>
-          <p className="text-gray-400 mt-2">
-            Team:
-            {" "}
-            {registration.teamName}
-          </p>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-4xl font-mono break-words">
+              Welcome to PBCTF Dashboard
+            </h1>
+            <p className="text-gray-400 mt-2">
+              Team:
+              {" "}
+              {registration.teamName}
+            </p>
+          </div>
+          <LogoutButton />
         </div>
-
         <div className="border border-green-400/20 rounded-lg p-6">
            <h2 className="text-2xl mb-4">Team Members</h2>
            <div className="space-y-4">
