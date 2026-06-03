@@ -4,7 +4,7 @@ import CtfRegsModel, { TempCTFUserModel } from "@/lib/db/models/CTFRegs";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import generateAccessToken from "@/lib/pbctf/generateAccessToken";
 import generateRefreshToken from "@/lib/pbctf/generateRefreshToken";
 import PBCTFRefreshToken from "@/lib/db/models/CTFRefreshToken";
@@ -687,14 +687,26 @@ async function verifyOTP(request: Request) {
         { status: 400 }
       );
     }
-    const accessToken = generateAccessToken(email);
-    const refreshToken = generateRefreshToken();
-    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
-    await PBCTFRefreshToken.create({
-      email,
-      tokenHash: refreshTokenHash,
-      expiresAt: new Date(Date.now()+7*24*60*60*1000),
-    });
+    const accessToken =
+  generateAccessToken(email);
+
+const refreshToken =
+  generateRefreshToken();
+
+const refreshTokenHash =
+  crypto
+    .createHash("sha256")
+    .update(refreshToken)
+    .digest("hex");
+
+await PBCTFRefreshToken.create({
+  email,
+  tokenHash: refreshTokenHash,
+  expiresAt: new Date(
+    Date.now() +
+    24 * 60 * 60 * 1000
+  ),
+});
     const response = NextResponse.json({
       success: true,
       message: "OTP verified successfully"
