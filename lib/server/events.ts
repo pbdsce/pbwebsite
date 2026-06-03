@@ -2,7 +2,7 @@ import EventModel, { type Events } from "@/lib/db/models/events";
 
 export const getAllEvents = async (): Promise<Events[]> => {
   try {
-    const events = await EventModel.find();
+    const events = await EventModel.find().lean();
     return events as Events[];
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -12,7 +12,7 @@ export const getAllEvents = async (): Promise<Events[]> => {
 
 export const getEventById = async (id: string): Promise<Events | null> => {
   try {
-    const event = await EventModel.findById(id);
+    const event = await EventModel.findById(id).lean();
     return event as Events | null;
   } catch (error) {
     console.error(`Error fetching event with id ${id}:`, error);
@@ -40,7 +40,7 @@ export const updateEvent = async (
       eventData._id,
       eventData,
       { new: true },
-    );
+    ).lean();
     return updatedEvent as Events | null;
   } catch (error) {
     console.error(`Error updating event with id ${eventData._id}:`, error);
