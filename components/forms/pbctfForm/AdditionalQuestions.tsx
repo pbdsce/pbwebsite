@@ -169,12 +169,27 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
           )}
           
           {showHintMessage && (
-            <p className="text-red-400 font-mono text-sm animate-in fade-in-0 slide-in-from-top-1 duration-500">
-              <strong>
-                {"Some things are removed from view. not from existence."}
-              </strong>
-            </p>
-          )}
+  <p className="text-red-400 font-mono text-sm animate-in fade-in-0 slide-in-from-top-1 duration-500">
+    <strong>
+      Dead stars still shine
+      <br /><br />
+
+      When you look at a star, you are not seeing it as it is. You are seeing it as it was, light that left home centuries ago, still travelling.
+      <br /><br />
+
+      We rebuilt everything. The face you see now is new. But the light from before us is still out there, still moving. Frozen at the moment it was captured.
+      <br /><br />
+
+      Find the old light. Something was said once, quietly, in a place most eyes slide past. It was never truly taken back.
+      <br /><br />
+
+      Some things are removed from view. Not from existence.
+      <br /><br />
+
+      Flag format: {"pbctf{...}"}
+    </strong>
+  </p>
+)}
         </div>
 
         <div className="space-y-2">

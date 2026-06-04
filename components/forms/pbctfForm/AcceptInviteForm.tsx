@@ -4,6 +4,7 @@ import { useState } from "react";
 import ParticipantForm from "./ParticipantForm";
 import { FormData } from "./types";
 import RulesAgreements from "./RulesAggrements";
+import SuccessScreen from "./SucessScreen";
 
 interface Props {
   token: string;
@@ -18,6 +19,7 @@ export default function AcceptInviteForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const {
     register,
@@ -31,6 +33,10 @@ export default function AcceptInviteForm({
       },
     },
   });
+
+  if (success) {
+     return <SuccessScreen />;
+    }
 
   async function handleAcceptInvite() {
 
@@ -111,12 +117,7 @@ export default function AcceptInviteForm({
         return;
       }
 
-      setMessage(
-        "Successfully joined team!"
-      );
-
-      window.location.href =
-        "/pbctf/login";
+    setSuccess(true);
 
     } catch (error) {
 

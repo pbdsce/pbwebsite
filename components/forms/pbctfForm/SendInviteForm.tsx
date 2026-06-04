@@ -63,7 +63,7 @@ export default function SendInviteForm() {
         onClick={() =>
           setShowForm(true)
         }
-        className="w-full bg-green-600 hover:bg-green-500 px-4 py-3 rounded-lg text-white font-semibold transition">
+        className="w-full border border-green-400/20 bg-gradient-to-r from-green-900/20 to-green-800/10 rounded-xl py-6 text-center hover:bg-green-400/5 transition-all duration-300 font-mono font-semi-bold text-xl">
         Add Member
       </button>
 
@@ -85,12 +85,12 @@ export default function SendInviteForm() {
                 e.target.value
               )
             }
-            className="flex-1 bg-black border border-green-400 px-4 py-3 rounded-lg text-white"
+            className="min-w-[250px] flex-1 bg-green-900/20 border border-green-500/20 px-4 py-3 rounded-lg text-white"
           />
 
           <button
             disabled={loading}
-            className="bg-blue-600 hover:bg-blue-500 px-4 py-3 rounded-lg text-white font-semibold transition"
+            className="border border-green-400/30 rounded-xl px-4 py-2 bg-green-900/10 hover:bg-green-900/20 transition-all duration-300"
           >
 
             {

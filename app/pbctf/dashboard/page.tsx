@@ -6,7 +6,6 @@ import LeaveTeam from "@/components/forms/pbctfForm/LeaveTeam";
 import SendInviteForm from "@/components/forms/pbctfForm/SendInviteForm";
 import RemoveMemberButton from "@/components/forms/pbctfForm/RemoveMemberButton";
 import LogoutButton from "@/components/forms/pbctfForm/Logout";
-import { motion } from "framer-motion";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -94,14 +93,15 @@ export default async function DashboardPage() {
             {registration.participant2 && (
               <RemoveMemberButton />
             )}
-
-            {registration.participant2 && (
-              <LeaveTeam />
-            )}
-
         </div>
         </div>
-      )}
+        )}
+        <div className="bg-gray-800/30 border border-green-400/20 rounded-lg p-6">
+          <h2 className="text-2xl mb-4">
+            Team Actions
+          </h2>
+          <LeaveTeam />
+        </div>
     </div>
    </div>
   </div>
