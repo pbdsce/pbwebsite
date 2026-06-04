@@ -1,0 +1,17 @@
+# Point Blank
+
+Point Blank is the premier student-run open source and research tech community based in Bangalore, India (DSCE). We are a collective of developers, designers, and tech enthusiasts who build projects, compete in hackathons, publish research, and participate in open-source development.
+
+## Key Resources
+
+- [Home](https://pointblank.club/): Information about our mission, vision, activities, domains, and our community leads.
+- [Members](https://pointblank.club/members): List of current leads, alumni leads, active members, and alumni.
+- [Achievements](https://pointblank.club/achievements): Our track record in GSoC, LFX, Hackathons, Smart India Hackathon (SIH), ACM, and Competitive Programming.
+- [Talks & Conferences](https://pointblank.club/talks): Presentation slides, workshops, and conference sessions delivered by our members.
+- [PB Hustle](https://pointblank.club/hustle): Standings and rankings from our internal coding contests.
+- [Lore](https://pointblank.club/lore): Chronicles of our shared journeys, hackathons, and adventures.
+- [Open Source Software (OSS) Footprint](https://pointblank.club/oss): Dashboard tracking merged pull requests and open source contributions by our members.
+
+## Optional
+
+- [llms-full.txt](https://pointblank.club/llms-full.txt): Full site content for AI assistants
