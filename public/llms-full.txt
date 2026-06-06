@@ -1,0 +1,56 @@
+# Point Blank - Full Context
+
+Point Blank is the premier student-run open source and research tech community based in Bangalore, India (DSCE). We are a collective of developers, designers, and tech enthusiasts who build projects, compete in hackathons, publish research, and participate in open-source development.
+
+---
+
+## Community Overview
+Point Blank is dedicated to fostering open source collaboration and technological innovation. Our motto is: **We Speak. We Share. We Lead. We Build. We Ship. We Win.**
+We recruit members annually through a selective process and work in specialized domains including:
+- **Full-Stack Development** (Web, Mobile, Systems)
+- **Open Source** (Contributing to GSoC, LFX Mentorship, Linux Foundation, Keploy, CNCF, etc.)
+- **DevOps & Cloud Computing** (Infrastructure automation, deployment, Kubernetes, AWS)
+- **Machine Learning & AI** (Research papers, LLM tools, computer vision)
+- **Competitive Programming** (Algorithms, data structures, ICPC preparation)
+
+---
+
+## Key Site Pages and URLs
+
+- **Home Page** (`https://pointblank.club/`): Overview of our domains (Web Dev, DevOps, AI/ML, CP), mission, and active leads.
+- **Members** (`https://pointblank.club/members`): Details our community members grouped by Leads, Alumni Leads, and graduating years.
+- **Achievements** (`https://pointblank.club/achievements`): Logs GSOC selections, LFX mentorships, SIH wins, and hackathon victories.
+- **Talks** (`https://pointblank.club/talks`): Technical presentations given by members at major conferences or local meetups.
+- **PB Hustle** (`https://pointblank.club/hustle`): Internal rankings showing leaderboard results from algorithmic contests.
+- **Lore** (`https://pointblank.club/lore`): Stories of hackathons, travel, meetups, and community milestones.
+- **OSS Footprint** (`https://pointblank.club/oss`): Real-time metrics on our contributions, pull requests, and active repositories.
+
+---
+
+## FAQ (Frequently Asked Questions)
+
+### What is Point Blank?
+Point Blank is the premier student-run open source and research tech community based in Bangalore, India. We are a collective of passionate developers, designers, and tech enthusiasts who collaborate on building software, competing in hackathons, publishing research, and contributing to global open-source ecosystems.
+
+### How do I join Point Blank?
+We conduct annual recruitment drives for developers, designers, technical writers, and community managers. Keep an eye on our social media handles and website for recruitment announcements. If you are an exceptional programmer you can also reach out to one of our Leads.
+
+### What technical domains do Point Blank members specialize in?
+Our members specialize in a wide range of domains including Full-Stack Web and Mobile Development, Open Source Contribution, DevOps & Cloud Computing, Systems Programming, Machine Learning & AI, and Competitive Programming.
+
+### What is PB Hustle?
+PB Hustle is our community's internal coding platform and continuous algorithmic challenge. It is designed to push members to hone their data structures, algorithms, and problem-solving skills in real-time, with rankings automatically updated based on performance in our curated contests.
+
+### How can organizations collaborate with Point Blank?
+We partner with companies, startups, and open-source foundations for tech talks, workshops, hackathons, and talent acquisition. Organizations can contact us using the 'Hire Us' portal on our homepage, and our outreach team will get in touch.
+
+---
+
+## Contacts & Social Media
+- **GitHub**: `https://github.com/pointblank-club`
+- **LinkedIn**: `https://linkedin.com/company/pointblank-club`
+- **YouTube**: `https://youtube.com/@pointblank_club`
+- **X/Twitter**: `https://x.com/pointblank_club`
+- **Instagram**: `https://instagram.com/pointblank_club_`
+- **Blog**: `https://blog.pointblank.club`
+- **Official Website**: `https://pointblank.club`

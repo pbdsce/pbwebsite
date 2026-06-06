@@ -364,7 +364,7 @@ export default function Achievements({
     <main className="min-h-screen text-white">
       {/* Heading */}
       <div className="flex flex-col items-center justify-center pt-20 pb-12 px-4 text-center">
-        <div className="text-3xl md:text-5xl lg:text-6xl font-medium mb-6 px-4 md:px-10 flex flex-wrap justify-center gap-2">
+        <h1 className="text-3xl md:text-5xl lg:text-6xl font-medium mb-6 px-4 md:px-10 flex flex-wrap justify-center gap-2">
           {phrases.map((phrase, idx) => (
             <motion.span
               key={idx}
@@ -380,7 +380,7 @@ export default function Achievements({
               {idx < phrases.length - 1 ? "." : ""}
             </motion.span>
           ))}
-        </div>
+        </h1>
 
         <motion.p
           initial={{ opacity: 0 }}
