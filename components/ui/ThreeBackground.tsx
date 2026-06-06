@@ -79,6 +79,10 @@ export default function ThreeBackground() {
     const keys: Key[] = [];
 
     const solidMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const frameMat = new THREE.MeshBasicMaterial({
+      color: GAP_NEON,
+      side: THREE.DoubleSide,
+    });
 
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -121,6 +125,7 @@ export default function ThreeBackground() {
           haloEdgeGeometry,
         );
         haloEdgeGeometry.dispose();
+        haloGeo.dispose();
         const halo = new LineSegments2(haloLineGeometry, haloMat);
 
         const group = new THREE.Group();
@@ -158,10 +163,6 @@ export default function ThreeBackground() {
         gapHole.closePath();
         gapShape.holes.push(gapHole);
         const frameGeo = new THREE.ShapeGeometry(gapShape);
-        const frameMat = new THREE.MeshBasicMaterial({
-          color: GAP_NEON,
-          side: THREE.DoubleSide,
-        });
         const frame = new THREE.Mesh(frameGeo, frameMat);
         frame.rotation.x = -Math.PI / 2;
         frame.position.set(px, 1, pz);
