@@ -32,9 +32,9 @@ export default function LoreCard({
           <div className="w-full flex flex-col-reverse md:flex-row min-h-100">
             <div className="w-full md:w-[50%]">
               <div className="min-h-18 w-full pt-8 pl-5 md:pl-12.5 ">
-                <h1 className="text-3xl sm:text-5xl md:text-5xl text-[#37FF00] font-medium">
+                <h2 className="text-3xl sm:text-5xl md:text-5xl text-[#37FF00] font-medium">
                   {title}
-                </h1>
+                </h2>
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2 w-full pl-5 md:pl-12.5">
