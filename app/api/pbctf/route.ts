@@ -19,6 +19,17 @@ type ParticipantInput = {
     howDidYouHear?: string;
   };
 
+type RecaptchaValidationResult =
+  | { ok: true }
+  | {
+      ok: false;
+      status: number;
+      body: {
+        message: string;
+        error: string;
+      };
+    };
+
 /**
  * @swagger
  * /api/registrations:
@@ -282,83 +293,111 @@ export async function POST(request: Request) {
  *                   type: string
  *                   example: "reCAPTCHA token not found! Try again"
  */
+async function verifyRecaptchaToken(
+  recaptchaToken: unknown,
+  expectedAction = "submit"
+): Promise<RecaptchaValidationResult> {
+  if (!recaptchaToken || typeof recaptchaToken !== "string") {
+    return {
+      ok: false,
+      status: 400,
+      body: {
+        message: "reCAPTCHA token not found! Try again",
+        error: "reCAPTCHA token not found!",
+      },
+    };
+  }
+
+  if (
+    !process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ||
+    !process.env.RECAPTCHA_PROJECT ||
+    !process.env.RECAPTCHA_API_KEY
+  ) {
+    return {
+      ok: false,
+      status: 500,
+      body: {
+        message: "reCAPTCHA is not configured on the server.",
+        error: "Missing reCAPTCHA environment variables",
+      },
+    };
+  }
+
+  const details = {
+    event: {
+      token: recaptchaToken,
+      siteKey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+      expectedAction,
+    },
+  };
+
+  const recaptchaResponse = await fetch(
+    `https://recaptchaenterprise.googleapis.com/v1/projects/${process.env.RECAPTCHA_PROJECT}/assessments?key=${process.env.RECAPTCHA_API_KEY}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(details),
+    }
+  );
+
+  const recaptchaResult = await recaptchaResponse.json();
+  if (!recaptchaResponse.ok) {
+    console.error("reCAPTCHA API error:", recaptchaResult);
+    return {
+      ok: false,
+      status: 500,
+      body: {
+        message: "reCAPTCHA validation failed.",
+        error: recaptchaResult.error?.message || "Google reCAPTCHA API error",
+      },
+    };
+  }
+
+  if (!recaptchaResult.tokenProperties?.valid) {
+    return {
+      ok: false,
+      status: 400,
+      body: {
+        message: "reCAPTCHA token is invalid.",
+        error: recaptchaResult.tokenProperties?.invalidReason || "Invalid token",
+      },
+    };
+  }
+
+  if (recaptchaResult.tokenProperties?.action !== expectedAction) {
+    return {
+      ok: false,
+      status: 400,
+      body: {
+        message: "reCAPTCHA token is invalid.",
+        error: "Invalid reCAPTCHA action",
+      },
+    };
+  }
+
+  if ((recaptchaResult.riskAnalysis?.score ?? 0) < 0.7) {
+    return {
+      ok: false,
+      status: 400,
+      body: {
+        message: "reCAPTCHA validation failed.",
+        error: "Low reCAPTCHA score",
+      },
+    };
+  }
+
+  return { ok: true };
+}
+
 async function validateRecaptcha(request: Request) {
   try {
     const formData = await request.json();
-    const { recaptcha_token } = formData;
+    const validation = await verifyRecaptchaToken(formData.recaptcha_token);
 
-    if (!recaptcha_token) {
-      return NextResponse.json(
-        {
-          message: "reCAPTCHA token not found! Try again",
-          error: "reCAPTCHA token not found!",
-        },
-        { status: 400 }
-      );
-    }
-
-    if (
-      !process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ||
-      !process.env.RECAPTCHA_PROJECT ||
-      !process.env.RECAPTCHA_API_KEY
-    ) {
-      return NextResponse.json(
-        {
-          message: "reCAPTCHA is not configured on the server.",
-          error: "Missing reCAPTCHA environment variables",
-        },
-        { status: 500 }
-      );
-    }
-
-    const details = {
-      event: {
-        token: recaptcha_token,
-        siteKey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
-      },
-    };
-
-    const recaptchaResponse = await fetch(
-      `https://recaptchaenterprise.googleapis.com/v1/projects/${process.env.RECAPTCHA_PROJECT}/assessments?key=${process.env.RECAPTCHA_API_KEY}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(details),
-      }
-    );
-
-    const recaptchaResult = await recaptchaResponse.json();
-    if (!recaptchaResponse.ok) {
-      console.error("reCAPTCHA API error:", recaptchaResult);
-      return NextResponse.json(
-        {
-          message: "reCAPTCHA validation failed.",
-          error: recaptchaResult.error?.message || "Google reCAPTCHA API error",
-        },
-        { status: 500 }
-      );
-    }
-
-    if (!recaptchaResult.tokenProperties?.valid) {
-      return NextResponse.json(
-        {
-          message: "reCAPTCHA token is invalid.",
-          error: recaptchaResult.tokenProperties?.invalidReason || "Invalid token",
-        },
-        { status: 400 }
-      );
-    }
-
-    if ((recaptchaResult.riskAnalysis?.score ?? 0) < 0.7) {
-      return NextResponse.json(
-        {
-          message: "reCAPTCHA validation failed.",
-          error: "Low reCAPTCHA score",
-        },
-        { status: 400 }
-      );
+    if (!validation.ok) {
+      return NextResponse.json(validation.body, { status: validation.status });
     }
 
     return NextResponse.json({ message: "Recaptcha validated!" });
@@ -676,6 +715,18 @@ async function addRegistration(request: Request) {
         { status: 400 }
       );
     }
+
+    const recaptchaValidation = await verifyRecaptchaToken(
+      data.recaptcha_token
+    );
+
+    if (!recaptchaValidation.ok) {
+      return NextResponse.json(recaptchaValidation.body, {
+        status: recaptchaValidation.status,
+      });
+    }
+
+    await connectDB();
 
     const transformParticipant = (p: ParticipantInput) => {
       if (!p) return undefined;

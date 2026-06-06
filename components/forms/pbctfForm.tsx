@@ -280,25 +280,6 @@ const PBCTFForm: React.FC = () => {
         return;
       }
 
-      const response1 = await fetch(
-        "/api/pbctf?action=validateRecaptcha",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ recaptcha_token }),
-        }
-      );
-
-      const response1Text = await response1.text();
-      const res = response1Text ? JSON.parse(response1Text) : {};
-
-      if (!response1.ok || res.error) {
-        toast.error(getRecaptchaErrorMessage(res.error, res.message));
-        return;
-      }
-
       if (
         data.participationType === "duo" &&
         data.participant2 &&
@@ -344,14 +325,19 @@ const PBCTFForm: React.FC = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify({ ...data, recaptcha_token }),
         }
       );
 
       const response2Text = await response2.text();
       const result = response2Text ? JSON.parse(response2Text) : {};
       if (!response2.ok) {
-        toast.error(result.error || "Failed to submit registration.");
+        toast.error(
+          getRecaptchaErrorMessage(
+            result.error || "Failed to submit registration.",
+            result.message
+          )
+        );
         return;
       }
       setSuccess(true);
