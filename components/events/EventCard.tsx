@@ -106,16 +106,14 @@ export default function EventCard({
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="object-cover select-none"
                 draggable={false}
+                loading="lazy"
               />
             )}
           </div>
 
           {/* Text */}
           <div className="flex flex-col gap-1 p-1 pl-2">
-            <span
-              className="text-xl lg:text-3xl font-medium leading-normal align-middle bg-linear-to-b from-[#37FF00] to-[#219900] bg-clip-text text-transparent"
-
-            >
+            <span className="text-xl lg:text-3xl font-medium leading-normal align-middle bg-linear-to-b from-[#37FF00] to-[#219900] bg-clip-text text-transparent">
               {title}
             </span>
             <span className="text-sm font-normal leading-normal text-white/65 line-clamp-1">
@@ -146,7 +144,8 @@ export default function EventCard({
               : "TBA"}
           </div>
           <div className="text-xs md:text-sm text-white/80">
-            <strong className="text-pbgreen">Location:</strong> {location || "TBA"}
+            <strong className="text-pbgreen">Location:</strong>{" "}
+            {location || "TBA"}
           </div>
           <p className="mt-2 text-xs md:text-sm leading-relaxed text-white/60 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-pbtext/5 [&::-webkit-scrollbar-track]:rounded-3xl [&::-webkit-scrollbar-thumb]:bg-pbtext/25 [&::-webkit-scrollbar-thumb]:rounded-full">
             {description}
