@@ -5,9 +5,6 @@ import { motion } from "framer-motion";
 const PBCTFRegisterPage = () => {
   return (
     <div className="min-h-screen mt-10 bg-black text-green-400 font-mono overflow-hidden">
-      <div className="hidden" id="secret-agent-flag" data-flag="pbctf{pls_h4ck_m3_d4ddy}">
-        🕵️‍♂️ CTF SECRET AGENT FLAG: pbctf&#123;pls_h4ck_m3_d4ddy&#125; 🕵️‍♂️
-      </div>
       <div className="max-w-4xl mx-auto px-6 py-8">
         <motion.div
           initial={{ opacity: 0 }}

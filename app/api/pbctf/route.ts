@@ -30,6 +30,8 @@ type RecaptchaValidationResult =
       };
     };
 
+const PBCTF_REGISTRATION_FLAG = process.env.PBCTF_REGISTRATION_FLAG;
+
 /**
  * @swagger
  * /api/registrations:
@@ -223,6 +225,8 @@ export async function POST(request: Request) {
       return sendOTP(request);
     } else if (action === "verifyOTP") {
       return verifyOTP(request);
+    } else if (action === "validateFlag") {
+      return validateFlag(request);
     } else if (action === "addRegistration") {
       return addRegistration(request);
     } else {
@@ -239,6 +243,39 @@ export async function POST(request: Request) {
     );
   }
 }
+
+async function validateFlag(request: Request) {
+  try {
+    if (!PBCTF_REGISTRATION_FLAG) {
+      return NextResponse.json(
+        { valid: false, message: "Flag validation is not configured." },
+        { status: 500 }
+      );
+    }
+
+    const data = await request.json();
+    const isValid =
+      typeof data.secretFlag === "string" &&
+      data.secretFlag === PBCTF_REGISTRATION_FLAG;
+
+    return NextResponse.json(
+      {
+        valid: isValid,
+        message: isValid
+          ? "Excellent! You've found the flag!"
+          : "Incorrect flag! Keep looking...",
+      },
+      { status: isValid ? 200 : 400 }
+    );
+  } catch (error) {
+    console.error("Error validating flag:", error);
+    return NextResponse.json(
+      { valid: false, message: "Unable to check the flag. Please try again." },
+      { status: 500 }
+    );
+  }
+}
+
 /**
  * @swagger
  * /api/registrations/validateRecaptcha:
@@ -711,6 +748,29 @@ async function addRegistration(request: Request) {
         {
           error:
             "Invalid data. Participant1 and participationType are required.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (!PBCTF_REGISTRATION_FLAG) {
+      return NextResponse.json(
+        {
+          message: "Flag validation is not configured.",
+          error: "Missing PBCTF_REGISTRATION_FLAG environment variable",
+        },
+        { status: 500 }
+      );
+    }
+
+    if (
+      typeof data.secretFlag !== "string" ||
+      data.secretFlag !== PBCTF_REGISTRATION_FLAG
+    ) {
+      return NextResponse.json(
+        {
+          message: "Incorrect flag! Keep looking...",
+          error: "Incorrect flag",
         },
         { status: 400 }
       );

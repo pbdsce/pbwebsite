@@ -30,6 +30,7 @@ const PBCTFForm: React.FC = () => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [participant1EmailVerified, setParticipant1EmailVerified] = useState<boolean>(false);
   const [participant2EmailVerified, setParticipant2EmailVerified] = useState<boolean>(false);
+  const [secretFlagValidated, setSecretFlagValidated] = useState<boolean>(false);
 
   const {
     register,
@@ -154,7 +155,8 @@ const PBCTFForm: React.FC = () => {
     }
 
     // Step 3: Additional Questions complete
-    const additionalQuestionsComplete = howDidYouHear && howDidYouHear.length > 0 && secretFlag === "pbctf{pls_h4ck_m3_d4ddy}";
+    const additionalQuestionsComplete =
+      howDidYouHear && howDidYouHear.length > 0 && secretFlagValidated;
     if (additionalQuestionsComplete) {
       newCompletedSteps.add(3);
     }
@@ -204,7 +206,7 @@ const PBCTFForm: React.FC = () => {
     participant2Name, participant2Email, participant2Phone, participant2Gender,
     participant2ExperienceLevel, participant2Affiliation, participant2AffiliationName, 
     participant2PreviousCTF, participant2CTFNames, participant2EmailVerified,
-    howDidYouHear, secretFlag,
+    howDidYouHear, secretFlag, secretFlagValidated,
     agreeRules, consentLeaderboard, allowContact
   ]);
 
@@ -420,6 +422,7 @@ const PBCTFForm: React.FC = () => {
             register={register}
             errors={errors}
             watch={watch}
+            onFlagValidationChange={setSecretFlagValidated}
           />
         </StepCard>
 

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
 import { UseFormRegister, FieldErrors, UseFormWatch } from "react-hook-form";
 import type { FormData } from "./types";
 
@@ -6,16 +7,77 @@ interface AdditionalQuestionsProps {
   register: UseFormRegister<FormData>;
   errors: FieldErrors<FormData>;
   watch: UseFormWatch<FormData>;
+  onFlagValidationChange: (isValid: boolean) => void;
 }
 
 const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
   register,
   errors,
   watch,
+  onFlagValidationChange,
 }) => {
   const howDidYouHear = watch("howDidYouHear") || [];
-  const secretFlag = watch("secretFlag");
+  const secretFlag = watch("secretFlag") || "";
   const [showHintMessage, setShowHintMessage] = useState(false);
+  const [flagStatus, setFlagStatus] = useState<
+    "idle" | "checking" | "valid" | "invalid" | "error"
+  >("idle");
+  const [flagMessage, setFlagMessage] = useState("");
+  const validationRequestId = useRef(0);
+
+  const secretFlagRegistration = register("secretFlag", {
+    required: "Secret flag is required to complete registration",
+  });
+
+  const checkFlag = async () => {
+    if (!secretFlag.trim() || flagStatus === "checking") {
+      setFlagStatus("invalid");
+      setFlagMessage("Enter a flag before checking.");
+      onFlagValidationChange(false);
+      return;
+    }
+
+    setFlagStatus("checking");
+    setFlagMessage("Checking flag...");
+    const requestId = ++validationRequestId.current;
+
+    try {
+      const response = await fetch("/api/pbctf?action=validateFlag", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secretFlag }),
+      });
+      const result = await response.json();
+
+      if (requestId !== validationRequestId.current) return;
+
+      if (response.ok && result.valid) {
+        setFlagStatus("valid");
+        setFlagMessage(result.message);
+        onFlagValidationChange(true);
+        return;
+      }
+
+      setFlagStatus("invalid");
+      setFlagMessage(result.message || "Incorrect flag! Keep looking...");
+      onFlagValidationChange(false);
+    } catch (error) {
+      if (requestId !== validationRequestId.current) return;
+
+      console.error("Error validating flag:", error);
+      setFlagStatus("error");
+      setFlagMessage("Unable to check the flag. Please try again.");
+      onFlagValidationChange(false);
+    }
+  };
+
+  const handleFlagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      event.stopPropagation();
+      void checkFlag();
+    }
+  };
 
   const hearAboutOptions = [
     "Previously Participated",
@@ -69,13 +131,26 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
       <div className="bg-gray-900/30 border border-green-400/20 rounded-lg p-6 space-y-4">
         <div className="flex items-center gap-2 mb-4">
           <h3 className="text-green-300 font-mono text-lg">
-            &quot;Prove You&apos;re Not a Bot (or a Noob)!&quot;
+            Dead stars still shine
           </h3>
         </div>
         
-        <p className="text-green-300/80 font-mono text-sm leading-relaxed">
-          To register, you must find the secret agent flag hidden on this page! 🕵‍♂️
-        </p>
+        <div className="space-y-3 text-green-300/80 font-mono text-sm leading-relaxed">
+          <p>
+            When you look at a star, you are not seeing it as it is. You are
+            seeing it as it was, light that left home centuries ago, still
+            travelling.
+          </p>
+          <p>
+            We rebuilt everything. The face you see now is new. But the light
+            from before us is still out there, still moving. Frozen at the
+            moment it was captured.
+          </p>
+          <p>
+            Find the old light. Something was said, once, quietly, in a place
+            most eyes slide past. It was never truly taken back.
+          </p>
+        </div>
         
         <div className="bg-gray-800/50 border border-green-400/10 rounded-lg p-4 space-y-2">
           {!showHintMessage && (
@@ -95,7 +170,9 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
           
           {showHintMessage && (
             <p className="text-red-400 font-mono text-sm animate-in fade-in-0 slide-in-from-top-1 duration-500">
-              <strong>😂 lol loser, this ain&apos;t for you son</strong>
+              <strong>
+                {"Some things are removed from view. not from existence."}
+              </strong>
             </p>
           )}
         </div>
@@ -106,34 +183,53 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
           </label>
           <input
             type="text"
+            enterKeyHint="done"
             placeholder={
               typeof window !== "undefined" && window.innerWidth < 640
                 ? "Enter flag..."
                 : "paste the flag here..."
             }
-            {...register("secretFlag", { 
-              required: "Secret flag is required to complete registration",
-              validate: (value) => 
-                value === "pbctf{pls_h4ck_m3_d4ddy}" || "Incorrect flag! Keep looking... 🔍"
-            })}
+            {...secretFlagRegistration}
+            onChange={(event) => {
+              secretFlagRegistration.onChange(event);
+              validationRequestId.current += 1;
+              setFlagStatus("idle");
+              setFlagMessage("");
+              onFlagValidationChange(false);
+            }}
+            onKeyDown={handleFlagKeyDown}
             className={`w-full px-4 py-3 bg-gray-900/50 border rounded-lg font-mono focus:outline-none focus:ring-1 focus:ring-green-400/50 transition-colors ${
               errors.secretFlag 
                 ? 'border-red-400/50 text-red-300 placeholder-red-500/50' 
-                : secretFlag === "pbctf{pls_h4ck_m3_d4ddy}"
+                : flagStatus === "valid"
                 ? 'border-green-400 text-green-300 placeholder-green-500/50'
+                : flagStatus === "invalid" || flagStatus === "error"
+                ? 'border-red-400/50 text-red-300 placeholder-red-500/50'
                 : 'border-green-400/30 text-green-300 placeholder-green-500/50'
             }`}
           />
+          <button
+            type="button"
+            onClick={() => void checkFlag()}
+            disabled={flagStatus === "checking"}
+            className="w-full sm:w-auto px-5 py-3 bg-green-400/20 hover:bg-green-400/30 border border-green-400/50 rounded-lg text-green-300 font-mono text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {flagStatus === "checking" ? "Checking..." : "Check Flag"}
+          </button>
           {errors.secretFlag && (
             <p className="text-red-400 font-mono text-sm flex items-center gap-2">
               <span>❌</span>
               {errors.secretFlag.message}
             </p>
           )}
-          {secretFlag === "pbctf{pls_h4ck_m3_d4ddy}" && (
-            <p className="text-green-400 font-mono text-sm flex items-center gap-2">
-              <span>✅</span>
-              Excellent! You&apos;ve found the flag! 🎉
+          {flagMessage && (
+            <p
+              aria-live="polite"
+              className={`font-mono text-sm ${
+                flagStatus === "valid" ? "text-green-400" : "text-red-400"
+              }`}
+            >
+              {flagMessage}
             </p>
           )}
         </div>
@@ -142,4 +238,4 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
   );
 };
 
-export default AdditionalQuestions; 
+export default AdditionalQuestions;

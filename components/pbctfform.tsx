@@ -14,7 +14,6 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
   watch,
 }) => {
   const howDidYouHear = watch("howDidYouHear") || [];
-  const secretFlag = watch("secretFlag");
   const [showHintMessage, setShowHintMessage] = useState(false);
 
   const hearAboutOptions = [
@@ -68,15 +67,27 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
       {/* Secret Flag Challenge */}
       <div className="bg-gray-900/30 border border-green-400/20 rounded-lg p-6 space-y-4">
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-2xl">🔍</span>
           <h3 className="text-green-300 font-mono text-lg">
-            &quot;Prove You&apos;re Not a Bot (or a Noob)!&quot;
+            dead stars still shine
           </h3>
         </div>
         
-        <p className="text-green-300/80 font-mono text-sm leading-relaxed">
-          To register, you must find the secret agent flag hidden on this page! 🕵‍♂️
-        </p>
+        <div className="space-y-3 text-green-300/80 font-mono text-sm leading-relaxed">
+          <p>
+            When you look at a star, you are not seeing it as it is. You are
+            seeing it as it was, light that left home centuries ago, still
+            travelling.
+          </p>
+          <p>
+            We rebuilt everything. The face you see now is new. But the light
+            from before us is still out there, still moving. Frozen at the
+            moment it was captured.
+          </p>
+          <p>
+            Find the old light. Something was said, once, quietly, in a place
+            most eyes slide past. It was never truly taken back.
+          </p>
+        </div>
         
         <div className="bg-gray-800/50 border border-green-400/10 rounded-lg p-4 space-y-2">
           {!showHintMessage && (
@@ -96,7 +107,9 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
           
           {showHintMessage && (
             <p className="text-red-400 font-mono text-sm animate-in fade-in-0 slide-in-from-top-1 duration-500">
-              <strong>😂 lol loser, this ain&apos;t for you son</strong>
+              <strong>
+                {"// some things are removed from view. not from existence."}
+              </strong>
             </p>
           )}
         </div>
@@ -110,14 +123,10 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
             placeholder="paste the flag here..."
             {...register("secretFlag", { 
               required: "Secret flag is required to complete registration",
-              validate: (value: string) => 
-                value === "pbctf{pls_h4ck_m3_d4ddy}" || "Incorrect flag! Keep looking... 🔍"
             })}
             className={`w-full px-4 py-3 bg-gray-900/50 border rounded-lg font-mono focus:outline-none focus:ring-1 focus:ring-green-400/50 transition-colors ${
               errors.secretFlag 
                 ? 'border-red-400/50 text-red-300 placeholder-red-500/50' 
-                : secretFlag === "pbctf{pls_h4ck_m3_d4ddy}"
-                ? 'border-green-400 text-green-300 placeholder-green-500/50'
                 : 'border-green-400/30 text-green-300 placeholder-green-500/50'
             }`}
           />
@@ -125,12 +134,6 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
             <p className="text-red-400 font-mono text-sm flex items-center gap-2">
               <span>❌</span>
               {errors.secretFlag.message}
-            </p>
-          )}
-          {secretFlag === "pbctf{pls_h4ck_m3_d4ddy}" && (
-            <p className="text-green-400 font-mono text-sm flex items-center gap-2">
-              <span>✅</span>
-              Excellent! You&apos;ve found the flag! 🎉
             </p>
           )}
         </div>
