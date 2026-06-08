@@ -102,6 +102,22 @@ const PBCTFForm: React.FC = () => {
   const agreeRules = watch("agreeRules");
   const consentLeaderboard = watch("consentLeaderboard");
   const allowContact = watch("allowContact");
+  const stepSequence = participationType === "duo"
+    ? [0, 1, 2, 3, 4]
+    : [0, 1, 3, 4];
+
+  const canAccessStep = (stepNumber: number) => {
+    const stepIndex = stepSequence.indexOf(stepNumber);
+    if (stepIndex === -1) return false;
+
+    return stepSequence
+      .slice(0, stepIndex)
+      .every((previousStep) => completedSteps.has(previousStep));
+  };
+
+  const allRequiredStepsCompleted = stepSequence.every((step) =>
+    completedSteps.has(step)
+  );
 
   // Handle participation type changes
   useEffect(() => {
@@ -168,34 +184,26 @@ const PBCTFForm: React.FC = () => {
 
     setCompletedSteps(newCompletedSteps);
 
-    // Auto-expand next step when current step is completed
+    // Keep only sequentially accessible sections open and expand the first
+    // incomplete section as the user progresses.
     setExpandedSteps(prev => {
-      const newExpanded = new Set(prev);
-      
-      // Expand step 1 when step 0 is completed
-      if (newCompletedSteps.has(0) && !newExpanded.has(1)) {
-        newExpanded.add(1);
+      const sequence = participationType === "duo"
+        ? [0, 1, 2, 3, 4]
+        : [0, 1, 3, 4];
+      const firstIncompleteIndex = sequence.findIndex(
+        (step) => !newCompletedSteps.has(step)
+      );
+      const lastAccessibleIndex =
+        firstIncompleteIndex === -1 ? sequence.length - 1 : firstIncompleteIndex;
+      const accessibleSteps = new Set(sequence.slice(0, lastAccessibleIndex + 1));
+      const newExpanded = new Set(
+        [...prev].filter((step) => accessibleSteps.has(step))
+      );
+
+      if (firstIncompleteIndex !== -1) {
+        newExpanded.add(sequence[firstIncompleteIndex]);
       }
-      
-      // Expand next step when step 1 is completed
-      if (newCompletedSteps.has(1) && !newExpanded.has(2) && !newExpanded.has(3)) {
-        if (participationType === "solo") {
-          newExpanded.add(3); // Skip to step 3 (additional questions) for solo participants
-        } else {
-          newExpanded.add(2); // Go to step 2 for duo participants
-        }
-      }
-      
-      // Expand step 3 when step 2 is completed (duo only)
-      if (participationType === "duo" && newCompletedSteps.has(2) && !newExpanded.has(3)) {
-        newExpanded.add(3);
-      }
-      
-      // Expand step 4 (rules) when step 3 (additional questions) is completed
-      if (newCompletedSteps.has(3) && !newExpanded.has(4)) {
-        newExpanded.add(4);
-      }
-      
+
       return newExpanded;
     });
   }, [
@@ -211,6 +219,8 @@ const PBCTFForm: React.FC = () => {
   ]);
 
   const handleStepClick = (stepNumber: number) => {
+    if (!canAccessStep(stepNumber)) return;
+
     setExpandedSteps(prev => {
       const newExpanded = new Set(prev);
       if (newExpanded.has(stepNumber)) {
@@ -366,6 +376,7 @@ const PBCTFForm: React.FC = () => {
           title="Choose Participation Mode"
           isCompleted={completedSteps.has(0)}
           isExpanded={expandedSteps.has(0)}
+          isLocked={!canAccessStep(0)}
           onStepClick={handleStepClick}
         >
           <ParticipationTypeSelection 
@@ -380,6 +391,7 @@ const PBCTFForm: React.FC = () => {
           title={participationType === 'solo' ? "Your Details" : "Team Leader Details"}
           isCompleted={completedSteps.has(1)}
           isExpanded={expandedSteps.has(1)}
+          isLocked={!canAccessStep(1)}
           onStepClick={handleStepClick}
         >
           <ParticipantForm 
@@ -398,6 +410,7 @@ const PBCTFForm: React.FC = () => {
             title="Team Member Details"
             isCompleted={completedSteps.has(2)}
             isExpanded={expandedSteps.has(2)}
+            isLocked={!canAccessStep(2)}
             onStepClick={handleStepClick}
           >
             <ParticipantForm 
@@ -416,6 +429,7 @@ const PBCTFForm: React.FC = () => {
           title="Additional Questions"
           isCompleted={completedSteps.has(3)}
           isExpanded={expandedSteps.has(3)}
+          isLocked={!canAccessStep(3)}
           onStepClick={handleStepClick}
         >
           <AdditionalQuestions 
@@ -432,6 +446,7 @@ const PBCTFForm: React.FC = () => {
           title="Rules & Agreements"
           isCompleted={completedSteps.has(4)}
           isExpanded={expandedSteps.has(4)}
+          isLocked={!canAccessStep(4)}
           onStepClick={handleStepClick}
         >
           <RulesAgreements 
@@ -447,7 +462,7 @@ const PBCTFForm: React.FC = () => {
         )}
 
         {/* Submit Button */}
-        {completedSteps.has(4) && (
+        {allRequiredStepsCompleted && (
           <div className="bg-gray-900/50 border border-green-400/30 rounded-lg p-6">
             <button
               type="submit"
