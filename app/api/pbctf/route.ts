@@ -846,10 +846,11 @@ async function addRegistration(request: Request) {
     };
 
     const registrationData = {
-      participant1: transformParticipant(data.participant1),
+      teamName: data.teamName || `${data.participant1.name}'s Team`,
+      participant1: { ...transformParticipant(data.participant1), role: "Leader",},
       participant2:
         data.participationType === "duo"
-          ? transformParticipant(data.participant2)
+          ?{ ...transformParticipant(data.participant2), role: "Member",}
           : undefined,
       participationType: data.participationType,
     };
