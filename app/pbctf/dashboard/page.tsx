@@ -36,7 +36,16 @@ export default async function DashboardPage() {
           <LogoutButton />
 
         </div>
-      
+        
+        <a
+          href="https://chat.whatsapp.com/GQGO7empTIb7ro9TSCwENX?mode=ac_c"
+          className="inline-flex items-center gap-2 bg-green-400/10 hover:bg-green-400/20 border border-green-400 text-green-300 font-mono px-6 py-3 rounded-lg transition-all duration-300"
+        >
+          Join WhatsApp Group
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
 
       <div className="bg-gray-800/30 border border-green-400/20 rounded-lg p-6">
         <h2 className="text-2xl mb-4">Team Members</h2>
