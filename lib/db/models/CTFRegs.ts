@@ -57,7 +57,7 @@ const backgroundSchema = new Schema({
 
 const participantSchema = new Schema<Participant>({
   name: { type: String, required: true },
-  email: { type: String, required: true },
+  email: { type: String, required: true, index: true },
   role: { type: String, enum: ["Leader", "Member"], required: true},
   gender: { type: String, enum: ["Male", "Female", "Other", "Prefer not to say"], required: true },
   background: { type: backgroundSchema, required: true },

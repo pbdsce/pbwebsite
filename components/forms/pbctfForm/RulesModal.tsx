@@ -290,7 +290,7 @@ const RulesModal: React.FC<RulesModalProps> = ({
         {/* Header */}
         <div className="p-6 border-b border-green-400/20">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-mono text-green-300">PBCTF 4.0 - Rules & Code of Conduct</h2>
+            <h2 className="text-xl font-mono text-green-300">PBCTF 5.0 - Rules & Code of Conduct</h2>
             <button
               onClick={handleClose}
               disabled={!hasScrolledToBottom}

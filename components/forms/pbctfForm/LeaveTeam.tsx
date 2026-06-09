@@ -34,7 +34,7 @@ export default function LeaveTeam() {
 
      setTimeout(() => {
         window.location.href =
-          "/pbctf/login";
+          "/";
       }, 1500);
     } 
     catch (error) {
