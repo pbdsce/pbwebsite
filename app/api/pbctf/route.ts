@@ -212,7 +212,7 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
-    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    const ip = request.headers.get('x-forwarded-for')?.split(",")[0] ?? 'unknown';
  
     const { success } = await ratelimiter.limit(ip);
     if (!success) {
@@ -663,6 +663,7 @@ async function sendOTP(request: Request) {
  */
 async function verifyOTP(request: Request) {
   try {
+    await connectDB();
     const { email, otp } = await request.json();
 
     if (!email || !otp) {
