@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import getCurrentUser from "@/lib/pbctf/getCurrentUser";
+import PBCTFRefreshToken from "@/lib/db/models/CTFRefreshToken";
 
 export async function POST() {
   const user = await getCurrentUser();
@@ -31,7 +32,37 @@ export async function POST() {
     await registration.save();
   }
 
-  return NextResponse.json({
-    success: true,
+  await PBCTFRefreshToken.deleteMany({
+   email: user.email,
   });
+
+  const response = NextResponse.json({
+  success: true,
+});
+
+response.cookies.set(
+  "pbctf_access",
+  "",
+  {
+    expires: new Date(0),
+    path: "/",
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+  }
+);
+
+response.cookies.set(
+  "pbctf_refresh",
+  "",
+  {
+    expires: new Date(0),
+    path: "/",
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+  }
+);
+
+return response;
 }
