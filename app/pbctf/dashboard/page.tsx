@@ -11,7 +11,9 @@ export default async function DashboardPage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/pbctf/login");
+    redirect(
+      "/api/pbctf/refresh?next=/pbctf/dashboard"
+    );
   }
   const {registration, isLeader} = user;
 

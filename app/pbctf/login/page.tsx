@@ -9,6 +9,8 @@ export default async function LoginPage() {
 
   const accessToken =
     cookieStore.get("pbctf_access")?.value;
+  const refreshToken =
+    cookieStore.get("pbctf_refresh")?.value;
 
   if (accessToken) {
     const payload =
@@ -17,6 +19,12 @@ export default async function LoginPage() {
     if (payload) {
       redirect("/pbctf/dashboard");
     }
+  }
+
+  if (refreshToken) {
+    redirect(
+      "/api/pbctf/refresh?next=/pbctf/dashboard"
+    );
   }
 
   return <LoginForm />;
