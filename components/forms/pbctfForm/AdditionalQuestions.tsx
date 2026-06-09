@@ -102,7 +102,7 @@ const AdditionalQuestions: React.FC<AdditionalQuestionsProps> = ({
               className="flex items-center space-x-3 text-green-300 font-mono text-sm cursor-pointer group"
             >
               <input
-                type="checkbox"
+                type="radio"
                 value={option}
                 {...register("howDidYouHear")}
                 className="appearance-none w-4 h-4 rounded-full border-2 border-green-400/70 bg-gray-900 checked:bg-green-400 checked:border-green-400 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-green-400/50appearance-none w-4 h-4 rounded-full accent-green-400 bg-gray-900 border-green-400/50 rounded focus:ring-green-400 focus:ring-2 focus:ring-offset-0"
