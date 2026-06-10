@@ -206,7 +206,7 @@ const Card: React.FC<CardProps> = ({
           }}
         >
           {hasImage && (
-            <div 
+            <div
               className="relative w-full aspect-[263/250] max-w-[263px] mx-auto perspective-[1000px] shrink-0 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] cursor-pointer"
               onClick={() => onFlip?.()}
             >
@@ -231,9 +231,11 @@ const Card: React.FC<CardProps> = ({
                     src={imageUrl}
                     alt={name}
                     fill
+                    loading="lazy"
+                    decoding="async"
                     className="object-cover object-center"
                     draggable={false}
-                    onLoadingComplete={()=>setImageLoaded(true)}
+                    onLoadingComplete={() => setImageLoaded(true)}
                   />
                 </div>
 
@@ -292,16 +294,16 @@ const Card: React.FC<CardProps> = ({
           >
             {linkedInUrl && (
               <a
-                      href={linkedInUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                    >
-              <div className="mb-4">
-                <LinkedIn className="h-10 w-10 text-pbgreen hover:text-white transition-colors" />
-              </div>
+                href={linkedInUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                <div className="mb-4">
+                  <LinkedIn className="h-10 w-10 text-pbgreen hover:text-white transition-colors" />
+                </div>
               </a>
             )}
             {company && <p className="text-pbgreen text-[17px]">@{company}</p>}

@@ -79,6 +79,10 @@ export default function ThreeBackground() {
     const keys: Key[] = [];
 
     const solidMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const frameMat = new THREE.MeshBasicMaterial({
+      color: GAP_NEON,
+      side: THREE.DoubleSide,
+    });
 
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
@@ -96,12 +100,12 @@ export default function ThreeBackground() {
           linewidth: BORDER_THICKNESS,
         });
         edgeMat.resolution.set(W0, H0);
-        const edges = new LineSegments2(
-          new LineSegmentsGeometry().fromEdgesGeometry(
-            new THREE.EdgesGeometry(geo),
-          ),
-          edgeMat,
+        const edgeGeometry = new THREE.EdgesGeometry(geo);
+        const lineGeometry = new LineSegmentsGeometry().fromEdgesGeometry(
+          edgeGeometry,
         );
+        edgeGeometry.dispose();
+        const edges = new LineSegments2(lineGeometry, edgeMat);
 
         // Soft glow halo on the directly hovered key
         const haloGeo = new THREE.BoxGeometry(
@@ -116,12 +120,13 @@ export default function ThreeBackground() {
           linewidth: BORDER_THICKNESS,
         });
         haloMat.resolution.set(W0, H0);
-        const halo = new LineSegments2(
-          new LineSegmentsGeometry().fromEdgesGeometry(
-            new THREE.EdgesGeometry(haloGeo),
-          ),
-          haloMat,
+        const haloEdgeGeometry = new THREE.EdgesGeometry(haloGeo);
+        const haloLineGeometry = new LineSegmentsGeometry().fromEdgesGeometry(
+          haloEdgeGeometry,
         );
+        haloEdgeGeometry.dispose();
+        haloGeo.dispose();
+        const halo = new LineSegments2(haloLineGeometry, haloMat);
 
         const group = new THREE.Group();
         group.add(mesh, edges, halo);
@@ -158,10 +163,6 @@ export default function ThreeBackground() {
         gapHole.closePath();
         gapShape.holes.push(gapHole);
         const frameGeo = new THREE.ShapeGeometry(gapShape);
-        const frameMat = new THREE.MeshBasicMaterial({
-          color: GAP_NEON,
-          side: THREE.DoubleSide,
-        });
         const frame = new THREE.Mesh(frameGeo, frameMat);
         frame.rotation.x = -Math.PI / 2;
         frame.position.set(px, 1, pz);
@@ -245,6 +246,7 @@ export default function ThreeBackground() {
     // Resize via ResizeObserver
     const resizeObs = new ResizeObserver((entries) => {
       const { width, height } = entries[0].contentRect;
+      if (width <= 0 || height <= 0) return;
       const a = width / height;
       const { viewH: vh, viewW: vw } = computeFrustum(a);
       const cam = camera as THREE.OrthographicCamera;
@@ -322,7 +324,9 @@ export default function ThreeBackground() {
     // Visibility tracking — pause when off-screen
     let isVisible = true;
     const visObs = new IntersectionObserver(
-      ([entry]) => { isVisible = entry.isIntersecting; },
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+      },
       { threshold: 0 },
     );
     visObs.observe(container);
@@ -335,13 +339,23 @@ export default function ThreeBackground() {
       resizeObs.disconnect();
       visObs.disconnect();
       renderer.dispose();
+      scene.traverse((object) => {
+        const mesh = object as THREE.Mesh;
+        mesh.geometry?.dispose();
+
+        const { material } = mesh;
+        if (Array.isArray(material)) {
+          material.forEach((item) => item.dispose());
+        } else {
+          material?.dispose();
+        }
+      });
+      renderer.forceContextLoss();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
     };
   }, []);
 
-  return (
-    <div ref={ref} className="absolute inset-0 -z-50  bg-black" />
-  );
+  return <div ref={ref} className="absolute inset-0 -z-50  bg-black" />;
 }

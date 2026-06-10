@@ -45,6 +45,7 @@ export function AchievementCard({
                 width={60}
                 height={60}
                 draggable={false}
+                loading="lazy"
               />
             ) : (
               initials
@@ -52,7 +53,13 @@ export function AchievementCard({
           </div>
 
           <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[#FFB413] flex items-center justify-center text-xs border-2 border-pbgray p-0.5">
-            <Image src={badge} alt="badge" width={20} height={20} draggable={false} />
+            <Image
+              src={badge}
+              alt="badge"
+              width={20}
+              height={20}
+              draggable={false}
+            />
           </div>
         </div>
 
@@ -86,8 +93,11 @@ export function AchievementCard({
                   <div
                     key={j}
                     className={`bg-pbsurface transition-all duration-300
-                      ${(filterCategory=="ALL"||filterCategory == item.category)
-                        ?"opacity-100 text-pbgreen/90":"opacity-40 text-pbtext"
+                      ${
+                        filterCategory == "ALL" ||
+                        filterCategory == item.category
+                          ? "opacity-100 text-pbgreen/90"
+                          : "opacity-40 text-pbtext"
                       } rounded-lg px-3.5 py-2.5 min-w-0`}
                   >
                     <p className="text-sm font-normal m-0 wrap-break-word">

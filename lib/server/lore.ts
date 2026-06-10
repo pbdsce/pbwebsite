@@ -3,7 +3,7 @@ import Lore from "../db/models/lores";
 
 export async function getAllLores(): Promise<LoreType[]> {
   try {
-    const lores = await Lore.find();
+    const lores = await Lore.find().lean();
     return lores as unknown as LoreType[];
   } catch (error) {
     console.error("Error fetching lores:", error);
@@ -23,8 +23,7 @@ export async function uploadLore(loreData: Omit<LoreType, "_id">) {
 
 export async function getLoreById(id: string) {
   try {
-    const lore = await Lore.findById(id);
-    return lore;
+    return await Lore.findById(id).lean();
   } catch (error) {
     console.error(`Error fetching lore with id ${id}:`, error);
     return null;
@@ -35,7 +34,7 @@ export async function updateLore(loreData: LoreType) {
   try {
     const updatedLore = await Lore.findByIdAndUpdate(loreData._id, loreData, {
       new: true,
-    });
+    }).lean();
     return updatedLore as unknown as LoreType | null;
   } catch (error) {
     console.error(`Error updating lore with id ${loreData._id}:`, error);

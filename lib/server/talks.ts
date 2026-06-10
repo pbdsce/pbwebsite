@@ -14,7 +14,7 @@ type TalkInput = {
 
 export const getAllTalks = async (): Promise<Talk[]> => {
   try {
-    const talks = await TalkModel.find();
+    const talks = await TalkModel.find().lean();
     return talks as Talk[];
   } catch (error) {
     console.error("Error fetching talks:", error);
@@ -24,7 +24,7 @@ export const getAllTalks = async (): Promise<Talk[]> => {
 
 export const getTalkById = async (id: string): Promise<Talk | null> => {
   try {
-    const talk = await TalkModel.findById(id);
+    const talk = await TalkModel.findById(id).lean();
     return talk as Talk | null;
   } catch (error) {
     console.error(`Error fetching talk with id ${id}:`, error);
@@ -50,7 +50,7 @@ export const updateTalk = async (
       talkData._id,
       talkData,
       { new: true },
-    );
+    ).lean();
     return updatedTalk as Talk | null;
   } catch (error) {
     console.error(`Error updating talk with id ${talkData._id}:`, error);

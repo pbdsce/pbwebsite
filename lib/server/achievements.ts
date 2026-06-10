@@ -4,7 +4,7 @@ import AchievementsModel, {
 
 export const getAllAchievements = async (): Promise<Achievements[]> => {
   try {
-    const achievements = await AchievementsModel.find();
+    const achievements = await AchievementsModel.find().lean();
     return achievements as Achievements[];
   } catch (error) {
     console.error("Error fetching achievements:", error);
@@ -16,7 +16,7 @@ export const getAchievementsById = async (
   id: string,
 ): Promise<Achievements | null> => {
   try {
-    const achievements = await AchievementsModel.findById(id);
+    const achievements = await AchievementsModel.findById(id).lean();
     return achievements as Achievements | null;
   } catch (error) {
     console.error(`Error fetching achievements with id ${id}:`, error);
@@ -42,7 +42,7 @@ export const updateAchievements = async (
   try {
     const updated = await AchievementsModel.findByIdAndUpdate(data._id, data, {
       new: true,
-    });
+    }).lean();
     return updated as Achievements | null;
   } catch (error) {
     console.error(`Error updating achievements with id ${data._id}:`, error);
