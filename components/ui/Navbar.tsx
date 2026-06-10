@@ -209,6 +209,10 @@ export default function Navbar() {
       href: "/achievements",
     },
     {
+      name: "Placements",
+      href: "/placements",
+    },
+    {
       name: "Lore",
       href: "/lore",
     },
