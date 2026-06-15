@@ -2,6 +2,7 @@
 import PBCTFForm from "@/components/forms/pbctfForm";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { RecaptchaProvider } from "@/components/recaptchaProvider";
 
 const PBCTFRegisterPage = () => {
   return (
@@ -94,7 +95,9 @@ const PBCTFRegisterPage = () => {
 
 </div>
           <div className="p-6">
-            <PBCTFForm />
+            <RecaptchaProvider>
+              <PBCTFForm />
+            </RecaptchaProvider>
           </div>
         </motion.div>
 

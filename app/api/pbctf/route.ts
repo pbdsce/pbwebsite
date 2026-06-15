@@ -350,6 +350,51 @@ async function verifyRecaptchaToken(
     };
   }
 
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+  if (secretKey) {
+    try {
+      const response = await fetch(
+        `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaToken}`,
+        {
+          method: "POST",
+        }
+      );
+      const data = await response.json();
+      if (!data.success) {
+        return {
+          ok: false,
+          status: 400,
+          body: {
+            message: "reCAPTCHA verification failed.",
+            error: data["error-codes"]?.join(", ") || "Verification failed",
+          },
+        };
+      }
+      if (data.score !== undefined && data.score < 0.5) {
+        return {
+          ok: false,
+          status: 400,
+          body: {
+            message: "reCAPTCHA validation failed.",
+            error: "Low reCAPTCHA score",
+          },
+        };
+      }
+      return { ok: true };
+    } catch (error) {
+      console.error("Error verifying standard reCAPTCHA:", error);
+      return {
+        ok: false,
+        status: 500,
+        body: {
+          message: "reCAPTCHA verification failed due to internal error.",
+          error: error instanceof Error ? error.message : String(error),
+        },
+      };
+    }
+  }
+
+  // 2. Google Cloud reCAPTCHA Enterprise fallback
   if (
     !process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ||
     !process.env.RECAPTCHA_PROJECT ||
@@ -360,7 +405,7 @@ async function verifyRecaptchaToken(
       status: 500,
       body: {
         message: "reCAPTCHA is not configured on the server.",
-        error: "Missing reCAPTCHA environment variables",
+        error: "Missing standard RECAPTCHA_SECRET_KEY or Enterprise environment variables",
       },
     };
   }

@@ -12,6 +12,7 @@ import AdditionalQuestions from "./pbctfForm/AdditionalQuestions";
 import StepCard from "./pbctfForm/StepCard";
 import SuccessScreen from "@/components/forms/pbctfForm/SucessScreen";
 import type { FormData } from "./pbctfForm/types";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 // PARAGATI RAJ ARE YOU READING THIS
 // I MISS YOU
@@ -41,37 +42,33 @@ const PBCTFForm: React.FC = () => {
     resetField,
   } = useForm<FormData>();
 
-  const executeRecaptcha = async () => {
-    const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
-    if (!siteKey || !window.grecaptcha?.enterprise) return null;
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
-    return new Promise<string | null>((resolve) => {
-      window.grecaptcha.enterprise.ready(async () => {
-        try {
-          const recaptchaToken = await window.grecaptcha.enterprise.execute(
-            siteKey,
-            { action: "submit" }
-          );
-          resolve(recaptchaToken);
-        } catch (error) {
-          console.error("Error executing reCAPTCHA:", error);
-          resolve(null);
-        }
-      });
-    });
+  const handleExecuteRecaptcha = async () => {
+    if (!executeRecaptcha) {
+      console.warn("reCAPTCHA is not loaded yet");
+      return null;
+    }
+    try {
+      const token = await executeRecaptcha("submit");
+      return token;
+    } catch (error) {
+      console.error("Error executing reCAPTCHA:", error);
+      return null;
+    }
   };
 
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/enterprise.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`;
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
+  // useEffect(() => {
+  //   const script = document.createElement("script");
+  //   script.src = `https://www.google.com/recaptcha/enterprise.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`;
+  //   script.async = true;
+  //   script.defer = true;
+  //   document.head.appendChild(script);
 
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
+  //   return () => {
+  //     document.head.removeChild(script);
+  //   };
+  // }, []);
 
   // Watch specific fields instead of entire objects to avoid unnecessary re-renders
   const participationType = watch("participationType");
@@ -286,7 +283,7 @@ const PBCTFForm: React.FC = () => {
         return;
       }
 
-      const recaptcha_token = await executeRecaptcha();
+      const recaptcha_token = await handleExecuteRecaptcha();
       if (!recaptcha_token) {
         toast.error("reCAPTCHA is not ready yet. Please wait a moment and try again.");
         return;

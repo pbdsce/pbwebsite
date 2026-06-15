@@ -41,6 +41,7 @@
     "react": "19.2.5",
     "react-confetti": "^6.4.0",
     "react-dom": "19.2.5",
+    "react-google-recaptcha-v3": "^1.11.0",
     "react-hook-form": "^7.53.0",
     "react-hot-toast": "^2.4.1",
     "react-use": "^17.6.0",
