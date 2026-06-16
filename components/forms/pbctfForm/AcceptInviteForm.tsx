@@ -5,6 +5,7 @@ import ParticipantForm from "./ParticipantForm";
 import { FormData } from "./types";
 import RulesAgreements from "./RulesAggrements";
 import SuccessScreen from "./SucessScreen";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 interface Props {
   token: string;
@@ -20,9 +21,27 @@ export default function AcceptInviteForm({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
+  const handleExecuteRecaptcha = async () => {
+    if (!executeRecaptcha) {
+      console.warn("reCAPTCHA is not loaded yet");
+      return null;
+    }
+    try {
+      const token = await executeRecaptcha("submit");
+      return token;
+    } catch (error) {
+      console.error("Error executing reCAPTCHA:", error);
+      return null;
+    }
+  };
 
   const {
     register,
+    handleSubmit,
     formState: { errors },
     watch,
     setValue,
@@ -38,18 +57,29 @@ export default function AcceptInviteForm({
      return <SuccessScreen />;
     }
 
-  async function handleAcceptInvite() {
+  async function handleAcceptInvite(formData: FormData) {
 
     try {
       setError("");
       setMessage("");
       setLoading(true);
 
-      const participant =
-        watch("participant2");
+      if (!emailVerified) {
+        setError("Please verify your email address before joining");
+        setLoading(false);
+        return;
+      }
 
-      const howDidYouHear =
-        watch("howDidYouHear") || [];
+      const recaptcha_token = await handleExecuteRecaptcha();
+      if (!recaptcha_token) {
+        setError("reCAPTCHA is not ready yet. Please wait a moment and try again.");
+        setLoading(false);
+        return;
+      }
+
+      const participant = formData.participant2;
+
+      const howDidYouHear = formData.howDidYouHear || [];
 
       if (!participant) {
         return;
@@ -68,6 +98,7 @@ export default function AcceptInviteForm({
 
             body: JSON.stringify({
               token,
+              recaptcha_token,
 
               participant: {
                 name:
@@ -146,7 +177,7 @@ export default function AcceptInviteForm({
 
   return (
 
-    <div className="space-y-6">
+    <form onSubmit={handleSubmit(handleAcceptInvite)} className="space-y-6">
 
       <ParticipantForm
         participantNumber={2}
@@ -154,6 +185,7 @@ export default function AcceptInviteForm({
         errors={errors}
         watch={watch}
         setValue={setValue}
+        onEmailVerificationChange={setEmailVerified}
       />
 
       {/* How did you hear about this CTF */}
@@ -197,8 +229,14 @@ export default function AcceptInviteForm({
       errors={errors}
     />
 
+      {error && (
+        <div className="bg-red-900/20 border border-red-400/30 rounded-lg p-4">
+          <p className="text-red-400 font-mono text-sm text-center">{error}</p>
+        </div>
+      )}
+
       <button
-        onClick={handleAcceptInvite}
+        type="submit"
         disabled={loading}
         className="bg-green-600 px-6 py-3 rounded text-white"
       >
@@ -211,6 +249,6 @@ export default function AcceptInviteForm({
 
       </button>
 
-    </div>
+    </form>
   );
 }

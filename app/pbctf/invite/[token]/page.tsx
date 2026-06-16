@@ -1,6 +1,7 @@
 import connectDB from "@/lib/db/connection";
 import TeamInvite from "@/lib/db/models/TeamInvite";
 import AcceptInviteForm from "@/components/forms/pbctfForm/AcceptInviteForm";
+import { RecaptchaProvider } from "@/components/recaptchaProvider";
 
 export const dynamic = "force-dynamic";
 
@@ -45,10 +46,12 @@ export default async function InvitePage({
           Invited as: {String(invite.email)}
         </p>
 
-        <AcceptInviteForm
-          token={token}
-          invitedEmail={String(invite.email)}
-        />
+        <RecaptchaProvider>
+          <AcceptInviteForm
+            token={token}
+            invitedEmail={String(invite.email)}
+          />
+        </RecaptchaProvider>
       </div>
     </div>
   );

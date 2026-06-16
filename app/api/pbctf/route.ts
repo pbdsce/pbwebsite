@@ -22,7 +22,7 @@ type ParticipantInput = {
     howDidYouHear?: string;
   };
 
-type RecaptchaValidationResult =
+export type RecaptchaValidationResult =
   | { ok: true }
   | {
       ok: false;
@@ -373,7 +373,7 @@ async function validateFlag(request: Request) {
  *                   type: string
  *                   example: "reCAPTCHA token not found! Try again"
  */
-async function verifyRecaptchaToken(
+export async function verifyRecaptchaToken(
   recaptchaToken: unknown,
   expectedAction = "submit"
 ): Promise<RecaptchaValidationResult> {

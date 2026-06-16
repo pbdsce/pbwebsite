@@ -2,19 +2,73 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db/connection";
 import TeamInvite from "@/lib/db/models/TeamInvite";
 import CtfRegsModel from "@/lib/db/models/CTFRegs";
+import { ratelimiter } from "@/lib/ratelimiter";
+import { verifyRecaptchaToken } from "@/app/api/pbctf/route";
+
+function getClientIp(request: Request): string {
+  const headers = [
+    "cf-connecting-ip",
+    "x-client-ip",
+    "x-real-ip",
+    "x-forwarded-for"
+  ];
+
+  for (const header of headers) {
+    const value = request.headers.get(header);
+    if (value) {
+      if (header === "x-forwarded-for") {
+        const parts = value.split(",");
+        const ip = parts[0]?.trim();
+        if (ip) return ip;
+      } else {
+        const ip = value.trim();
+        if (ip) return ip;
+      }
+    }
+  }
+
+  return "127.0.0.1";
+}
 
 export async function POST(
   request: Request
 ) {
 
   try {
+    const ip = getClientIp(request);
+ 
+    let isRateLimited = false;
+    if (ratelimiter) {
+      try {
+        const limitResult = await ratelimiter.limit(ip);
+        if (!limitResult.success) {
+          isRateLimited = true;
+        }
+      } catch (limiterError) {
+        console.error("Rate limiter error, failing open:", limiterError);
+      }
+    } else {
+      console.warn("Rate limiter not configured, skipping rate limit check.");
+    }
+
+    if (isRateLimited) {
+      return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+    }
 
     await connectDB();
     const body = await request.json();
     const {
       token,
+      recaptcha_token,
       participant,
     } = body;
+
+    const recaptchaValidation = await verifyRecaptchaToken(recaptcha_token);
+    if (!recaptchaValidation.ok) {
+      return NextResponse.json(recaptchaValidation.body, {
+        status: recaptchaValidation.status,
+      });
+    }
 
     if (!token || !participant) {
 
