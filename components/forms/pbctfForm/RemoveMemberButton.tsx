@@ -34,7 +34,7 @@ export default function RemoveMemberButton() {
       }
 
       setMessage(
-        "Member removed successfully"
+        "Teammate removed successfully"
       );
 
       setTimeout(() => {
@@ -91,7 +91,7 @@ export default function RemoveMemberButton() {
       {
         loading
           ? "Removing"
-          : "Remove Member"
+          : "Remove Teammate"
       }
     </button>
   )}
