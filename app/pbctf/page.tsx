@@ -72,13 +72,13 @@ const PBCTFRegisterPage = () => {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="bg-gray-900/30 border border-green-400/20 rounded-lg"
         >
-         <div className="border-b border-green-400/20 px-6 py-3 flex justify-between items-center">
+         <div className="border-b border-green-400/20 px-6 py-3 flex flex-wrap justify-between items-center gap-2">
 
-  <h2 className="text-green-300 font-semibold">
+  <h2 className="text-green-300 font-semibold text-sm sm:text-base">
     Registration Terminal
   </h2>
 
-  <div className="flex items-center gap-2 font-mono text-sm">
+  <div className="flex items-center gap-1.5 sm:gap-2 font-mono text-xs sm:text-sm">
     
     <p className="text-gray-400">
       Already registered?
