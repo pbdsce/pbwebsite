@@ -210,12 +210,50 @@ export async function GET(request: Request) {
  *                   type: string
  *                   example: "An error occurred"
  */
+function getClientIp(request: Request): string {
+  const headers = [
+    "cf-connecting-ip",
+    "x-client-ip",
+    "x-real-ip",
+    "x-forwarded-for"
+  ];
+
+  for (const header of headers) {
+    const value = request.headers.get(header);
+    if (value) {
+      if (header === "x-forwarded-for") {
+        const parts = value.split(",");
+        const ip = parts[0]?.trim();
+        if (ip) return ip;
+      } else {
+        const ip = value.trim();
+        if (ip) return ip;
+      }
+    }
+  }
+
+  return "127.0.0.1";
+}
+
 export async function POST(request: Request) {
   try {
-    const ip = request.headers.get('x-forwarded-for')?.split(",")[0] ?? 'unknown';
+    const ip = getClientIp(request);
  
-    const { success } = await ratelimiter.limit(ip);
-    if (!success) {
+    let isRateLimited = false;
+    if (ratelimiter) {
+      try {
+        const limitResult = await ratelimiter.limit(ip);
+        if (!limitResult.success) {
+          isRateLimited = true;
+        }
+      } catch (limiterError) {
+        console.error("Rate limiter error, failing open:", limiterError);
+      }
+    } else {
+      console.warn("Rate limiter not configured, skipping rate limit check.");
+    }
+
+    if (isRateLimited) {
       return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
     } 
 
