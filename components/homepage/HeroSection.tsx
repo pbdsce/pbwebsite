@@ -3,7 +3,7 @@
 import { Lexend_Tera } from "next/font/google";
 import ThreeBackground from "@/components/ui/ThreeBackground";
 import { motion } from "framer-motion";
-import GsocCard from "@/components/ui/GsocCard";
+import PbctfBanner from "@/components/ui/PbctfBanner";
 
 const lexendTera = Lexend_Tera({
   subsets: ["latin"],
@@ -54,8 +54,8 @@ export default function HeroSection() {
             ),
           )}
         </h1>
-        <div className="w-full max-w-88 sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl z-20">
-          <GsocCard />
+        <div className="flex w-full max-w-88 sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl flex-col gap-4 z-20">
+          <PbctfBanner />
         </div>
       </div>
     </section>
