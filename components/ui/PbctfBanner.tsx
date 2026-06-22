@@ -129,7 +129,7 @@ export default function PbctfBanner() {
         {/* Date strips */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex items-center gap-2.5 rounded-2xl border border-pbgreen/20 bg-pbgreen/4 px-4 py-3">
-            <Calendar className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-pbgreen" />
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-pbgreen" />
             <div className="min-w-0">
               <span className="block font-mono text-[10px] uppercase tracking-widest text-pbtext/60">
                 Register By
@@ -140,7 +140,8 @@ export default function PbctfBanner() {
             </div>
           </div>
           <div className="flex items-center gap-2.5 rounded-2xl border border-pbgreen/20 bg-pbgreen/4 px-4 py-3">
-            <Clock className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-pbgreen" />
+            <Calendar className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 text-pbgreen" />
+
             <div className="min-w-0">
               <span className="block font-mono text-[10px] uppercase tracking-widest text-pbtext/60">
                 Hacking Starts
