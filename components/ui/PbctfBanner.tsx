@@ -65,11 +65,11 @@ export default function PbctfBanner() {
       <div className="relative z-10 flex flex-col gap-5 px-6 sm:px-8 py-6 sm:py-7">
         {/* Terminal title bar */}
         <div className="flex items-center justify-between border-b border-pbgreen/15 pb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <span className="h-2.5 w-2.5 rounded-full bg-red-500/70" />
             <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/70" />
             <span className="h-2.5 w-2.5 rounded-full bg-pbgreen/80" />
-            <span className="ml-2 font-mono text-[10px] sm:text-xs text-pbtext/70">
+            <span className="font-mono text-[10px] sm:text-xs text-pbtext/70">
               pbctf@pointblank:~$
             </span>
           </div>
