@@ -9,7 +9,7 @@ const OctokitWithPlugins = Octokit.plugin(throttling, retry);
 
 export function createOctokit(): InstanceType<typeof OctokitWithPlugins> {
   return new OctokitWithPlugins({
-    auth: process.env.GITHUB_TOKEN,
+    auth: process.env.TOKEN_GITHUB,
     throttle: {
       onRateLimit: (retryAfter: number, _options: any, _octokit: any, retryCount: number) => {
         console.warn(`[GitHub] Rate limit — retrying after ${retryAfter}s (attempt ${retryCount + 1}/3)`);

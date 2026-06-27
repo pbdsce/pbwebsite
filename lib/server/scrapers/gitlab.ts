@@ -3,7 +3,7 @@ import { getOrgTagSync } from "@/lib/data/orgs";
 import type { RawContribution } from "./types";
 
 const GITLAB_BASE  = "https://gitlab.com/api/v4";
-const GITLAB_TOKEN = process.env.GITLAB_TOKEN;
+const GITLAB_TOKEN = process.env.TOKEN_GITLAB;
 
 function gitlabHeaders(): HeadersInit {
   const headers: Record<string, string> = { "Content-Type": "application/json" };

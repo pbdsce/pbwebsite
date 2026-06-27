@@ -10,7 +10,7 @@ import { getOrgTag } from "@/lib/data/orgs";
 const OctokitWithPlugins = Octokit.plugin(throttling, retry);
 
 const octokit = new OctokitWithPlugins({
-  auth: process.env.GITHUB_TOKEN,
+  auth: process.env.TOKEN_GITHUB,
   throttle: {
     onRateLimit: (retryAfter: number, options: any, _: any, retryCount: number) => {
       console.warn(`[GitHub] Rate limit — retrying after ${retryAfter}s (attempt ${retryCount + 1}/3)`);
