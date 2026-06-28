@@ -1,9 +1,10 @@
-name: Deploy Staging
+name: Deploy
 
 on:
   push:
     branches:
       - staging
+      - prod
 
 jobs:
   build-and-deploy:
@@ -23,7 +24,9 @@ jobs:
 
       - name: Generate image metadata
         id: meta
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "env=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -31,23 +34,24 @@ jobs:
           context: .
           push: true
           tags: |
-            shreyashsri/pbwebsite:staging
-            shreyashsri/pbwebsite:staging-${{ steps.meta.outputs.sha_short }}
+            shreyashsri/pbwebsite:${{ steps.meta.outputs.env }}
+            shreyashsri/pbwebsite:${{ steps.meta.outputs.env }}-${{ steps.meta.outputs.sha_short }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Update staging manifest in infra repo
+      - name: Update manifest in infra repo
         env:
           PAT: ${{ secrets.INFRA_PAT }}
         run: |
-          IMAGE_TAG="staging-${{ steps.meta.outputs.sha_short }}"
+          ENV="${{ steps.meta.outputs.env }}"
+          IMAGE_TAG="${ENV}-${{ steps.meta.outputs.sha_short }}"
           git clone https://${PAT}@github.com/pointblank-club/infra.git infra
           cd infra
           sed -i "s|image: shreyashsri/pbwebsite:.*|image: shreyashsri/pbwebsite:${IMAGE_TAG}|" \
-            argocd/pbwebsite/staging/deployment.yaml
+            argocd/pbwebsite/${ENV}/deployment.yaml
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add argocd/pbwebsite/staging/deployment.yaml
+          git add argocd/pbwebsite/${ENV}/deployment.yaml
           git diff --cached --quiet && echo "No changes to commit" && exit 0
-          git commit -m "chore(staging): update pbwebsite image to ${IMAGE_TAG}"
+          git commit -m "chore(${ENV}): update pbwebsite image to ${IMAGE_TAG}"
           git push
