@@ -142,7 +142,7 @@ export async function runScrapeJob(options: {
     let since: Date | undefined;
 
 if (incremental) {
-  const WINDOW_DAYS = 10;
+  const WINDOW_DAYS = 3;
   since = new Date(Date.now() - WINDOW_DAYS * 24 * 60 * 60 * 1000);
 }
 
