@@ -105,7 +105,7 @@ const Card: React.FC<CardProps> = ({
 
           {/* Back */}
           <div
-            className="absolute inset-0 w-full h-full backface-hidden transform-[rotateY(180deg)] rounded-[20px] border border-pbgreen bg-[#1C1C1C] p-4 flex flex-col items-center justify-center text-center"
+            className="absolute inset-0 w-full h-full backface-hidden transform-[rotateY(180deg)] rounded-[20px] border z-98 border-pbgreen bg-[#1C1C1C] p-4 flex flex-col items-center justify-center text-center"
             style={{
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
