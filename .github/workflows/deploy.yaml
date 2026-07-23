@@ -48,10 +48,10 @@ jobs:
           git clone https://${PAT}@github.com/pointblank-club/infra.git infra
           cd infra
           sed -i "s|image: shreyashsri/pbwebsite:.*|image: shreyashsri/pbwebsite:${IMAGE_TAG}|" \
-            argocd/pbwebsite/${ENV}/deployment.yaml
+            argocd/website/pbwebsite/${ENV}/deployment.yaml
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add argocd/pbwebsite/${ENV}/deployment.yaml
+          git add argocd/website/pbwebsite/${ENV}/deployment.yaml
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "chore(${ENV}): update pbwebsite image to ${IMAGE_TAG}"
           git push
