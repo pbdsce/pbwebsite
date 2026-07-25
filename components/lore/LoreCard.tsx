@@ -13,6 +13,7 @@ type LoreCardProps = LoreType & {
 };
 export default function LoreCard({
   _id,
+  id,
   title,
   date,
   location,
@@ -26,7 +27,7 @@ export default function LoreCard({
   const [expanded, setExpanded] = useState<boolean>(false);
 
   return (
-    <div className="mb-6 md:mb-9">
+    <div className="mb-6 md:mb-9" data-lore-id={id ?? undefined}>
       <div className="w-full flex justify-center px-4 sm:px-6">
         <div className="w-full max-w-7xl bg-[#1C1C1C] rounded-2xl overflow-hidden flex flex-col">
           <div className="w-full flex flex-col-reverse md:flex-row min-h-100">
