@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function EventCard({
   title,
@@ -17,7 +18,7 @@ export default function EventCard({
   title: string;
   description: string;
   image?: string;
-  date?: string;
+  date: string;
   location?: string;
   registrationLink?: string;
   isFlipped?: boolean;
@@ -26,6 +27,10 @@ export default function EventCard({
   onEdit?: () => void;
   onDelete?: () => void;
 }) {
+  const [timeNow] = useState(() => Date.now())
+  const eventTimeMillis: number = Date.parse(date)
+  const isPast:boolean = (eventTimeMillis > timeNow)?false:true
+  
   return (
     <div
       className="group relative w-full h-full cursor-pointer"
@@ -151,7 +156,7 @@ export default function EventCard({
             {description}
           </p>
 
-          {registrationLink && (
+          {(!isPast&&registrationLink) && (
             <div className="text-xs md:text-sm text-white/80">
               <strong className="text-pbgreen">Registration Link:</strong>{" "}
               <a
