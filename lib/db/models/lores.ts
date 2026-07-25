@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 interface Lore extends mongoose.Document {
+  id: string | null;
   title: string;
   date: Date;
   location: string;
@@ -10,6 +11,7 @@ interface Lore extends mongoose.Document {
 }
 
 const LoreModel = new mongoose.Schema({
+  id: { type: String, default: null },
   title: { type: String, required: true },
   date: { type: Date, required: true },
   location: { type: String, required: true },
