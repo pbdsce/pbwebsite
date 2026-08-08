@@ -53,6 +53,7 @@ export interface OssOrganization {
   id: string;
   name: string;
   url?: string;
+  avatarUrl?: string;
   platform?: ContributionPlatform;
   description?: string;
   tag: ContributionTag;

@@ -1,133 +1,107 @@
 import type { ContributorView } from "@/components/oss/types";
-import { Pill } from "@/components/ui/Pill";
-import {
-  formatContributionMeta,
-  getContributorGithubUrl,
-  getOrganizationGithubUrl,
-} from "@/components/oss/utils";
+import OssAvatar from "@/components/oss/widgets/OssAvatar";
+import { GithubMarkIcon } from "@/components/oss/elements/OssIcons";
+import { getContributorGithubUrl } from "@/components/oss/utils";
 
 export default function OssContributorCard({
   contributor,
+  flipped,
+  onToggleFlip,
 }: {
   contributor: ContributorView;
+  flipped: boolean;
+  onToggleFlip: () => void;
 }) {
+  const orgCount = contributor.organizations.length;
   const contributorUrl = getContributorGithubUrl(contributor);
-  const shouldHideAdeiOrg =
-    (contributor.login?.toLowerCase() === "saniyafatima07"
-      || contributor.name.trim().toLowerCase() === "saniya fatima");
-  const sortedOrganizations = contributor.organizations
-    .filter(
-      (organization) =>
-        !(
-          shouldHideAdeiOrg
-          && organization.name.trim().toLowerCase() === "adeyosemanputra"
-        ),
-    )
-    .sort(
-      (left, right) =>
-        (right.prCount ?? 0) - (left.prCount ?? 0) ||
-        left.name.localeCompare(right.name),
-  );
-  const visibleOrgs = sortedOrganizations.slice(0, 5);
-  const remainingOrgs = sortedOrganizations.slice(5);
+
   return (
-    <div className="rounded-[16px] bg-[#1c1c1c] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.22)] sm:rounded-[20px] sm:p-5 md:p-6">
-      <div className="flex flex-col gap-4 sm:gap-5 md:gap-6">
-        <div className="min-w-0">
-          <h3 className="break-words text-lg font-medium text-white sm:text-xl">
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={
+        flipped
+          ? `Show ${contributor.name} details`
+          : `Show organizations for ${contributor.name}`
+      }
+      onClick={onToggleFlip}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onToggleFlip();
+        }
+      }}
+      className="relative h-full cursor-pointer perspective-distant"
+    >
+      <div
+        className={`relative h-full rounded-[20px] border transition-transform duration-500 transform-3d ${
+          flipped
+            ? "border-pbgreen"
+            : "border-transparent hover:border-pbgreen/60"
+        }`}
+        style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
+      >
+        <div className="flex h-full flex-col items-center rounded-[20px] bg-pbgray p-6 text-center backface-hidden sm:p-7">
+          <OssAvatar
+            login={contributor.login}
+            name={contributor.name}
+            platform={contributor.platform}
+            shape="square"
+            size={96}
+          />
+          <h3 className="mt-4 w-full truncate text-lg font-semibold text-white sm:text-xl">
             {contributor.name}
           </h3>
-          {contributor.login && (
-            contributorUrl ? (
-                <a
-                  href={contributorUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-1 block break-words text-sm text-zinc-500 transition-colors hover:text-zinc-300"
-                >
-                @{contributor.login}
-                </a>
-              ) : (
-                <p className="mt-1 break-words text-sm text-zinc-500">
-                 @{contributor.login}
-              </p>
-  )
-)}
-          <p className="mt-4 text-sm leading-relaxed text-zinc-400">
-            {formatContributionMeta(
-              contributor.prCount,
-            )}
-          </p>
-          {contributor.bio && (
-            <p className="mt-4 text-sm leading-relaxed text-zinc-400">
-              {contributor.bio}
-            </p>
-          )}
-        </div>
 
-        <div className="border-t border-zinc-800/50 pt-4">
-          <div className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">
-            Organizations
+          <div className="mt-5 flex w-full items-center justify-center gap-3 border-t border-zinc-800/60 pt-4">
+            <span className="flex items-center gap-1.5 rounded-full border border-pbborder bg-pbdarkgray px-3.5 py-1.5 text-sm">
+              <span className="font-medium text-pbgreen">
+                {contributor.prCount}
+              </span>
+              <span className="text-white">PRs</span>
+            </span>
+            <span className="flex items-center gap-1.5 rounded-full border border-pbborder bg-pbdarkgray px-3.5 py-1.5 text-sm">
+              <span className="font-medium text-pbgreen">{orgCount}</span>
+              <span className="text-white">{orgCount === 1 ? "ORG" : "ORGs"}</span>
+            </span>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-          {contributor.organizations.length === 0 ? (
-  <span className="text-xs text-zinc-600">No orgs yet</span>
-) : (
-  <>
-    {visibleOrgs.map((organization) => (
-      <a
-        key={organization.id}
-        href={getOrganizationGithubUrl(
-          organization.name,
-          organization.url,
-          organization.platform,
-        )}
-        target="_blank"
-        rel="noreferrer"
-        className="transition-transform hover:-translate-y-0.5"
-      >
-        <Pill
-          className="max-w-[160px]"
-          variant="muted"
-        >
-          <span className="truncate">{organization.name}</span>
-        </Pill>
-      </a>
-    ))}
-
-    {remainingOrgs.length > 0 && (
-      <div className="relative group inline-block">
-        <Pill
-          className="cursor-pointer font-medium"
-          variant="muted"
-        >
-          +{remainingOrgs.length} more
-        </Pill>
-
-        {/* Hover dropdown */}
-        <div className="invisible absolute left-1/2 top-full z-50 mt-2 flex w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 flex-wrap gap-1.5 rounded-lg bg-[#111] p-2 opacity-0 shadow-xl transition group-hover:visible group-hover:opacity-100 sm:max-w-[340px]">
-        {remainingOrgs.map((org) => (
-          <a
-            key={org.id}
-            href={getOrganizationGithubUrl(
-              org.name,
-              org.url,
-              org.platform,
-            )}
-            target="_blank"
-            rel="noreferrer"
-            className="transition-transform hover:-translate-y-0.5"
-          >
-            <Pill size="compact" variant="muted">
-              {org.name}
-            </Pill>
-          </a>
-        ))}
         </div>
-      </div>
-    )}
-  </>
-)}
+
+        <div
+          className="absolute inset-0 flex flex-col items-center rounded-[20px] bg-pbgray p-6 text-center backface-hidden sm:p-7"
+          style={{ transform: "rotateY(180deg)" }}
+        >
+          {contributorUrl ? (
+            <a
+              href={contributorUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(event) => event.stopPropagation()}
+              aria-label={`Open ${contributor.name}'s GitHub profile`}
+              className="inline-flex text-pbgreen transition-colors hover:text-white"
+            >
+              <GithubMarkIcon className="h-10 w-10" />
+            </a>
+          ) : (
+            <GithubMarkIcon className="h-10 w-10 text-pbgreen" />
+          )}
+          <div className="mt-4 h-px w-full bg-zinc-800/60" />
+          <h4 className="mt-4 text-lg font-medium text-pbgreen sm:text-xl">
+            Organizations
+          </h4>
+          <div className="mt-4 flex max-h-full flex-wrap items-start justify-center gap-2 overflow-y-auto">
+            {contributor.organizations.length === 0 ? (
+              <span className="text-xs text-zinc-600">No organizations yet</span>
+            ) : (
+              contributor.organizations.map((organization) => (
+                <span
+                  key={organization.id}
+                  className="rounded-full border border-pbborder bg-pbdarkgray px-3 py-1.5 text-xs text-white"
+                >
+                  {organization.name}
+                </span>
+              ))
+            )}
           </div>
         </div>
       </div>

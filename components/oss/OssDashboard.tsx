@@ -72,6 +72,7 @@ async function fetchDashboardData(endpoint: string): Promise<DashboardData> {
     id: org.orgLogin,
     name: org.orgLogin,
     url: org.orgUrl,
+    avatarUrl: org.orgAvatar,
     platform: getPreferredPlatform(org.platforms),
     description: undefined,
     tag: org.tag,
@@ -281,19 +282,20 @@ export default function OssDashboard({ endpoint }: { endpoint: string }) {
           ))}
         </div>
 
+        <div className="mb-8 sm:mb-10">
+          <OssOverviewSection
+            totalContributors={stats.totalContributors}
+            totalMergedPRs={stats.totalMergedPRs}
+            totalOrganizations={stats.totalOrganizations}
+          />
+        </div>
+
         {activeTab === "dashboard" && (
-          <div className="space-y-10">
-            <OssOverviewSection
-              totalContributors={stats.totalContributors}
-              totalMergedPRs={stats.totalMergedPRs}
-              totalOrganizations={stats.totalOrganizations}
-            />
-            <OssHighlightsSection
-              contributorStats={contributors}
-              organizationStats={organizations}
-              onTabChange={setActiveTab}
-            />
-          </div>
+          <OssHighlightsSection
+            contributorStats={contributors}
+            organizationStats={organizations}
+            onTabChange={setActiveTab}
+          />
         )}
 
         {activeTab === "organizations" && (

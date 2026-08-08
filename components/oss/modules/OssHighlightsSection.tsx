@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import type {
   ContributorView,
   DashboardTab,
@@ -17,6 +20,11 @@ export default function OssHighlightsSection({
   organizationStats: OrganizationView[];
   onTabChange: (tab: DashboardTab) => void;
 }) {
+  const [flippedOrgId, setFlippedOrgId] = useState<string | null>(null);
+  const [flippedContributorId, setFlippedContributorId] = useState<
+    string | null
+  >(null);
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
       <div>
@@ -34,6 +42,12 @@ export default function OssHighlightsSection({
                 <OssOrganizationPreviewCard
                   key={organization.id}
                   organization={organization}
+                  flipped={flippedOrgId === organization.id}
+                  onToggleFlip={() =>
+                    setFlippedOrgId((current) =>
+                      current === organization.id ? null : organization.id,
+                    )
+                  }
                 />
               ))
           )}
@@ -55,6 +69,12 @@ export default function OssHighlightsSection({
                 <OssContributorPreviewCard
                   key={contributor.id}
                   contributor={contributor}
+                  flipped={flippedContributorId === contributor.id}
+                  onToggleFlip={() =>
+                    setFlippedContributorId((current) =>
+                      current === contributor.id ? null : contributor.id,
+                    )
+                  }
                 />
               ))
           )}

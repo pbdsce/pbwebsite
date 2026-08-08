@@ -17,7 +17,7 @@ export default function OssHero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className="mt-4 max-w-5xl text-balance text-sm font-medium leading-relaxed text-zinc-400 sm:mt-8 sm:text-base md:text-lg lg:text-xl"
+        className="mt-4 max-w-5xl text-balance text-sm font-light leading-relaxed text-zinc-400 sm:mt-8 sm:text-base md:text-lg lg:text-2xl"
       >
         Every merged pull request from a Point Blank member, in one place.
         From first-year first PRs to alumni still shipping years later, it all

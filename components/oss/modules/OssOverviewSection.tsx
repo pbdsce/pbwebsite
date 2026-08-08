@@ -17,18 +17,18 @@ export default function OssOverviewSection({
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 md:gap-6">
       <OssStatCard
-        icon={<PrStatIcon />}
+        icon={<PrStatIcon size={64} />}
         title="Total PRs Merged"
         value={totalMergedPRs}
       />
       <OssStatCard
-        icon={<OrgStatIcon />}
-        title="Unique Orgs"
+        icon={<OrgStatIcon size={64} />}
+        title="Total Orgs"
         value={totalOrganizations}
       />
       <OssStatCard
-        icon={<ContributorStatIcon />}
-        title="Contributors"
+        icon={<ContributorStatIcon size={64} />}
+        title="Total Contributors"
         value={totalContributors}
       />
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function OssFilterMenu({
@@ -42,21 +42,23 @@ export default function OssFilterMenu({
 
   return (
     <div ref={containerRef} className={cn("relative w-full sm:w-auto", className)}>
-      <Button
+      <button
         type="button"
-        size="pill"
-        variant={isOpen ? "success" : "surface"}
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
-        className="w-full px-5 py-3 text-xs uppercase tracking-[0.18em] sm:w-auto"
+        className={cn(
+          "flex h-9.5 w-full items-center justify-center gap-2 rounded-[10px] border border-pbborder px-4 text-sm font-medium text-white transition-colors sm:w-auto",
+          isOpen ? "bg-pbgreen text-black" : "bg-pbdarkgray hover:bg-pbborder",
+        )}
       >
+        <SlidersHorizontal className="h-4 w-4" />
         Filter
-      </Button>
+      </button>
 
       {isOpen && (
         <div
           className={cn(
-            "mt-3 w-full rounded-[20px] border border-[#39FF14]/15 bg-[#111111] p-4 shadow-[0_24px_64px_rgba(0,0,0,0.35)] sm:absolute sm:right-0 sm:top-full sm:z-30 sm:mt-3 sm:min-w-[300px]",
+            "mt-2 w-full rounded-[10px] border border-[#2a2a2a] bg-pbdarkgray p-2 shadow-lg sm:absolute sm:right-0 sm:top-full sm:z-30 sm:mt-2 sm:w-auto sm:min-w-40",
             panelClassName,
           )}
         >

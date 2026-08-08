@@ -10,17 +10,15 @@ export default function OssStatCard({
   value: number;
 }) {
   return (
-    <div className="flex min-h-[120px] flex-col rounded-[16px] bg-[#1c1c1c] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.22)] sm:min-h-[160px] sm:rounded-[20px] sm:p-6">
-      <div className="mb-3 flex items-center gap-3 sm:mb-6 sm:gap-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] sm:h-14 sm:w-14 sm:rounded-[18px]">
-          {icon}
-        </div>
-        <h3 className="text-zinc-400 text-[10px] tracking-wider uppercase font-medium sm:text-sm sm:tracking-widest">
-          {title}
-        </h3>
-      </div>
-      <div className="mt-auto text-3xl font-medium text-white sm:text-4xl md:text-5xl">
+    <div className="relative flex min-h-[120px] flex-col justify-center overflow-hidden rounded-[16px] bg-[#1c1c1c] p-5 sm:min-h-[160px] sm:rounded-[20px] sm:p-6 md:min-h-[200px]">
+      <span className="pr-14 text-sm text-zinc-400 sm:pr-20 sm:text-base md:text-[17px]">
+        {title}
+      </span>
+      <span className="mt-2 bg-linear-to-b from-white to-zinc-500 bg-clip-text text-4xl font-medium text-transparent sm:mt-3 sm:text-5xl md:text-6xl lg:text-[80px]">
         {value}
+      </span>
+      <div className="pointer-events-none absolute right-4 top-1/2 h-10 w-10 -translate-y-1/2 text-pbgreen opacity-90 sm:right-6 sm:h-14 sm:w-14 md:h-16 md:w-16">
+        {icon}
       </div>
     </div>
   );

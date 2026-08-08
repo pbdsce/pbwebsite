@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import type {
   OrganizationSortOptionId,
   OrganizationTagFilter,
@@ -12,6 +15,8 @@ import OssFilterGroup from "@/components/oss/widgets/OssFilterGroup";
 import OssFilterMenu from "@/components/oss/widgets/OssFilterMenu";
 import OssOrganizationCard from "@/components/oss/widgets/OssOrganizationCard";
 import OssSearchInput from "@/components/oss/widgets/OssSearchInput";
+
+const PAGE_SIZE = 12;
 
 export default function OssOrganizationsPanel({
   onOrganizationTagChange,
@@ -30,50 +35,53 @@ export default function OssOrganizationsPanel({
   organizations: OrganizationView[];
   searchQuery: string;
 }) {
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [prevOrganizations, setPrevOrganizations] = useState(organizations);
+  const [flippedId, setFlippedId] = useState<string | null>(null);
+
+  if (organizations !== prevOrganizations) {
+    setPrevOrganizations(organizations);
+    setVisibleCount(PAGE_SIZE);
+  }
+
+  const visibleOrganizations = organizations.slice(0, visibleCount);
+  const hasMore = visibleCount < organizations.length;
+
   return (
     <div>
       <div className="mb-6 flex flex-col gap-3 sm:gap-4 md:mb-8 md:flex-row md:items-center md:justify-between">
-        <h2 className="shrink-0 text-2xl font-medium text-white sm:text-3xl">
-          Explore Repositories
+        <h2 className="shrink-0 text-2xl font-normal text-pbgreen sm:text-3xl">
+          Organizations
         </h2>
         <div className="flex w-full flex-col gap-3 sm:flex-row md:w-auto md:items-start md:justify-end">
           <OssSearchInput
             value={searchQuery}
             onChange={onSearchQueryChange}
+            placeholder="Search organizations"
           />
           <OssFilterMenu>
             {({ close }) => (
-              <div className="space-y-4">
-                <div>
-                  <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
-                    Sort By
-                  </p>
-                  <OssFilterGroup
-                    activeId={orgSort}
-                    options={ORGANIZATION_SORT_OPTIONS}
-                    onChange={(value) => {
-                      onOrgSortChange(value);
-                      close();
-                    }}
-                    className="grid grid-cols-2 gap-2"
-                  />
-                </div>
+              <div className="space-y-1">
+                <OssFilterGroup
+                  activeId={orgSort}
+                  options={ORGANIZATION_SORT_OPTIONS}
+                  onChange={(value) => {
+                    onOrgSortChange(value);
+                    close();
+                  }}
+                  className="flex flex-col"
+                />
 
                 {SHOW_ORGANIZATION_TAGS && (
-                  <div>
-                    <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
-                      Tags
-                    </p>
-                    <OssFilterGroup
-                      activeId={organizationTag}
-                      options={ORGANIZATION_TAG_OPTIONS}
-                      onChange={(value) => {
-                        onOrganizationTagChange(value);
-                        close();
-                      }}
-                      className="grid grid-cols-2 gap-2"
-                    />
-                  </div>
+                  <OssFilterGroup
+                    activeId={organizationTag}
+                    options={ORGANIZATION_TAG_OPTIONS}
+                    onChange={(value) => {
+                      onOrganizationTagChange(value);
+                      close();
+                    }}
+                    className="flex flex-col border-t border-[#2a2a2a] pt-1"
+                  />
                 )}
               </div>
             )}
@@ -88,14 +96,34 @@ export default function OssOrganizationsPanel({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:gap-6 lg:grid-cols-3">
-          {organizations.map((organization) => (
-            <OssOrganizationCard
-              key={organization.id}
-              organization={organization}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:gap-6 lg:grid-cols-3">
+            {visibleOrganizations.map((organization) => (
+              <OssOrganizationCard
+                key={organization.id}
+                organization={organization}
+                flipped={flippedId === organization.id}
+                onToggleFlip={() =>
+                  setFlippedId((current) =>
+                    current === organization.id ? null : organization.id,
+                  )
+                }
+              />
+            ))}
+          </div>
+
+          {hasMore && (
+            <div className="mt-8 flex justify-center sm:mt-10">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                className="rounded-[10px] border border-pbborder bg-pbdarkgray px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-pbborder"
+              >
+                View More
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
