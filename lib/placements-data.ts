@@ -24,7 +24,7 @@ export const PLACEMENT_COMPANIES: PlacementCompany[] = [
   { name: "Aspora", offers: 2, onCampus: 0, offCampus: 2, domain: "aspora.com" },
   { name: "Nasdaq", offers: 2, onCampus: 2, offCampus: 0, domain: "nasdaq.com" },
   { name: "Sabi", offers: 2, onCampus: 0, offCampus: 2, domain: "sabi.am" },
-  { name: "Stealth Startups", offers: 2, onCampus: 0, offCampus: 2, note: "×2, anonymous" },
+  { name: "Stealth Startups", offers: 2, onCampus: 0, offCampus: 2 },
   { name: "Microsoft", offers: 1, onCampus: 1, offCampus: 0, featured: true, domain: "microsoft.com" },
   { name: "Oracle", offers: 1, onCampus: 0, offCampus: 1, featured: true, domain: "oracle.com" },
   { name: "VISA", offers: 1, onCampus: 1, offCampus: 0, featured: true, domain: "visa.com" },

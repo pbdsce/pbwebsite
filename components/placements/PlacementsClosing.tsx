@@ -11,21 +11,10 @@ export default function PlacementsClosing() {
     >
       <div className="max-w-8xl mx-auto">
         <FadeIn>
-          <div className="relative overflow-hidden rounded-4xl border border-pbborder bg-pbcard p-8 sm:p-12 lg:p-16">
-            <div
-              aria-hidden
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(70% 60% at 100% 0%, rgba(55,255,0,0.10) 0%, rgba(55,255,0,0) 60%), radial-gradient(50% 50% at 0% 100%, rgba(55,255,0,0.06) 0%, rgba(55,255,0,0) 60%)",
-              }}
-            />
-            <div className="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+          <div className="rounded-4xl border border-pbborder bg-pbcard p-8 sm:p-12 lg:p-16">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
               <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-pbgreen/90">
-                  Hiring?
-                </p>
-                <h3 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight">
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight">
                   Hire from this <br className="hidden sm:block" />
                   list <span className="text-pbgreen">next year.</span>
                 </h3>
@@ -35,7 +24,7 @@ export default function PlacementsClosing() {
                   careers portal and we&apos;ll get it in front of the batch.
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 shrink-0">
+              <div className="flex flex-col gap-5 shrink-0">
                 <a
                   href="https://careers.pointblank.club/"
                   target="_blank"

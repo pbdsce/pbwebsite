@@ -39,39 +39,22 @@ export default function PlacementsStats() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           {stats.map((s, i) => (
             <FadeIn key={s.label} delay={i * 0.08}>
-              <div
-                className={`relative h-full rounded-3xl border p-6 sm:p-8 overflow-hidden ${
-                  s.emphasis
-                    ? "bg-pbcard border-pbgreen/40"
-                    : "bg-pbcard border-pbborder"
-                }`}
-              >
-                {s.emphasis && (
-                  <div
-                    aria-hidden
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      background:
-                        "radial-gradient(120% 70% at 100% 0%, rgba(55,255,0,0.10) 0%, rgba(55,255,0,0) 60%)",
-                    }}
-                  />
-                )}
-                <div className="relative">
-                  <div className="text-xs uppercase tracking-[0.2em] text-white/40">
-                    {s.label}
-                  </div>
-                  <div className="mt-3 flex items-baseline gap-2">
-                    <div
-                      className={`text-6xl sm:text-7xl font-semibold tabular-nums ${
-                        s.emphasis ? "text-pbgreen" : "text-white"
-                      }`}
-                      style={{ letterSpacing: "-0.04em" }}
-                    >
-                      {s.value}
-                    </div>
-                  </div>
-                  <div className="mt-4 text-sm text-white/60">{s.caption}</div>
+              <div className="h-full rounded-3xl border border-pbborder bg-pbcard p-6 sm:p-8 transition-colors duration-200 hover:border-pbgreen/60">
+
+                <div className="text-xs uppercase tracking-[0.2em] text-white/40">
+                  {s.label}
                 </div>
+                <div className="mt-3 flex items-baseline gap-2">
+                  <div
+                    className={`text-6xl sm:text-7xl font-semibold tabular-nums ${
+                      s.emphasis ? "text-pbgreen" : "text-white"
+                    }`}
+                    style={{ letterSpacing: "-0.04em" }}
+                  >
+                    {s.value}
+                  </div>
+                </div>
+                <div className="mt-4 text-sm text-white/60">{s.caption}</div>
               </div>
             </FadeIn>
           ))}

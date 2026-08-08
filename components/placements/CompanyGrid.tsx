@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Lexend_Tera } from "next/font/google";
-import { Sparkles } from "lucide-react";
 import FadeIn from "@/components/FadeIn";
 import {
   HEADLINER_COMPANIES,
@@ -10,127 +8,72 @@ import {
   type PlacementCompany,
 } from "@/lib/placements-data";
 
-const lexendTera = Lexend_Tera({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-});
-
-function campusTag(c: PlacementCompany) {
-  if (c.offCampus > 0 && c.onCampus > 0) return "mixed";
-  return c.onCampus > 0 ? "on-campus" : "off-campus";
-}
-
 function formatCount(n: number) {
   return n.toString().padStart(2, "0");
 }
 
-function CornerOrnament({
-  domain,
-  fallbackToStealth = false,
-}: {
-  domain?: string;
-  fallbackToStealth?: boolean;
-}) {
-  const [failed, setFailed] = useState(false);
-  const showStealth = !domain || failed;
+function chunk<T>(items: T[], size: number): T[][] {
+  const rows: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    rows.push(items.slice(i, i + size));
+  }
+  return rows;
+}
 
-  if (showStealth && !fallbackToStealth) return null;
+function CompanyLogo({ name, domain }: { name: string; domain?: string }) {
+  const [failed, setFailed] = useState(false);
+  const initials = name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  if (!domain || failed) {
+    return (
+      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-pbgray border border-pbborder flex items-center justify-center text-[10px] font-semibold text-white/70">
+        {initials}
+      </div>
+    );
+  }
 
   return (
-    <div
-      aria-hidden
-      className="absolute pointer-events-none select-none"
-      style={{
-        right: "-24px",
-        bottom: "-24px",
-        width: "128px",
-        height: "128px",
-      }}
-    >
-      {showStealth ? (
-        <Sparkles
-          strokeWidth={1.25}
-          className="w-full h-full text-pbgreen opacity-[0.18] transition-opacity duration-300 group-hover:opacity-30"
-          style={{
-            filter: "drop-shadow(0 0 18px rgba(55,255,0,0.22))",
-          }}
-        />
-      ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={`https://www.google.com/s2/favicons?domain=${domain}&sz=256`}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          onError={() => setFailed(true)}
-          className="w-full h-full object-contain opacity-[0.18] grayscale contrast-125 transition-opacity duration-300 group-hover:opacity-30"
-          style={{
-            filter: "drop-shadow(0 0 18px rgba(55,255,0,0.18))",
-          }}
-        />
-      )}
+    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-pbborder flex items-center justify-center overflow-hidden">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`}
+        alt={`${name} logo`}
+        loading="lazy"
+        decoding="async"
+        onError={() => setFailed(true)}
+        className="w-2/3 h-2/3 object-contain"
+      />
     </div>
   );
 }
 
 function HeadlinerCard({ company }: { company: PlacementCompany }) {
-  const multi = company.offers > 1;
-  const tag = campusTag(company);
   return (
-    <div
-      className={`group relative h-full rounded-3xl border bg-pbcard p-6 sm:p-7 overflow-hidden transition-colors duration-200 ${
-        multi
-          ? "border-pbgreen/30 hover:border-pbgreen/60"
-          : "border-pbborder hover:border-white/20"
-      }`}
-    >
-      {multi && (
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(120% 80% at 100% 0%, rgba(55,255,0,0.08) 0%, rgba(55,255,0,0) 60%)",
-          }}
-        />
-      )}
-      <CornerOrnament domain={company.domain} fallbackToStealth />
-
-      <div className="relative flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <div className="flex items-baseline gap-2 text-white/40 text-xs uppercase tracking-[0.22em]">
-            <span>{company.offers === 1 ? "offer" : "offers"}</span>
-          </div>
-          <div
-            className={`mt-1 text-6xl sm:text-7xl font-semibold tabular-nums ${
-              multi ? "text-pbgreen" : "text-white"
-            }`}
-            style={{ letterSpacing: "-0.05em", lineHeight: "1" }}
-          >
-            {formatCount(company.offers)}
-          </div>
-        </div>
-        <div className="shrink-0 flex flex-col items-end gap-1 text-right">
-          <span
-            className={`text-[10px] font-semibold uppercase tracking-[0.18em] px-2.5 py-1 rounded-full ${
-              tag === "on-campus"
-                ? "bg-white/[0.06] text-white/70"
-                : tag === "off-campus"
-                  ? "bg-pbgreen/15 text-pbgreen"
-                  : "bg-white/[0.06] text-white/70"
-            }`}
-          >
-            {tag}
-          </span>
-        </div>
+    <div className="group h-full rounded-3xl border border-pbborder bg-pbcard p-6 sm:p-7 transition-colors duration-200 hover:border-pbgreen/60">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-white/40 text-xs uppercase tracking-[0.22em]">
+          {company.offers === 1 ? "offer" : "offers"}
+        </span>
+        <CompanyLogo name={company.name} domain={company.domain} />
       </div>
 
-      <div className="relative mt-8 sm:mt-10">
+      <div
+        className={`mt-3 text-6xl sm:text-7xl font-semibold tabular-nums ${
+          company.offers > 1 ? "text-pbgreen" : "text-white"
+        }`}
+        style={{ letterSpacing: "-0.05em", lineHeight: "1" }}
+      >
+        {formatCount(company.offers)}
+      </div>
+
+      <div className="mt-8 sm:mt-10">
         <div className="h-px w-full bg-white/[0.07]" />
-        <p
-          className={`mt-4 text-lg sm:text-xl text-white font-medium leading-tight ${lexendTera.className}`}
-          style={{ letterSpacing: "-0.02em" }}
-        >
+        <p className="mt-4 text-lg sm:text-xl text-white font-medium leading-tight">
           {company.name}
         </p>
         {company.note && (
@@ -142,9 +85,6 @@ function HeadlinerCard({ company }: { company: PlacementCompany }) {
 }
 
 export default function CompanyGrid() {
-  const headlinerCount = HEADLINER_COMPANIES.length;
-  const otherCount = OTHER_COMPANIES.length;
-
   return (
     <section
       id="placements-companies"
@@ -152,65 +92,60 @@ export default function CompanyGrid() {
     >
       <div className="max-w-8xl mx-auto">
         <FadeIn>
-          <h2 className="text-3xl sm:text-4xl font-semibold">
+          <h2 className="text-3xl sm:text-4xl font-semibold text-center">
             Where the <span className="text-pbgreen">batch</span> landed.
           </h2>
         </FadeIn>
         <FadeIn delay={0.08}>
-          <p className="mt-3 max-w-2xl text-sm sm:text-base text-white/60 leading-relaxed">
-            A roster of the companies that hired us this year — sorted by impact,
-            not alphabet.
+          <p className="mt-3 max-w-2xl mx-auto text-center text-sm sm:text-base text-white/60 leading-relaxed">
+            A roster of the companies that hired us this year, sorted by
+            impact rather than alphabetically.
           </p>
         </FadeIn>
 
-        <FadeIn delay={0.16}>
-          <div className="mt-10 flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-white/40">
-            <span className="text-pbgreen">Headliners</span>
-            <span className="flex-1 h-px bg-white/10" />
-            <span className="tabular-nums">{headlinerCount}</span>
-          </div>
-        </FadeIn>
-
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 xl:grid-flow-dense">
           {HEADLINER_COMPANIES.map((c, i) => (
             <FadeIn
               key={c.name}
               delay={Math.min(i * 0.04, 0.3)}
               y={16}
-              className="h-full"
+              className={`h-full ${
+                c.name === "VISA" ? "sm:col-start-2 lg:col-start-3 xl:col-start-4" : ""
+              }`}
             >
               <HeadlinerCard company={c} />
             </FadeIn>
           ))}
+
+          <FadeIn delay={0.1} className="col-span-full xl:col-start-2 xl:col-span-2">
+            <div className="h-full rounded-3xl border border-pbborder bg-pbcard p-6 sm:p-8 flex flex-col items-center justify-center gap-5 text-center overflow-hidden">
+              <span className="text-white/40 text-xs uppercase tracking-[0.22em]">
+                Additional offers from
+              </span>
+              <div className="flex flex-col items-center gap-2 text-xs sm:text-sm text-pbgreen leading-relaxed">
+                {chunk(OTHER_COMPANIES, 6).map((row, rowIdx) => (
+                  <div
+                    key={rowIdx}
+                    className="flex flex-nowrap items-center justify-center gap-x-2 sm:gap-x-3"
+                  >
+                    {row.map((c, i) => {
+                      return (
+                        <span key={c.name} className="inline-flex items-center gap-2 sm:gap-3 whitespace-nowrap">
+                          {c.name}
+                          {i < row.length - 1 && (
+                            <span aria-hidden className="text-white/20">
+                              ·
+                            </span>
+                          )}
+                        </span>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </FadeIn>
         </div>
-
-        <FadeIn delay={0.1}>
-          <div className="mt-20 flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-white/40">
-            <span>+ 1 offer each from</span>
-            <span className="flex-1 h-px bg-white/10" />
-            <span className="tabular-nums">{otherCount}</span>
-          </div>
-        </FadeIn>
-
-        <FadeIn delay={0.18}>
-          <div className="mt-6 rounded-3xl border border-pbborder bg-pbcard/60 p-6 sm:p-8 lg:p-10">
-            <ul
-              className={`flex flex-wrap gap-x-3 gap-y-3 sm:gap-x-5 sm:gap-y-4 text-base sm:text-lg lg:text-xl text-white/85 leading-tight ${lexendTera.className}`}
-              style={{ letterSpacing: "-0.02em" }}
-            >
-              {OTHER_COMPANIES.map((c, i) => (
-                <li key={c.name} className="flex items-center gap-3 sm:gap-5">
-                  <span>{c.name}</span>
-                  {i < OTHER_COMPANIES.length - 1 && (
-                    <span aria-hidden className="text-pbgreen/60 select-none">
-                      ·
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </FadeIn>
       </div>
     </section>
   );
