@@ -19,11 +19,54 @@ const lexand = Lexend({
 });
 
 export const metadata: Metadata = {
-  title: "Point Blank",
+  metadataBase: new URL("https://www.pointblank.club"),
+  title: {
+    default: "Point Blank",
+    template: "%s | Point Blank",
+  },
   description:
-    "Point Blank is a student-run tech community. We are a group of tech enthusiasts who love to learn and grow together.",
+    "Point Blank is a student run tech community. We are a group of tech enthusiasts who love to learn and grow together.",
+  keywords: ["Point Blank", "student tech community", "open source community", "coding club"],
+  authors:[{name: "Point Blank"}],
   icons: {
     icon: ico.src,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: "https://www.pointblank.club",
+    title: "Point Blank",
+    description:
+      "Point Blank is a student run open source community. We are a group of tech enthusiasts who love to learn and grow together.",
+    siteName: "Point Blank",
+    images: [
+      {
+        url: "/og-image.png", 
+        width: 1200,
+        height: 630,
+        alt: "Point Blank",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Point Blank",
+    description:
+      "Point Blank is a student run open source community.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "https://www.pointblank.club",
   },
 };
 
@@ -37,7 +80,7 @@ export default async function RootLayout({
   const user = sessionCookie ? (await verifyAuth(sessionCookie.value)) || null : null;
 
   return (
-    <html lang="en_IN">
+    <html lang="en-IN">
       {process.env.NEXT_PUBLIC_GTM_ID && (
         <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
       )}
