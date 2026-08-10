@@ -85,6 +85,24 @@ export default async function RootLayout({
         <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
       )}
 
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "Point Blank",
+            url: "https://www.pointblank.club",
+            logo: "https://www.pointblank.club/og-image.png",
+            sameAs: [
+              "https://x.com/pointblank_club",
+              "https://instagram.com/pointblank_club_",
+              "https://linkedin.com/company/pointblank-club",
+            ],
+          }),
+        }}
+      />
+
       <body className={`bg-pbpages ${lexand.className}`}>
         <Analytics
           websiteId={process.env.NEXT_PUBLIC_HELLYEAH_TRACKER_ID as string}
