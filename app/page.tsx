@@ -1,31 +1,45 @@
-"use client";
+import type { Metadata } from "next";
+import HomeClient from "@/components/homepage/HomeClient";
 
-import { useEffect } from "react";
-import HeroSection from "@/components/homepage/HeroSection";
-import MissionVisionSection from "@/components/homepage/MissionVisionSection";
-import CardStack from "@/components/homepage/CardStack";
-import DomainsSection from "@/components/homepage/DomainsSection";
-import ActivitiesSection from "@/components/homepage/ActivitiesSection";
-import FoundingMembersSection from "@/components/homepage/FoundingMembersSection";
-import StayConnectedSection from "@/components/homepage/StayConnectedSection";
-import { useLoadingStore } from "@/lib/store/loading";
+const PAGE_TITLE = "Point Blank | Student Run Open Source Community from India";
+const PAGE_DESCRIPTION =
+  "Point Blank is a student run open source community. We are a group of tech enthusiasts who love to learn and grow together.";
+const PAGE_URL = "https://www.pointblank.club";
+
+export const metadata: Metadata = {
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
+  alternates: {
+    canonical: PAGE_URL,
+  },
+  openGraph: {
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+    url: PAGE_URL,
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+  },
+};
 
 export default function Home() {
-  const setLoading = useLoadingStore((s) => s.setLoading);
-
-  useEffect(() => {
-    setLoading(false);
-  }, [setLoading]);
-
   return (
     <>
-      <HeroSection />
-      <MissionVisionSection />
-      <CardStack />
-      <DomainsSection />
-      <ActivitiesSection />
-      <FoundingMembersSection />
-      <StayConnectedSection />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Point Blank",
+            url: PAGE_URL,
+          }),
+        }}
+      />
+      <HomeClient />
     </>
   );
 }
