@@ -18,6 +18,8 @@ export interface Achievements extends mongoose.Document {
     CP?: Achievement[];
     ACM?: Achievement[];
   };
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const AchievementsSchema = new mongoose.Schema({
@@ -67,7 +69,9 @@ const AchievementsSchema = new mongoose.Schema({
       },
     ],
   },
-});
+},
+{ timestamps: true }
+);
 
 const AchievementsModel =
   mongoose.models.Achievements ||
