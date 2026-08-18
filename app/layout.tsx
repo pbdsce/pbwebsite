@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   },
   description:
     "Point Blank is a student run tech community. We are a group of tech enthusiasts who love to learn and grow together.",
-  keywords: ["Point Blank", "student tech community", "open source community", "coding club"],
+  keywords: ["Point Blank", "student tech community India", "open source community India", "Point Blank coding club", "Point Blank Club", "Point Blank India", "Point Blank tech community", "Point Blank coding club", "Point Blank open source", "student developers India", "developer community India", "college tech community", "student coding community", "open source contributors", "open source development"],
   authors:[{name: "Point Blank"}],
   icons: {
     icon: ico.src,
