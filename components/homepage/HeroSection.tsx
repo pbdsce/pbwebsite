@@ -4,6 +4,7 @@ import { Lexend_Tera } from "next/font/google";
 import ThreeBackground from "@/components/ui/ThreeBackground";
 import { motion } from "framer-motion";
 import SihBanner from "@/components/ui/SihBanner";
+import Recruitment from "@/components/ui/Recruitment";
 
 const lexendTera = Lexend_Tera({
   subsets: ["latin"],
@@ -37,6 +38,7 @@ export default function HeroSection() {
       id="home"
       className="relative z-10 min-h-[90vh] overflow-hidden text-white bg-pbpages"
     >
+      <Recruitment />
       <ThreeBackground />
       <div className="relative z-10 min-h-[90vh] flex items-center px-4 sm:px-10 lg:px-24 py-28 lg:py-20 max-w-420 mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center w-full">
