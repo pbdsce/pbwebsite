@@ -8,6 +8,8 @@ interface Lore extends mongoose.Document {
   preview: string;
   story: string[];
   images: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const LoreModel = new mongoose.Schema({
@@ -18,7 +20,11 @@ const LoreModel = new mongoose.Schema({
   preview: { type: String, required: true },
   story: { type: [String], required: true },
   images: { type: [String], required: true },
-});
+},
+{
+  timestamps: true
+}
+);
 
 const Lore = mongoose.models.Lore || mongoose.model("Lore", LoreModel);
 

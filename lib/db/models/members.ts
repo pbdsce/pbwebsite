@@ -9,6 +9,8 @@ export interface Members extends mongoose.Document {
   company?: string;
   tags?: "lead" | "alumni-lead";
   leadDesc?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const MembersSchema = new mongoose.Schema({
@@ -24,7 +26,8 @@ const MembersSchema = new mongoose.Schema({
   },
   tags: { type: String, enum: ["lead", "alumni-lead"], required: false },
   leadDesc: { type: String, required: false },
-});
+},
+{ timestamps: true });
 
 const MembersModel =
   mongoose.models.Members || mongoose.model("Members", MembersSchema);

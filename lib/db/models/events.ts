@@ -8,6 +8,8 @@ export interface Events extends mongoose.Document {
   lastDateOfRegistration: string;
   imageURL: string;
   registrationLink: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const Eventschema: mongoose.Schema<Events> = new mongoose.Schema({
@@ -39,7 +41,11 @@ const Eventschema: mongoose.Schema<Events> = new mongoose.Schema({
     type: String,
     required: true,
   },
-});
+},
+  {
+    timestamps: true
+  }
+);
 
 const EventModel =
   mongoose.models.Events || mongoose.model<Events>("Events", Eventschema);
