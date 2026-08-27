@@ -12,6 +12,7 @@ import verifyAuth from "@/lib/verifyAuth";
 import ico from "@/public/favicon.ico";
 import ReactLenis from "lenis/react";
 import ScrollToTop from "@/components/ui/ScrollToTop";
+import { Toaster } from "react-hot-toast";
 
 const lexand = Lexend({
   subsets: ["latin"],
@@ -62,6 +63,7 @@ export default async function RootLayout({
             {children}
             <Footer />
           </div>
+          <Toaster position="top-center" />
         </ReactLenis>
       </body>
     </html>
