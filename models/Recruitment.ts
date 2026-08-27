@@ -11,19 +11,7 @@ export interface RecruitmentData {
   about: string;
 }
 
-export interface TempRecruitmentUser {
-  email: string;
-  otp: string;
-  otpExpiresAt: Date;
-  isVerified: boolean;
-  verifiedAt: Date | null;
-  failedAttempts: number;
-  lockedUntil: Date | null;
-}
-
 export interface RecruitmentDoc extends Document, RecruitmentData { }
-
-export interface TempRecruitmentUserDoc extends Document, TempRecruitmentUser { }
 
 const recruitmentSchema = new Schema<RecruitmentDoc>(
   {
@@ -103,49 +91,6 @@ recruitmentSchema.pre("validate", function () {
   }
 });
 
-const tempRecruitmentUserSchema = new Schema<TempRecruitmentUserDoc>(
-  {
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    otp: {
-      type: String,
-      required: true,
-    },
-    otpExpiresAt: {
-      type: Date,
-      required: true,
-    },
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-    verifiedAt: {
-      type: Date,
-      default: null,
-    },
-    failedAttempts: {
-      type: Number,
-      default: 0,
-    },
-    lockedUntil: {
-      type: Date,
-      default: null,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-
-// TTL index removed to prevent premature document purging due to server/client clock skew
-// Expiration is safely managed in application logic during verifyOTP
-
-
 function getRecruitmentModel() {
   return (
     (mongoose.models.recruitment2026 as mongoose.Model<RecruitmentDoc>) ||
@@ -157,19 +102,6 @@ function getRecruitmentModel() {
   );
 }
 
-function getTempRecruitmentUserModel() {
-  return (
-    (mongoose.models.temprecruitment2026 as mongoose.Model<TempRecruitmentUserDoc>) ||
-    mongoose.model<TempRecruitmentUserDoc>(
-      "temprecruitment2026",
-      tempRecruitmentUserSchema,
-      "temprecruitment2026"
-    )
-  );
-}
-
 const RecruitmentModel = getRecruitmentModel();
-const TempRecruitmentUserModel = getTempRecruitmentUserModel();
 
 export default RecruitmentModel;
-export { TempRecruitmentUserModel };

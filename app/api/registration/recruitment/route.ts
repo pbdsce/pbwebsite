@@ -1,35 +1,7 @@
 import connectDB from "@/lib/db/connection";
-import RecruitmentModel, { TempRecruitmentUserModel } from "@/models/Recruitment";
+import RecruitmentModel from "@/models/Recruitment";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
-import { createTransport } from "nodemailer";
-import jwt from "jsonwebtoken";
-import { randomInt } from "crypto";
-
-const OTP_TOKEN_EXPIRY = "10m";
-const MAX_OTP_ATTEMPTS = 5;
-const OTP_LOCKOUT_MINUTES = 15;
-
-function getJwtSecret(): string {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error("JWT_SECRET environment variable is required");
-  }
-  return secret;
-}
-
-const transporter = createTransport({
-  host: process.env.MAIL_SMTP,
-  port: parseInt((process.env.MAIL_SMTP_PORT || "465") as string),
-  secure: true,
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: true,
-  },
-});
 
 /**
  * @swagger
@@ -177,7 +149,7 @@ export async function GET(request: Request) {
  *         required: true
  *         schema:
  *           type: string
- *           description: Action to perform (addRegistration, sendOTP, verifyOTP, checkDuplicates)
+ *           description: Action to perform (addRegistration, checkDuplicates)
  *               email:
  *                 type: string
  *               whatsapp_number:
@@ -236,10 +208,6 @@ export async function POST(request: Request) {
 
     if (action === "addRegistration") {
       return addRegistration(request);
-    } else if (action === "sendOTP") {
-      return sendOTP(request);
-    } else if (action === "verifyOTP") {
-      return verifyOTP(request);
     } else if (action === "checkDuplicates") {
       return checkDuplicates(request);
     } else {
@@ -310,143 +278,6 @@ async function checkDuplicates(request: Request) {
   }
 }
 
-function generateOTP(): string {
-  return randomInt(100000, 999999).toString();
-}
-
-async function sendOTP(request: Request) {
-  try {
-    await connectDB();
-
-    const { email } = await request.json();
-
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
-    }
-
-    const normalizedEmail = email.toLowerCase().trim();
-    const OTP_COOLDOWN_MS = 60 * 1000; // 60 seconds between sends per email
-
-    // Per-email rate limit: reject if an OTP was sent recently
-    const existingTemp = await TempRecruitmentUserModel.findOne({ email: normalizedEmail });
-    if (existingTemp) {
-      const elapsed = Date.now() - new Date((existingTemp as unknown as { createdAt: Date }).createdAt).getTime();
-      if (elapsed < OTP_COOLDOWN_MS) {
-        const retryAfter = Math.ceil((OTP_COOLDOWN_MS - elapsed) / 1000);
-        return NextResponse.json(
-          { error: `Please wait ${retryAfter}s before requesting a new OTP.` },
-          { status: 429 }
-        );
-      }
-    }
-
-    const otp = generateOTP();
-    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-    await TempRecruitmentUserModel.deleteMany({ email: normalizedEmail });
-    await TempRecruitmentUserModel.create({
-      email: normalizedEmail,
-      otp,
-      otpExpiresAt,
-    });
-
-    // Send OTP via Nodemailer
-    await transporter.sendMail({
-      from: `Point Blank <${process.env.MAIL_USER}>`,
-      to: email,
-      subject: "Point Blank Recruitment - OTP Verification",
-      html: `
-        <p>Hello,</p>
-        <p>Your OTP for recruitment registration is:</p>
-        <h2 style="letter-spacing:8px;font-family:monospace;color:#22c55e;">${otp}</h2>
-        <p>This OTP is valid for <strong>10 minutes</strong>.</p>
-        <p>If you did not request this, please ignore this email.</p>
-        <p>Best regards,<br/>Team Point Blank</p>
-      `,
-    });
-
-    return NextResponse.json({ message: "OTP sent successfully" });
-  } catch {
-    return NextResponse.json(
-      { error: "Failed to send OTP" },
-      { status: 500 }
-    );
-  }
-}
-
-async function verifyOTP(request: Request) {
-  try {
-    await connectDB();
-
-    const body = await request.json();
-    const { email, otp } = body;
-
-    if (!email || !otp) {
-      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
-    }
-
-    const normalizedEmail = email.toLowerCase().trim();
-    const cleanOtp = String(otp).trim();
-
-    const tempUser = await TempRecruitmentUserModel.findOne({ email: normalizedEmail });
-    if (!tempUser) {
-      return NextResponse.json({ error: "Invalid or expired OTP. Please request a new one." }, { status: 400 });
-    }
-
-    // Check if the account is locked due to too many failed attempts
-    if (tempUser.lockedUntil && new Date() < new Date(tempUser.lockedUntil)) {
-      const remaining = Math.ceil((new Date(tempUser.lockedUntil).getTime() - Date.now()) / 60000);
-      return NextResponse.json(
-        { error: `Too many failed attempts. Please wait ${remaining} minute(s) or request a new OTP.` },
-        { status: 429 }
-      );
-    }
-
-    if (new Date() > new Date(tempUser.otpExpiresAt)) {
-      await TempRecruitmentUserModel.deleteOne({ email: normalizedEmail });
-      return NextResponse.json({ error: "Invalid or expired OTP. Please request a new one." }, { status: 400 });
-    }
-
-    if (String(tempUser.otp).trim() !== cleanOtp) {
-      // Track failed attempt
-      tempUser.failedAttempts = (tempUser.failedAttempts || 0) + 1;
-
-      if (tempUser.failedAttempts >= MAX_OTP_ATTEMPTS) {
-        tempUser.lockedUntil = new Date(Date.now() + OTP_LOCKOUT_MINUTES * 60 * 1000);
-        await tempUser.save();
-        return NextResponse.json(
-          { error: `Too many failed attempts. Please wait ${OTP_LOCKOUT_MINUTES} minutes or request a new OTP.` },
-          { status: 429 }
-        );
-      }
-
-      await tempUser.save();
-      const remaining = MAX_OTP_ATTEMPTS - tempUser.failedAttempts;
-      return NextResponse.json(
-        { error: `Invalid OTP. ${remaining} attempt(s) remaining before lockout.` },
-        { status: 400 }
-      );
-    }
-
-    // OTP is correct — mark as verified and issue a single-use JWT token
-    tempUser.isVerified = true;
-    tempUser.verifiedAt = new Date();
-    tempUser.failedAttempts = 0;
-    tempUser.lockedUntil = null;
-    await tempUser.save();
-
-    const verificationToken = jwt.sign(
-      { email: normalizedEmail, purpose: "otp_verified" },
-      getJwtSecret(),
-      { expiresIn: OTP_TOKEN_EXPIRY }
-    );
-
-    return NextResponse.json({ message: "OTP verified successfully", verificationToken });
-  } catch {
-    return NextResponse.json({ error: "Failed to verify OTP" }, { status: 500 });
-  }
-}
-
 async function addRegistration(request: Request) {
   try {
     await connectDB();
@@ -464,60 +295,7 @@ async function addRegistration(request: Request) {
 
     const data = await request.json();
 
-    const { verificationToken, ...registrationData } = data;
-
-    if (!verificationToken) {
-      return NextResponse.json(
-        { error: "Email verification required. Please verify your OTP before registering." },
-        { status: 403 }
-      );
-    }
-
-    // Verify the JWT token
-    let tokenPayload: { email: string; purpose: string };
-    try {
-      tokenPayload = jwt.verify(verificationToken, getJwtSecret()) as { email: string; purpose: string };
-    } catch {
-      return NextResponse.json(
-        { error: "Invalid or expired verification token. Please verify your OTP again." },
-        { status: 403 }
-      );
-    }
-
-    if (tokenPayload.purpose !== "otp_verified") {
-      return NextResponse.json(
-        { error: "Invalid verification token." },
-        { status: 403 }
-      );
-    }
-
-    const verifiedEmail = tokenPayload.email;
-
-    // Ensure a verified temp record exists for this email (single-use)
-    const verifiedRecord = await TempRecruitmentUserModel.findOne({
-      email: verifiedEmail,
-      isVerified: true,
-    });
-
-    if (!verifiedRecord) {
-      return NextResponse.json(
-        { error: "Verification record not found. The token may have already been used. Please verify your OTP again." },
-        { status: 403 }
-      );
-    }
-
-    // Delete the temp record to prevent reuse
-    await TempRecruitmentUserModel.deleteOne({ email: verifiedEmail });
-
-    // Ensure the email in the registration matches the verified email
-    if (registrationData.email?.toLowerCase().trim() !== verifiedEmail) {
-      return NextResponse.json(
-        { error: "Email mismatch. The registration email must match the verified email." },
-        { status: 403 }
-      );
-    }
-
-    const data2 = registrationData;
+    const data2 = data;
 
     // Validate required fields
     const requiredFields = [
