@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { years, branches } from "@/lib/constants/dropdownOptions";
 import Success from "./success";
@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 import CustomSelect from "@/components/ui/custom-select";
 import ReviewInformationForm from "./recruitmentForm/ReviewInformationForm";
-import OTPVerificationForm from "./recruitmentForm/OTPVerificationForm";
 
 interface FormData {
   name: string;
@@ -25,18 +24,9 @@ const RecruitmentForm: React.FC = () => {
   const [display, setDisplay] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const [currentStep, setCurrentStep] = useState<"form" | "review" | "otp">("form");
+  const [currentStep, setCurrentStep] = useState<"form" | "review">("form");
   const [formDataForSubmission, setFormDataForSubmission] =
     useState<FormData | null>(null);
-
-  // OTP state
-  const [otp, setOtp] = useState("");
-  const [otpError, setOtpError] = useState("");
-  const [isVerifyingOTP, setIsVerifyingOTP] = useState(false);
-  const [isSendingOTP, setIsSendingOTP] = useState(false);
-  const [resendTimer, setResendTimer] = useState(0);
-  const resendIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const verificationTokenRef = useRef<string | null>(null);
 
   const {
     register,
@@ -74,108 +64,6 @@ const RecruitmentForm: React.FC = () => {
     setDisplay(true);
   }, [watchedYear]);
 
-
-
-  // Cleanup resend timer on unmount
-  useEffect(() => {
-    return () => {
-      if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
-    };
-  }, []);
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  };
-
-  const startResendTimer = useCallback(() => {
-    setResendTimer(60);
-    if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
-    resendIntervalRef.current = setInterval(() => {
-      setResendTimer((prev) => {
-        if (prev <= 1) {
-          if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, []);
-
-  const sendOTP = async (email: string) => {
-    setIsSendingOTP(true);
-    setOtpError("");
-    try {
-      const response = await fetch(
-        "/api/registration/recruitment?action=sendOTP",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
-      );
-      const result = await response.json();
-      if (!response.ok) {
-        toast.error(result.error || "Failed to send OTP");
-        return false;
-      }
-      toast.success("OTP sent to your email!");
-      startResendTimer();
-      return true;
-    } catch {
-      toast.error("Failed to send OTP");
-      return false;
-    } finally {
-      setIsSendingOTP(false);
-    }
-  };
-
-  const verifyOTP = async () => {
-    if (!formDataForSubmission) return;
-    setIsVerifyingOTP(true);
-    setOtpError("");
-    try {
-      const response = await fetch(
-        "/api/registration/recruitment?action=verifyOTP",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: formDataForSubmission.email, otp }),
-        }
-      );
-      const result = await response.json();
-      if (!response.ok) {
-        setOtpError(result.error || "OTP verification failed");
-        return;
-      }
-      toast.success("OTP verified!");
-      // Store the verification token for the registration request
-      verificationTokenRef.current = result.verificationToken || null;
-      // Proceed to submit registration
-      const success = await submitRegistration(formDataForSubmission);
-      if (success) {
-        setSuccess(true);
-      }
-    } catch {
-      setOtpError("Failed to verify OTP");
-    } finally {
-      setIsVerifyingOTP(false);
-    }
-  };
-
-  const handleOTPChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/\D/g, "").slice(0, 6);
-    setOtp(val);
-    setOtpError("");
-  };
-
-  const handleResendOTP = async () => {
-    if (formDataForSubmission) {
-      await sendOTP(formDataForSubmission.email);
-    }
-  };
-
   const submitRegistration = async (data: FormData): Promise<boolean> => {
     try {
       const response = await fetch(
@@ -185,10 +73,7 @@ const RecruitmentForm: React.FC = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            ...data,
-            verificationToken: verificationTokenRef.current,
-          }),
+          body: JSON.stringify(data),
         }
       );
 
@@ -260,12 +145,11 @@ const RecruitmentForm: React.FC = () => {
 
     if (currentStep === "review") {
       setIsSubmitting(false);
-      // Move to OTP step
-      setCurrentStep("otp");
-      setOtp("");
-      setOtpError("");
-      // Auto-send OTP
-      await sendOTP(data.email);
+      // Submit registration directly
+      const success = await submitRegistration(data);
+      if (success) {
+        setSuccess(true);
+      }
       return;
     }
   };
@@ -294,30 +178,11 @@ const RecruitmentForm: React.FC = () => {
     await onSubmit(data);
   };
 
-  if (currentStep === "otp" && formDataForSubmission) {
-    return (
-      <OTPVerificationForm
-        formDataForSubmission={formDataForSubmission}
-        otp={otp}
-        otpError={otpError}
-        isVerifyingOTP={isVerifyingOTP}
-        isSendingOTP={isSendingOTP}
-        resendTimer={resendTimer}
-        onOTPChange={handleOTPChange}
-        onVerifyOTP={verifyOTP}
-        onResendOTP={handleResendOTP}
-        onBackToForm={() => setCurrentStep("review")}
-        formatTime={formatTime}
-      />
-    );
-  }
-
   if (currentStep === "review" && formDataForSubmission) {
     return (
       <ReviewInformationForm
         formDataForSubmission={formDataForSubmission}
         isSubmitting={isSubmitting}
-  
         onEditInformation={handleEditInformation}
         onSubmitRegistration={handleSubmitRegistration}
       />
