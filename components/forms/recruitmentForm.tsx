@@ -341,6 +341,9 @@ const RecruitmentForm: React.FC = () => {
                       <label className="block text-sm font-medium text-white/60">
                         USN
                         <span className="text-red-500"> * </span>
+                        <span className="text-red-400">
+                          First-year students can use their registration number (e.g., 26UGDSXXX).
+                        </span>
                       </label>
                       <input
                         {...register("college_id", {
@@ -353,7 +356,7 @@ const RecruitmentForm: React.FC = () => {
                         })}
                         name="college_id"
                         type="text"
-                        placeholder="Enter your USN (e.g., 1DS21CS123)"
+                        placeholder="Enter your USN (e.g., 1DS21CS123/26UGDS123)"
                         className="w-full px-4 py-3 rounded-xl border border-white/10 bg-pbsurface text-white placeholder:text-white/25 focus:outline-none focus:border-[#37ff00]/50 focus:ring-1 focus:ring-[#37ff00]/20 transition-colors"
                       />
                     </>
